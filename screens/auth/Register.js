@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import axios from "axios"; // Use axios for API call (you can use fetch as well)
+import axios from "axios";
 
 export default function Register({ navigation }) {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -66,7 +66,6 @@ export default function Register({ navigation }) {
           navigation.navigate("VerificationScreen");
         } else {
           navigation.navigate("VerificationScreen");
-
           console.error("API call failed:", response);
         }
       } catch (error) {
