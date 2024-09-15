@@ -5,14 +5,45 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Alert,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons"; // For the back icon
+import { Ionicons } from "@expo/vector-icons";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
 
 export default function Login({ navigation }) {
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [rePassword, setRePassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+    if (!phoneNumber || !password) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+
+    try {
+      setLoading(true); // Bắt đầu loading
+      const response = await axios.post("http://localhost:3000/auth/login", {
+        phone: phoneNumber,
+        password: password,
+      });
+
+      const { token, user } = response.data;
+
+      // Lưu token vào AsyncStorage
+      await AsyncStorage.setItem("token", token);
+
+      Alert.alert("Success", "Login successful!");
+
+      // Sau khi login thành công, điều hướng đến trang Home
+      navigation.navigate("Home", { user });
+    } catch (error) {
+      Alert.alert("Error", error.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false); // Kết thúc loading
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -46,11 +77,15 @@ export default function Login({ navigation }) {
         secureTextEntry
         placeholderTextColor="#ccc"
       />
+
       <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate("Home")}
+        style={[styles.button, { backgroundColor: loading ? "#999" : "#000" }]} // Đổi màu khi loading
+        onPress={handleLogin}
+        disabled={loading} // Vô hiệu hóa khi đang loading
       >
-        <Text style={styles.buttonText}>Next</Text>
+        <Text style={styles.buttonText}>
+          {loading ? "Logging in..." : "Next"}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -88,7 +123,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
   },
   button: {
-    backgroundColor: "#ccc", // Disabled state color
+    backgroundColor: "#000",
     padding: 15,
     borderRadius: 5,
     alignItems: "center",

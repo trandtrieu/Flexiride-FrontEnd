@@ -5,37 +5,108 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Alert,
 } from "react-native";
+import axios from "axios";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const VerificationScreen = ({ navigation }) => {
+const VerificationScreen = ({ navigation, route }) => {
   const [code, setCode] = useState("");
+  const [check, setCheck] = useState(""); 
   const [timer, setTimer] = useState(30);
+  const { account } = route.params;
+
+  // Chuyển đổi số điện thoại từ định dạng địa phương sang định dạng quốc tế
+  const toPhone = account.phone.startsWith('0')
+    ? `+84${account.phone.substring(1)}`
+    : account.phone;
 
   useEffect(() => {
+    const generateAndSendCode = async () => {
+      const newCode = generateVerificationCode();
+      setCheck(newCode);
+
+      try {
+        await axios.post("http://localhost:3000/service/send-sms", {
+          body: newCode,
+          phone: toPhone,
+        });
+        console.log("Verification code sent.");
+      } catch (error) {
+        console.error("Failed to send verification code:", error);
+        Alert.alert("Error", "Failed to send verification code. Please try again.");
+      }
+    };
+
+    generateAndSendCode();
+
     const countdown = setInterval(() => {
       if (timer > 0) {
-        setTimer(timer - 1);
+        setTimer(prevTimer => prevTimer - 1);
       }
     }, 1000);
 
     return () => clearInterval(countdown);
-  }, [timer]);
+  }, []); 
 
-  const handleResendCode = () => {
+  const generateVerificationCode = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  };
+
+  const handleResendCode = async () => {
+    const newCode = generateVerificationCode();
+    setCheck(newCode);
     setTimer(30);
+
+    try {
+      await axios.post("http://localhost:3000/service/send-sms", {
+        body: newCode,
+        phone: toPhone,
+      });
+      console.log("Verification code resent.");
+    } catch (error) {
+      console.error("Failed to resend verification code:", error);
+      Alert.alert("Error", "Failed to resend verification code. Please try again.");
+    }
+  };
+
+  const isCodeValid = code.length === 6 && !isNaN(code);
+
+  const handleSubmit = async () => {
+    if (code === check) {
+      try {
+        const response = await axios.post("http://localhost:3000/auth/register", {
+          phone: toPhone,
+          email: account.email,
+          password: account.password
+        });
+
+        const { token } = response.data;
+
+        await AsyncStorage.setItem("token", token);
+  
+        Alert.alert("Success", "Registration successful!");
+        navigation.navigate("Home");
+      } catch (error) {
+        console.error("Failed to complete registration:", error);
+        Alert.alert("Error", "Failed to complete registration. Please try again.");
+      }
+    } else {
+      Alert.alert("Error", "Invalid verification code.");
+    }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.label}>
-        Enter the 6-digit code sent to your email: trandtrieu@gmail.com
+        Enter the 6-digit code sent to your phone: {toPhone}
       </Text>
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
           value={code}
           onChangeText={setCode}
-          keyboardType="number"
+          keyboardType="number-pad"
           maxLength={6}
           placeholder="123456"
         />
@@ -58,8 +129,9 @@ const VerificationScreen = ({ navigation }) => {
         </Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={styles.button}
-        // onPress={() => navigation.navigate("VerificationScreen")}
+        style={[styles.button, { backgroundColor: isCodeValid ? "#007BFF" : "#ccc" }]}
+        onPress={handleSubmit}
+        disabled={!isCodeValid}
       >
         <Text style={styles.buttonText}>Next</Text>
       </TouchableOpacity>

@@ -11,7 +11,6 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import axios from "axios"; // Use axios for API call (you can use fetch as well)
 
 export default function Register({ navigation }) {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -23,6 +22,11 @@ export default function Register({ navigation }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showRePassword, setShowRePassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Hàm tạo mã 6 chữ số ngẫu nhiên
+  const generateVerificationCode = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  };
 
   const validateForm = () => {
     const newErrors = {};
@@ -56,19 +60,22 @@ export default function Register({ navigation }) {
     if (validateForm()) {
       setIsLoading(true);
 
-      try {
-        const response = await axios.post("https://example.com/api/register", {
-          phoneNumber,
-          email,
-          password,
-        });
-        if (response.status === 200) {
-          navigation.navigate("VerificationScreen");
-        } else {
-          navigation.navigate("VerificationScreen");
+      // Tạo đối tượng account với mã xác minh
+      const account = {
+        phone: phoneNumber,
+        email: email,
+        password: password,
+        code: generateVerificationCode(), // Tạo mã 6 số ngẫu nhiên
+      };
 
-          console.error("API call failed:", response);
-        }
+      try {
+        // const response = await axios.post("http://localhost:3000/service/send-sms", {
+        //   body: Check,
+        //   phone: phoneNumber,
+        // });
+        // Điều hướng đến màn hình VerificationScreen và gửi đối tượng account
+        setIsLoading(false);
+        navigation.navigate("VerificationScreen", { account });
       } catch (error) {
         console.error("Error during API call:", error);
       } finally {
