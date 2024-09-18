@@ -24,6 +24,11 @@ export default function Register({ navigation }) {
   const [showRePassword, setShowRePassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Hàm tạo mã 6 chữ số ngẫu nhiên
+  const generateVerificationCode = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  };
+
   const validateForm = () => {
     const newErrors = {};
 
@@ -56,18 +61,22 @@ export default function Register({ navigation }) {
     if (validateForm()) {
       setIsLoading(true);
 
+      // Tạo đối tượng account với mã xác minh
+      const account = {
+        phone: phoneNumber,
+        email: email,
+        password: password,
+        code: generateVerificationCode(), // Tạo mã 6 số ngẫu nhiên
+      };
+
       try {
-        const response = await axios.post("https://example.com/api/register", {
-          phoneNumber,
-          email,
-          password,
-        });
-        if (response.status === 200) {
-          navigation.navigate("VerificationScreen");
-        } else {
-          navigation.navigate("VerificationScreen");
-          console.error("API call failed:", response);
-        }
+        // const response = await axios.post("http://localhost:3000/service/send-sms", {
+        //   body: Check,
+        //   phone: phoneNumber,
+        // });
+        // Điều hướng đến màn hình VerificationScreen và gửi đối tượng account
+        setIsLoading(false);
+        navigation.navigate("VerificationScreen", { account });
       } catch (error) {
         console.error("Error during API call:", error);
       } finally {
@@ -92,9 +101,7 @@ export default function Register({ navigation }) {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
 
-        <Text style={styles.headerText}>
-          Welcome! Register with your account
-        </Text>
+        <Text style={styles.headerText}>Bắt đầu </Text>
         <Text style={styles.subText}>
           With a valid number, you can access rides, deliveries, and our other
           services.
@@ -199,10 +206,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   headerText: {
-    fontSize: 25,
+    fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 10,
-    textAlign: "left",
+    textAlign: "center",
+    marginBottom: 20,
   },
   subText: {
     fontSize: 18,

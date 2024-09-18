@@ -1,36 +1,48 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
-import { Button } from "react-native-elements"; // Install react-native-elements if you don't have it
-import { FontAwesome } from "@expo/vector-icons"; // or react-native-vector-icons for Google icon
+import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 
-export default function Authenticate({ navigation }) {
+export default function WelcomeScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Image
-          source={{
-            uri: "https://reactnative.dev/img/tiny_logo.png",
-          }}
-          style={styles.logo}
-        />
-        <Text style={styles.subtitle}>Your everyday everything app</Text>
+        <Image source={require("../../assets/Logo.png")} style={styles.logo} />
+        <Text style={styles.subtitle}>
+          Chuyến đi của bạn, sự lựa chọn của bạn
+        </Text>
       </View>
 
+      {/* Illustration at the center */}
+      <Image
+        source={require("../../assets/illustration.png")}
+        style={styles.illustration}
+      />
+
+      {/* Login Button */}
       <TouchableOpacity
         style={styles.loginButton}
-        onPress={() => navigation.navigate("Login")}
+        onPress={() => navigation.navigate("LoginOptions")}
       >
-        <Text style={styles.loginButtonText}>Log In</Text>
+        <Text style={styles.loginButtonText}>Đăng nhập</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-        <Text style={styles.signupText}>New to Grab? Sign up!</Text>
+      {/* Register Button */}
+      <TouchableOpacity
+        style={styles.registerButton}
+        onPress={() => navigation.navigate("Register")}
+      >
+        <Text style={styles.registerButtonText}>
+          Bạn mới biết đến FRide? Hãy đăng ký!
+        </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.googleButton}>
-        <FontAwesome name="google" size={20} />
-        <Text style={styles.googleButtonText}>Login With Google</Text>
-      </TouchableOpacity>
+      {/* <Image
+        source={require("../../assets/auth_background1.png")}
+        style={styles.leftImage}
+      />
+      <Image
+        source={require("../../assets/auth_background2.png")}
+        style={styles.rightImage}
+      /> */}
     </View>
   );
 }
@@ -38,55 +50,69 @@ export default function Authenticate({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#63b553",
+    backgroundColor: "#FFC323",
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
   },
   header: {
     alignItems: "center",
-    marginBottom: 40,
+    marginBottom: 20,
   },
   logo: {
-    width: 150,
-    height: 50,
+    width: 120,
+    height: 60,
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 16,
-    color: "#fff",
+    color: "#7A2113",
     textAlign: "center",
+    marginBottom: 20,
+  },
+  illustration: {
+    width: 300,
+    height: 300,
+    resizeMode: "contain",
+    marginBottom: 40,
   },
   loginButton: {
-    backgroundColor: "#4caf50",
-    width: "100%",
-    padding: 15,
-    borderRadius: 5,
+    backgroundColor: "#270C6D",
+    paddingVertical: 15,
+    paddingHorizontal: 130,
+    borderRadius: 30,
     marginBottom: 20,
-    alignItems: "center",
   },
   loginButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
+    color: "white",
+    fontSize: 18,
   },
-  signupText: {
-    color: "#fff",
+  registerButton: {
+    borderColor: "#270C6D",
+    borderWidth: 1,
+    paddingVertical: 15,
+    paddingHorizontal: 40,
+    borderRadius: 30,
     marginBottom: 20,
   },
-  googleButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 5,
-    width: "100%",
-    justifyContent: "center",
-  },
-  googleButtonText: {
-    marginLeft: 10,
+  registerButtonText: {
+    color: "#270C6D",
     fontSize: 16,
-    fontWeight: "bold",
-    color: "black",
+  },
+  leftImage: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    width: 100,
+    height: 100,
+    resizeMode: "contain",
+  },
+  rightImage: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 100,
+    height: 100,
+    resizeMode: "contain",
   },
 });
