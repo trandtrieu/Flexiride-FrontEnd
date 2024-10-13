@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "flexiride-FE-cus",
-    "slug": "flexiride-FE-cus",
+    "slug": "flex",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -18,10 +18,20 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7e66f206-a270-4180-ada2-9f56ffe66cdf"
+      }
+    },
+    "owner": "trandtrieu"
   }
 }

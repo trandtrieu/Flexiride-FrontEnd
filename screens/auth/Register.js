@@ -70,11 +70,6 @@ export default function Register({ navigation }) {
       };
 
       try {
-        // const response = await axios.post("http://localhost:3000/service/send-sms", {
-        //   body: Check,
-        //   phone: phoneNumber,
-        // });
-        // Điều hướng đến màn hình VerificationScreen và gửi đối tượng account
         setIsLoading(false);
         navigation.navigate("VerificationScreen", { account });
       } catch (error) {

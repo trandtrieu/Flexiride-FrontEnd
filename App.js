@@ -13,6 +13,13 @@ import LoginOptions from "./screens/auth/LoginOptions";
 import Authenticate from "./screens/auth/Authenticate";
 import EnterNameScreen from "./screens/auth/EnterNameScreen";
 import VerifyWithSelfie from "./screens/auth/VerifyWithSelfie";
+import BikeBook from "./screens/BikeBookScreen";
+import GoogleMap from "./screens/GoogleMap";
+import SearchScreen from "./screens/SearchScreen";
+import LocationPicker from "./screens/LocationPicker";
+import MapScreen from "./screens/MapScreen";
+import LocationComponent from "./screens/LocationComponent";
+import PickupLocationScreen from "./screens/ConfirmPickupScreen";
 
 export default function App() {
   const Stack = createNativeStackNavigator();
@@ -62,6 +69,41 @@ export default function App() {
         <Stack.Screen
           name="VerifyWithSelfie"
           component={VerifyWithSelfie}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="BikeBook"
+          component={BikeBook}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="GoogleMap"
+          component={GoogleMap}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="SearchScreen"
+          component={SearchScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="LocationPicker"
+          component={LocationPicker}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="MapScreen"
+          component={MapScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="LocationComponent"
+          component={LocationComponent}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="PickupLocationScreen"
+          component={PickupLocationScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

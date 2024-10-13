@@ -10,6 +10,8 @@ import {
   Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import BottomNavigation from "./layouts/BottomNavigation";
+import ServiceIcons from "./layouts/ServiceIcons";
 
 const Home = ({ navigation }) => {
   return (
@@ -31,36 +33,7 @@ const Home = ({ navigation }) => {
         </View>
 
         {/* Service Icons */}
-        <View style={styles.servicesContainer}>
-          <TouchableOpacity style={styles.serviceItem}>
-            <Image
-              source={require("../assets/bike-icon.png")}
-              style={styles.serviceIcon}
-            />
-            <Text style={styles.serviceText}>Xe máy</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.serviceItem}>
-            <Image
-              source={require("../assets/car-icon.png")}
-              style={styles.serviceIcon}
-            />
-            <Text style={styles.serviceText}>Ô tô</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.serviceItem}>
-            <Image
-              source={require("../assets/hire-driver-icon.png")}
-              style={styles.serviceIcon}
-            />
-            <Text style={styles.serviceText}>Thuê tài xế</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.serviceItem}>
-            <Image
-              source={require("../assets/car-pool-icon.png")}
-              style={styles.serviceIcon}
-            />
-            <Text style={styles.serviceText}>Xe ghép</Text>
-          </TouchableOpacity>
-        </View>
+        <ServiceIcons />
 
         {/* Cards */}
         <View style={styles.cardsContainer}>
@@ -107,29 +80,7 @@ const Home = ({ navigation }) => {
         </View>
       </ScrollView>
 
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNavigation}>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="home-outline" size={24} color="#FFD700" />
-          <Text style={styles.navText}>Trang chủ</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="document-text-outline" size={24} color="black" />
-          <Text style={styles.navText}>Hoạt động</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="card-outline" size={24} color="black" />
-          <Text style={styles.navText}>Thanh toán</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="notifications-outline" size={24} color="black" />
-          <Text style={styles.navText}>Tín nhắn</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="person-outline" size={24} color="black" />
-          <Text style={styles.navText}>Tài khoản</Text>
-        </TouchableOpacity>
-      </View>
+      <BottomNavigation navigation={navigation} />
     </View>
   );
 };
@@ -238,26 +189,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     paddingHorizontal: 10,
     color: "#888",
-  },
-  bottomNavigation: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    backgroundColor: "#fff",
-    paddingVertical: 10,
-    borderTopColor: "#DDD",
-    borderTopWidth: 1,
-    position: "absolute", // Đặt ở cuối màn hình
-    bottom: 0, // Căn nó xuống dưới cùng
-    width: "100%", // Đảm bảo chiếm toàn bộ chiều rộng
-    height: 60, // Chiều cao cố định cho bottom navigation
-  },
-  navItem: {
-    alignItems: "center",
-  },
-  navText: {
-    fontSize: 12,
-    marginTop: 5,
-    color: "#333",
   },
 });
 
