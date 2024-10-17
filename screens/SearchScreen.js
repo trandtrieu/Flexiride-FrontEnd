@@ -18,7 +18,7 @@ import { debounce } from "lodash";
 const { width, height } = Dimensions.get("window");
 
 // Thay thế bằng API key thực tế của bạn
-const GOOGLE_PLACES_API_KEY = "AIzaSyA4jwyF9rUD7yFlI0rIyX-iene3uNFTlbI";
+const VIETMAP_API_KEY = "6eefaffe83383f5405728d4a3e7349ac405a8b1e90178d4b";
 
 const SearchScreen = ({ navigation }) => {
   const [pickUpLocation, setPickUpLocation] = useState("");
@@ -123,7 +123,7 @@ const SearchScreen = ({ navigation }) => {
   const onSelectPlace = useCallback(async (placeId) => {
     setLoading(true);
     try {
-      const apiUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,geometry&key=${GOOGLE_PLACES_API_KEY}`;
+      const apiUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,geometry&key=${VIETMAP_API_KEY}`;
       const result = await fetch(apiUrl);
       const json = await result.json();
 

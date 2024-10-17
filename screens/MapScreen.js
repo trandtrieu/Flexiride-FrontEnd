@@ -1,315 +1,224 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
-  StyleSheet,
-  TextInput,
-  ScrollView,
-  TouchableOpacity,
   Text,
-  TouchableWithoutFeedback,
-  Keyboard,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
-import * as Location from "expo-location"; // Import expo-location
 import { Icon } from "react-native-elements";
+import { VIETMAP_API_KEY } from "@env";
 
 const MapScreen = ({ navigation, route }) => {
-  const [region, setRegion] = useState({
-    latitude: 16.047079,
-    longitude: 108.20623,
-    latitudeDelta: 0.005,
-    longitudeDelta: 0.005,
-  });
-  const [pickupLocation, setPickupLocation] = useState(null);
-  const [destinationLocation, setDestinationLocation] = useState(null);
-  const [isSelectingPickup, setIsSelectingPickup] = useState(true);
-  const [searchText, setSearchText] = useState("");
+  const { pickupLocation, destinationLocation, onSelectPickupLocation } =
+    route.params;
+
+  const [selectedPickupLocation, setSelectedPickupLocation] =
+    useState(pickupLocation);
+  const [nearbyPlaces, setNearbyPlaces] = useState([]);
+  const [loading, setLoading] = useState(false);
   const mapRef = useRef(null);
 
-  // Lấy vị trí hiện tại của người dùng
   useEffect(() => {
-    const getCurrentLocation = async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        console.log("Quyền truy cập vị trí bị từ chối");
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      const { latitude, longitude } = location.coords;
-      const newRegion = {
-        latitude,
-        longitude,
-        latitudeDelta: 0.005,
-        longitudeDelta: 0.005,
-      };
-      setRegion(newRegion);
-
-      if (mapRef.current) {
-        mapRef.current.animateToRegion(newRegion, 1000);
-      }
-
-      // Lấy địa chỉ từ tọa độ
-      fetchAddressFromCoordinates(latitude, longitude);
-    };
-
-    getCurrentLocation();
-  }, []);
+    fetchNearbyPlaces(pickupLocation.latitude, pickupLocation.longitude);
+  }, [pickupLocation]);
 
   const fetchAddressFromCoordinates = async (latitude, longitude) => {
-    const apiKey = process.env.GOOGLE_PLACES_API_KEY;
-    console.log("🚀 ~ fetchAddressFromCoordinates ~ apiKey:", apiKey);
-
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`;
-
+    const url = `https://maps.vietmap.vn/api/reverse/v3?apikey=${VIETMAP_API_KEY}&lat=${latitude}&lng=${longitude}`;
     try {
       const response = await fetch(url);
       const data = await response.json();
-      if (data.results && data.results.length > 0) {
-        const address = data.results[0].formatted_address;
-        setSearchText(address);
-      } else {
-        console.log("Không tìm thấy địa chỉ");
+      if (data.length > 0) {
+        return {
+          address: data[0].address,
+          name: data[0].name || "Unknown Place",
+        };
       }
     } catch (error) {
-      console.error("Lỗi khi lấy địa chỉ từ tọa độ:", error);
+      console.error("Error fetching address:", error);
+    }
+    return {
+      address: "Unknown Address",
+      name: "Unknown Place",
+    };
+  };
+
+  const fetchNearbyPlaces = async (latitude, longitude) => {
+    const radius = 500; // Bán kính tìm kiếm 500 mét
+    const url = `https://maps.vietmap.vn/api/search/v3?apikey=${VIETMAP_API_KEY}&text=*&focus=${latitude},${longitude}&circle_center=${latitude},${longitude}&circle_radius=${radius}&size=10`;
+
+    setLoading(true);
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data && data.length > 0) {
+        setNearbyPlaces(data);
+      } else {
+        console.log("Không có địa điểm gần đó.");
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy các vị trí gần đó:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleRegionChangeComplete = async (newRegion) => {
-    setRegion(newRegion);
-
-    // Giới hạn số lần gọi API
-    if (
-      newRegion.latitude !== region.latitude ||
-      newRegion.longitude !== region.longitude
-    ) {
-      fetchAddressFromCoordinates(newRegion.latitude, newRegion.longitude);
-    }
-
-    const selectedLocation = {
+    setLoading(true);
+    const locationData = await fetchAddressFromCoordinates(
+      newRegion.latitude,
+      newRegion.longitude
+    );
+    setSelectedPickupLocation({
       latitude: newRegion.latitude,
       longitude: newRegion.longitude,
-      name: searchText,
-    };
-
-    if (isSelectingPickup) {
-      setPickupLocation(selectedLocation);
-    } else {
-      setDestinationLocation(selectedLocation);
-    }
+      name: locationData.name,
+      address: locationData.address,
+    });
+    setLoading(false);
   };
 
-  const handleConfirmLocations = () => {
-    if (pickupLocation && destinationLocation) {
-      const pickupString = `Đón tại: ${pickupLocation.name}`;
-      const destinationString = `Điểm đến: ${destinationLocation.name}`;
-      route.params.onSelectLocations(pickupString, destinationString);
-      navigation.goBack();
-    }
+  const handleConfirmLocation = () => {
+    navigation.navigate("RouteScreen", {
+      pickupLocation: selectedPickupLocation,
+      destinationLocation: destinationLocation,
+    });
   };
-
-  const clearInput = () => {
-    setSearchText("");
+  const handleBack = () => {
+    onSelectPickupLocation(selectedPickupLocation);
+    navigation.goBack();
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Icon
-            name="arrow-back"
-            type="ionicon"
-            style={styles.backButton}
-            size={25}
-            onPress={() => navigation.goBack()}
-          />
-          <View style={styles.searchContainer}>
-            <TextInput
-              style={styles.searchInput}
-              placeholder={
-                isSelectingPickup
-                  ? "Nhập địa chỉ đón tại"
-                  : "Nhập địa chỉ điểm đến"
-              }
-              value={searchText}
-              onChangeText={setSearchText}
-            />
-            {searchText.length > 0 && (
-              <TouchableOpacity onPress={clearInput} style={styles.clearButton}>
-                <Icon name="close" size={20} color="#4a4a4a" />
-              </TouchableOpacity>
-            )}
-            {/* <View style={styles.header}>
-            <Text
-              style={styles.searchInput}
-              placeholder={"Nhập địa chỉ đón tại"}
-            />
-          </View> */}
-          </View>
-        </View>
-
-        <MapView
-          ref={mapRef}
-          style={styles.map}
-          region={region}
-          onRegionChangeComplete={handleRegionChangeComplete}
-          showsUserLocation={true}
-        >
-          {pickupLocation && (
-            <Marker
-              coordinate={{
-                latitude: pickupLocation.latitude,
-                longitude: pickupLocation.longitude,
-              }}
-              title="Vị trí đón"
-              pinColor="green"
-            />
-          )}
-          {destinationLocation && (
-            <Marker
-              coordinate={{
-                latitude: destinationLocation.latitude,
-                longitude: destinationLocation.longitude,
-              }}
-              title="Điểm đến"
-              pinColor="red"
-            />
-          )}
-        </MapView>
-
-        <View pointerEvents="none" style={styles.centerMarkerContainer}>
-          <Icon
-            name="location"
-            type="ionicon"
-            size={40}
-            color={isSelectingPickup ? "green" : "red"}
-          />
-        </View>
-
-        <View style={styles.switchContainer}>
-          <TouchableOpacity
-            style={styles.switchButton}
-            onPress={() => setIsSelectingPickup(!isSelectingPickup)}
-          >
-            <Text style={styles.switchButtonText}>
-              {isSelectingPickup ? "Chọn điểm đến" : "Chọn đón tại"}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.bottomPanel}>
-          <Text style={styles.addressTitle}>Tap Hóa Tứ Vang</Text>
-          <Text style={styles.address}>
-            Thanh Niên, X.Duy Hải, H.Duy Xuyên...
-          </Text>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleConfirmLocations}
-          >
-            <Text style={styles.buttonText}>Chọn điểm đón này</Text>
-          </TouchableOpacity>
-        </View>
+    <View style={styles.container}>
+      <View style={styles.searchBar}>
+        <Icon name="arrow-back" type="ionicon" size={25} onPress={handleBack} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Đón tại?"
+          value={selectedPickupLocation.name}
+          editable={false}
+        />
       </View>
-    </TouchableWithoutFeedback>
+
+      {/* Bản đồ */}
+      <MapView
+        ref={mapRef}
+        style={styles.map}
+        initialRegion={{
+          latitude: pickupLocation.latitude,
+          longitude: pickupLocation.longitude,
+          latitudeDelta: 0.005,
+          longitudeDelta: 0.005,
+        }}
+        onRegionChangeComplete={handleRegionChangeComplete}
+        showsUserLocation={true}
+      >
+        <Marker
+          coordinate={{
+            latitude: selectedPickupLocation.latitude,
+            longitude: selectedPickupLocation.longitude,
+          }}
+          title="Điểm đón"
+          pinColor="green"
+        />
+      </MapView>
+
+      {/* Danh sách địa điểm gợi ý */}
+      <View style={styles.bottomPanel}>
+        <ScrollView style={styles.suggestionsList}>
+          {nearbyPlaces.map((place, index) => (
+            <View key={index} style={styles.locationItem}>
+              <Icon name="location" type="ionicon" size={20} />
+              <View style={styles.locationTextWrapper}>
+                <Text style={styles.locationName}>{place.name}</Text>
+                <Text style={styles.locationAddress}>{place.address}</Text>
+              </View>
+              <Text style={styles.locationDistance}>
+                {place.distance ? `${place.distance.toFixed(1)} km` : "N/A"}
+              </Text>
+            </View>
+          ))}
+        </ScrollView>
+
+        {/* Nút xác nhận */}
+        <TouchableOpacity
+          style={styles.confirmButton}
+          onPress={handleConfirmLocation}
+          disabled={loading} // Disable button khi đang lấy dữ liệu
+        >
+          <Text style={styles.confirmButtonText}>
+            {loading ? "Đang tải..." : "Chọn điểm đón này"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f8f8",
   },
-  header: {
+  searchBar: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 10,
+    padding: 30,
     backgroundColor: "#fff",
     elevation: 2,
-  },
-  searchContainer: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    marginHorizontal: 10,
-    backgroundColor: "#fff",
-    padding: 10,
-    borderRadius: 5,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: "#ddd",
+    zIndex: 1,
   },
   searchInput: {
     flex: 1,
-    fontSize: 12,
-  },
-  clearButton: {
-    padding: 5,
+    marginLeft: 10,
+    fontSize: 16,
+    color: "#000",
   },
   map: {
-    flex: 1,
-    marginTop: 10,
+    flex: 4, // Bản đồ chiếm phần lớn không gian
   },
-  centerMarkerContainer: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    marginLeft: -20,
-    marginTop: -40,
-    zIndex: 10,
-  },
-  switchContainer: {
-    position: "absolute",
-    bottom: 150,
-    alignSelf: "center",
-  },
-  switchButton: {
-    backgroundColor: "#4CAF50",
-    padding: 10,
-    borderRadius: 5,
-    elevation: 3,
-  },
-  switchButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    textAlign: "center",
-  },
-  confirmButton: {
-    backgroundColor: "#FF5722",
-    padding: 15,
-    borderRadius: 5,
-    position: "absolute",
-    bottom: 80,
-    left: "10%",
-    right: "10%",
-    elevation: 3,
-  },
-  confirmButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    textAlign: "center",
-  },
-  ottomPanel: {
-    padding: 20,
+  bottomPanel: {
+    flex: 2, // Giới hạn chiều cao của bottom panel
     backgroundColor: "#fff",
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    elevation: 3,
   },
-  addressTitle: {
-    fontSize: 16,
+  suggestionsList: {
+    flexShrink: 1, // Để ScrollView không chiếm quá nhiều không gian
+  },
+  locationItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderColor: "#ddd",
+  },
+  locationTextWrapper: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  locationName: {
     fontWeight: "bold",
   },
-  address: {
-    fontSize: 14,
-    color: "#666",
+  locationAddress: {
+    color: "#555",
   },
-  button: {
-    marginTop: 20,
-    backgroundColor: "green",
+  locationDistance: {
+    color: "#555",
+  },
+  confirmButton: {
+    backgroundColor: "#4CAF50",
     padding: 15,
     borderRadius: 5,
     alignItems: "center",
+    marginTop: 10,
   },
-  buttonText: {
-    color: "white",
+  confirmButtonText: {
+    color: "#fff",
     fontWeight: "bold",
   },
 });

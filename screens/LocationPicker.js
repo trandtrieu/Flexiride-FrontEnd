@@ -13,8 +13,10 @@ import {
 import { Button, Icon } from "react-native-elements";
 import { TouchableWithoutFeedback } from "react-native";
 import * as Location from "expo-location";
+import { VIETMAP_API_KEY } from "@env";
+import _ from "lodash";
 
-const LocationPicker = ({ navigation }) => {
+const LocationPicker = ({ navigation, route }) => {
   const [selectedTab, setSelectedTab] = useState("recent");
   const [pickup, setPickup] = useState("");
   const [destination, setDestination] = useState("");
@@ -23,43 +25,92 @@ const LocationPicker = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [currentLocation, setCurrentLocation] = useState(null);
   const [nearbyPlaces, setNearbyPlaces] = useState([]);
+  const predictionCache = {};
+  const nearbyPlacesCache = {};
 
-  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+  let previousLocation = null;
 
   useEffect(() => {
     getCurrentLocation();
+    console.log("running");
   }, []);
+
+  useEffect(() => {
+    // Lắng nghe sự kiện khi màn hình này được focus để cập nhật pickup
+    const unsubscribe = navigation.addListener("focus", () => {
+      if (route.params?.newPickupLocation) {
+        // Nhận dữ liệu từ MapScreen
+        setPickup(route.params.newPickupLocation);
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, route.params?.newPickupLocation]);
+  const debouncedFetchPlacePredictions = _.debounce(async (input) => {
+    if (input.length > 1) {
+      const results = await fetchPlacePredictions(input);
+      setPredictions(results);
+    } else {
+      setPredictions([]);
+    }
+  }, 1000);
   const fetchPlacePredictions = async (input) => {
+    if (predictionCache[input]) {
+      return predictionCache[input];
+    }
     if (!currentLocation) {
       console.log("Vị trí hiện tại không có sẵn");
       return [];
     }
 
     const { latitude, longitude } = currentLocation;
-    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${input}&key=${apiKey}&language=vi&location=${latitude},${longitude}&radius=5000`;
+    const url = `https://maps.vietmap.vn/api/autocomplete/v3?apikey=${VIETMAP_API_KEY}&text=${input}&focus=${latitude},${longitude}`;
 
     setLoading(true);
+
     try {
       const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status: ${response.status}`);
+      }
+
       const data = await response.json();
+      predictionCache[input] = data;
+      if (!data || data.length === 0) {
+        console.log("No predictions found");
+        return [];
+      }
+
       const predictionsWithDistance = await Promise.all(
-        data.predictions.map(async (prediction) => {
-          const location = await fetchPlaceDetails(prediction.place_id);
-          if (location) {
+        data.map(async (prediction) => {
+          if (!prediction.ref_id) {
+            return { ...prediction, distance: null };
+          }
+
+          // Fetch details using the ref_id to get lat/lng
+          const locationDetails = await fetchPlaceDetails(prediction.ref_id);
+          if (locationDetails && locationDetails.lat && locationDetails.lng) {
             const distance = calculateDistance(
               latitude,
               longitude,
-              location.lat,
-              location.lng
+              locationDetails.lat,
+              locationDetails.lng
             );
-            return { ...prediction, distance }; // Gán thêm khoảng cách vào prediction
+            return {
+              ...prediction,
+              distance,
+              lat: locationDetails.lat,
+              lng: locationDetails.lng,
+            };
+          } else {
+            return { ...prediction, distance: null };
           }
-          return prediction;
         })
       );
+
       return predictionsWithDistance;
     } catch (error) {
-      console.error("Error fetching place predictions:", error);
       return [];
     } finally {
       setLoading(false);
@@ -67,80 +118,166 @@ const LocationPicker = ({ navigation }) => {
   };
 
   const fetchPlaceDetails = async (placeId) => {
-    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${apiKey}`;
+    const url = `https://maps.vietmap.vn/api/place/v3?apikey=${VIETMAP_API_KEY}&refid=${placeId}`;
     try {
       const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status: ${response.status}`);
+      }
+
       const data = await response.json();
-      const location = data.result.geometry.location;
-      return location;
+
+      if (data && data.lat && data.lng) {
+        return { lat: data.lat, lng: data.lng };
+      } else {
+        console.log(
+          "No coordinates found in place details for ref_id:",
+          placeId
+        );
+        return null;
+      }
     } catch (error) {
       console.error("Error fetching place details:", error);
       return null;
     }
   };
+
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371; // Bán kính trái đất tính bằng km
-    const dLat = (lat2 - lat1) * (Math.PI / 180);
-    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) {
+      console.log("Invalid coordinates for distance calculation.");
+      return null;
+    }
+
+    const R = 6371;
+    const toRad = (value) => (value * Math.PI) / 180;
+
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * (Math.PI / 180)) *
-        Math.cos(lat2 * (Math.PI / 180)) *
+      Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2)) *
         Math.sin(dLon / 2) *
         Math.sin(dLon / 2);
+
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c;
+
     return distance;
   };
 
   const handlePickupChange = async (text) => {
-    setPickup(text);
-    setIsPickupFocused(true);
-    if (text.length > 1) {
-      const results = await fetchPlacePredictions(text);
-      setPredictions(results);
+    if (predictionCache[text]) {
+      setPredictions(predictionCache[text]);
     } else {
-      setPredictions([]);
+      setPickup(text);
+      setIsPickupFocused(true);
+      debouncedFetchPlacePredictions(text);
     }
   };
 
   const handleDestinationChange = async (text) => {
-    setDestination(text);
-    setIsPickupFocused(false);
-    if (text.length > 1) {
-      const results = await fetchPlacePredictions(text);
-      setPredictions(results);
+    if (predictionCache[text]) {
+      setPredictions(predictionCache[text]);
     } else {
-      setPredictions([]);
+      setDestination(text);
+      setIsPickupFocused(false);
+      debouncedFetchPlacePredictions(text);
     }
   };
 
   const handlePredictionSelect = (prediction) => {
     if (isPickupFocused) {
-      setPickup(prediction.structured_formatting.main_text);
+      console.log("Pickup location selected:", prediction);
+      setPickup(prediction);
     } else {
-      setDestination(prediction.structured_formatting.main_text);
+      console.log("Destination location selected:", prediction);
+      setDestination(prediction);
     }
+
     setPredictions([]);
+
+    if (isPickupFocused && destination) {
+      console.log("Navigating to MapScreen with:");
+      console.log("Pickup:", {
+        latitude: prediction.lat,
+        longitude: prediction.lng,
+        name: prediction.name,
+        address: prediction.address,
+      });
+      console.log("Destination:", {
+        latitude: destination.lat,
+        longitude: destination.lng,
+        name: destination.name,
+        address: destination.address,
+      });
+
+      navigation.navigate("MapScreen", {
+        pickupLocation: {
+          latitude: prediction.lat,
+          longitude: prediction.lng,
+          name: prediction.name,
+          address: prediction.address,
+        },
+        destinationLocation: {
+          latitude: destination.lat,
+          longitude: destination.lng,
+          name: destination.name,
+          address: destination.address,
+        },
+        onSelectPickupLocation: (newPickupLocation) => {
+          console.log("New pickup location from MapScreen:", newPickupLocation);
+          setPickup(newPickupLocation);
+        },
+      });
+    } else if (!isPickupFocused && pickup) {
+      console.log("Navigating to MapScreen with:");
+      console.log("Pickup:", {
+        latitude: pickup.lat,
+        longitude: pickup.lng,
+        name: pickup.name,
+        address: pickup.address,
+      });
+      console.log("Destination:", {
+        latitude: prediction.lat,
+        longitude: prediction.lng,
+        name: prediction.name,
+        address: prediction.address,
+      });
+
+      navigation.navigate("MapScreen", {
+        pickupLocation: {
+          latitude: pickup.lat,
+          longitude: pickup.lng,
+          name: pickup.name,
+          address: pickup.address,
+        },
+        destinationLocation: {
+          latitude: prediction.lat,
+          longitude: prediction.lng,
+          name: prediction.name,
+          address: prediction.address,
+        },
+        onSelectPickupLocation: (newPickupLocation) => {
+          console.log("New pickup location from MapScreen:", newPickupLocation);
+          setPickup(newPickupLocation);
+        },
+      });
+    }
   };
 
-  const handleSelectFromMap = () => {
-    navigation.navigate("MapScreen", {
-      onSelectLocations: (pickupString, destinationString) => {
-        setPickup(pickupString);
-        setDestination(destinationString);
-      },
-    });
-  };
-
+  // Hàm lấy địa chỉ từ tọa độ hiện tại
   const fetchAddressFromCoordinates = async (latitude, longitude) => {
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`;
+    const url = `https://maps.vietmap.vn/api/reverse/v3?apikey=${VIETMAP_API_KEY}&lat=${latitude}&lng=${longitude}`;
 
+    console.log("🚀 ~ fetchAddressFromCoordinates ~ url:", url);
     try {
       const response = await fetch(url);
       const data = await response.json();
-      if (data.results && data.results.length > 0) {
-        const address = data.results[0].formatted_address;
+      if (data.length > 0) {
+        const address = data[0].address; // Extract address properly
         setPickup(address);
       } else {
         console.log("Không tìm thấy địa chỉ");
@@ -151,19 +288,60 @@ const LocationPicker = ({ navigation }) => {
   };
 
   const fetchNearbyPlaces = async (latitude, longitude) => {
-    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=500&key=${apiKey}`;
+    const cacheKey = `${latitude},${longitude}`;
+    if (nearbyPlacesCache[cacheKey]) {
+      setNearbyPlaces(nearbyPlacesCache[cacheKey]);
+      return;
+    }
+    const radius = 500;
+    const size = 10;
+    const url = `https://maps.vietmap.vn/api/search/v3?apikey=${VIETMAP_API_KEY}&text=*&focus=${latitude},${longitude}&circle_center=${latitude},${longitude}&circle_radius=${radius}&size=${size}`;
+
     setLoading(true);
     try {
       const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status: ${response.status}`);
+      }
+
       const data = await response.json();
-      if (data.results) {
-        setNearbyPlaces(data.results);
+
+      if (data && data.length > 0) {
+        nearbyPlacesCache[cacheKey] = data;
+
+        const placesWithDistance = await Promise.all(
+          data.map(async (place) => {
+            let placeLat = place.lat;
+            let placeLng = place.lng;
+
+            if (!placeLat || !placeLng) {
+              const placeDetails = await fetchPlaceDetails(place.ref_id);
+              placeLat = placeDetails?.lat;
+              placeLng = placeDetails?.lng;
+            }
+
+            if (placeLat && placeLng) {
+              const distance = calculateDistance(
+                latitude,
+                longitude,
+                placeLat,
+                placeLng
+              );
+              return { ...place, distance, lat: placeLat, lng: placeLng };
+            } else {
+              return { ...place, distance: null };
+            }
+          })
+        );
+
+        setNearbyPlaces(placesWithDistance);
         setSelectedTab("suggested");
       } else {
-        console.log("Không tìm thấy địa điểm gần đó.");
+        console.log("No nearby places found.");
       }
     } catch (error) {
-      console.error("Lỗi khi gọi API Nearby Places:", error);
+      console.error("Error fetching nearby places:", error);
     } finally {
       setLoading(false);
     }
@@ -172,7 +350,7 @@ const LocationPicker = ({ navigation }) => {
   const getCurrentLocation = async () => {
     setLoading(true);
     try {
-      let { status } = await Location.requestForegroundPermissionsAsync();
+      const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         Alert.alert(
           "Quyền truy cập vị trí bị từ chối",
@@ -182,18 +360,29 @@ const LocationPicker = ({ navigation }) => {
         return;
       }
 
-      let location = await Location.getCurrentPositionAsync({});
+      const location = await Location.getCurrentPositionAsync({});
       const { latitude, longitude } = location.coords;
-      setCurrentLocation({ latitude, longitude });
+      const distance = previousLocation
+        ? calculateDistance(
+            previousLocation.latitude,
+            previousLocation.longitude,
+            latitude,
+            longitude
+          )
+        : null;
 
-      await fetchAddressFromCoordinates(latitude, longitude);
-      await fetchNearbyPlaces(latitude, longitude);
+      if (!previousLocation || distance > 0.5) {
+        setCurrentLocation({ latitude, longitude });
+        await fetchNearbyPlaces(latitude, longitude);
+        previousLocation = { latitude, longitude };
+      }
     } catch (error) {
       console.error("Error getting location", error);
     } finally {
       setLoading(false);
     }
   };
+
   const handleInputClear = (field) => {
     if (field === "pickup") {
       setPickup("");
@@ -204,10 +393,19 @@ const LocationPicker = ({ navigation }) => {
   };
 
   const handleNearbyPlaceSelect = (place) => {
-    setPickup(place.name);
+    setPickup(place);
     setPredictions([]);
   };
 
+  const handleSelectFromMap = () => {
+    navigation.navigate("MapScreen", {
+      pickupLocation: pickup,
+      destinationLocation: destination,
+      onSelectPickupLocation: (newPickupLocation) => {
+        setPickup(newPickupLocation); // Cập nhật vị trí đón
+      },
+    });
+  };
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
@@ -224,14 +422,13 @@ const LocationPicker = ({ navigation }) => {
               <TextInput
                 style={styles.input}
                 placeholder="Đón tại"
-                value={pickup}
+                value={pickup ? pickup.name : ""}
                 onChangeText={handlePickupChange}
                 onFocus={() => setIsPickupFocused(true)}
                 multiline={false}
                 scrollEnabled={false}
                 textAlign="left"
               />
-
               {pickup ? (
                 <Icon
                   name="close-circle"
@@ -246,7 +443,7 @@ const LocationPicker = ({ navigation }) => {
               <TextInput
                 style={styles.input}
                 placeholder="Đến đâu?"
-                value={destination}
+                value={destination ? destination.name : ""} // Hiển thị name nhưng lưu toàn bộ prediction
                 onChangeText={handleDestinationChange}
                 onFocus={() => setIsPickupFocused(false)}
                 textAlign="left"
@@ -286,26 +483,18 @@ const LocationPicker = ({ navigation }) => {
                     size={24}
                     color="#FFC323"
                   />
-                  {prediction.distance && (
-                    <Text style={styles.locationDistance}>
-                      {prediction.distance.toFixed(0)} km
-                    </Text>
-                  )}
+                  <Text style={styles.locationDistance}>
+                    {prediction.distance != null
+                      ? `${prediction.distance.toFixed(1)} km`
+                      : "N/A"}
+                  </Text>
                 </View>
                 <View style={styles.textWrapper}>
-                  <Text style={styles.locationName}>
-                    {prediction.structured_formatting.main_text}
-                  </Text>
+                  <Text style={styles.locationName}>{prediction.name}</Text>
                   <Text style={styles.locationAddress}>
-                    {prediction.structured_formatting.secondary_text}
+                    {prediction.address}
                   </Text>
                 </View>
-                <Icon
-                  name="dots-three-vertical"
-                  type="entypo"
-                  size={16}
-                  color="#A9A9A9"
-                />
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -371,26 +560,35 @@ const LocationPicker = ({ navigation }) => {
                 />
               </TouchableOpacity>
               <ScrollView style={styles.locations}>
-                {nearbyPlaces.map((place, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={styles.locationItem}
-                    onPress={() => handleNearbyPlaceSelect(place)}
-                  >
-                    <Icon
-                      name="location"
-                      type="ionicon"
-                      size={20}
-                      color="#4a4a4a"
-                    />
-                    <View style={styles.locationText}>
-                      <Text style={styles.locationName}>{place.name}</Text>
-                      <Text style={styles.locationAddress}>
-                        {place.vicinity}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
+                {nearbyPlaces.map((place, index) => {
+                  return (
+                    <TouchableOpacity
+                      key={index}
+                      style={styles.locationItem}
+                      onPress={() => handleNearbyPlaceSelect(place)}
+                    >
+                      <View style={styles.iconWrapper}>
+                        <Icon
+                          name="location"
+                          type="ionicon"
+                          size={24}
+                          color="#FFC323"
+                        />
+                        <Text style={styles.locationDistance}>
+                          {place.distance != null
+                            ? `${(place.distance * 1000).toFixed(0)} m`
+                            : "N/A"}
+                        </Text>
+                      </View>
+                      <View style={styles.textWrapper}>
+                        <Text style={styles.locationName}>{place.name}</Text>
+                        <Text style={styles.locationAddress}>
+                          {place.address}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
               </ScrollView>
             </>
           )}
@@ -478,10 +676,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "bold",
     marginBottom: 2,
-  },
-  locationAddress: {
-    fontSize: 10,
-    color: "black",
   },
   locationDistance: {
     fontSize: 10,

@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
 
 export default function Login({ navigation }) {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -43,18 +44,26 @@ export default function Login({ navigation }) {
     if (validateForm()) {
       setIsLoading(true);
 
-      // Simulate login action
       const loginData = {
         phone: phoneNumber,
         password: password,
+        role: "1",
       };
+      console.log("🚀 ~ handleSubmit ~ loginData:", loginData);
 
       try {
-        // Assume login API call here
-        setIsLoading(false);
-        navigation.navigate("Home"); // Redirect to home after login
+        const response = await axios.post(
+          "http://192.168.88.142:3000/auth/login",
+          loginData
+        );
+
+        if (response.data.token) {
+          console.log("Login successful, token:", response.data.token);
+          navigation.navigate("Home");
+        }
       } catch (error) {
         console.error("Error during login:", error);
+        setErrors({ general: "Invalid phone number or password" });
       } finally {
         setIsLoading(false);
       }
