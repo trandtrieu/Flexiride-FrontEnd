@@ -3,7 +3,7 @@ import axios from 'axios';
 const domain = 'http://localhost:3000'; // Thay thế bằng URL API thực tế
 
 // Token cho khách hàng và tài xế
-const CUSTOMER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGU4ZjQxYWMyYWNiODM1ZmY5MGRmNCIsImVtYWlsIjoidGhpbmhAZXhhbXBsZS5jb20iLCJpYXQiOjE3MjkzMTkyODgsImV4cCI6MTcyOTMyMjg4OH0.1Rakl5bDE6EA04HApDZqv769MTvNhJXs8P9o1uiWXyA';
+const CUSTOMER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGU4ZjQxYWMyYWNiODM1ZmY5MGRmNCIsImVtYWlsIjoidGhpbmhAZXhhbXBsZS5jb20iLCJpYXQiOjE3MjkzMjYwMDgsImV4cCI6MTcyOTMyOTYwOH0.YgeOzbec5XWGQn8W5pLRQESNiQC_Z_WD7M2-SzlHJII';
 const DRIVER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGZkNDcyMmZiOGM0MDZhMjJmZDExZSIsImVtYWlsIjoidGhpbmhAZXhhbXBsZS5jb20iLCJpYXQiOjE3MjkxODE0ODEsImV4cCI6MTcyOTE4NTA4MX0.z4jztfXpzF6Lx9X2XEN5qZ4sneMXiHm838lI2Cq__lI';
 
 // Cấu hình axios để sử dụng token tương ứng cho khách hàng
