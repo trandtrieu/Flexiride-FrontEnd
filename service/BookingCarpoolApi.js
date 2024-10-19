@@ -27,7 +27,7 @@ export const createCarpoolRequest = (data) => customerApi.post('/booking-carpool
 export const getAvailableRides = (params) => customerApi.get('/booking-carpool/available-rides', { params });
 
 export const joinCarpoolRequest = (requestId) => customerApi.post(`/booking-carpool/join-request/${requestId}`);
-export const cancelCarpoolRequest = (requestId) => customerApi.post(`/booking-carpool/join-request/${requestId}`);
+export const cancelCarpoolRequest = (requestId) => customerApi.post(`/booking-carpool/unjoin-request/${requestId}`);
 
 export const getCustomerRides = () => customerApi.get('/booking-carpool/my-rides');
 export const getCustomerNotifications = () => customerApi.get('/notification/');
