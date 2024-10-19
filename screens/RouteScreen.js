@@ -7,38 +7,30 @@ import {
   ActivityIndicator,
   Image,
 } from "react-native";
-import MapView, { Polyline } from "react-native-maps";
+import MapView, { Marker, Polyline } from "react-native-maps";
 import { VIETMAP_API_KEY } from "@env";
 import axios from "axios";
 import polyline from "@mapbox/polyline";
 import { ScrollView } from "react-native";
 import { Icon } from "react-native-elements";
+import { formatCurrency } from "../utils/formatPrice";
 
 const RouteScreen = ({ route, navigation }) => {
-  //   const { pickupLocation, destinationLocation } = route.params;
+  const { pickupLocation, destinationLocation } = route.params;
 
-  const defaultPickupLocation = {
-    latitude: 16.054407,
-    longitude: 108.202167,
-  };
-
-  const defaultDestinationLocation = {
-    latitude: 16.051588,
-    longitude: 108.199971,
-  };
-
-  const {
-    pickupLocation = defaultPickupLocation,
-    destinationLocation = defaultDestinationLocation,
-  } = route.params || {};
   const [routeData, setRouteData] = useState(null);
   const [loading, setLoading] = useState(false);
   const mapRef = useRef(null);
+  const [services, setServices] = useState([]);
+  const images = {
+    "bike-icon.png": require("../assets/bike-icon.png"),
+    "car-icon.png": require("../assets/car-icon.png"),
+  };
 
   useEffect(() => {
-    // calculateRoute();
+    calculateRoute();
+    fetchServicesAndPrices();
   }, [pickupLocation, destinationLocation]);
-
   const calculateRoute = async () => {
     setLoading(true);
     try {
@@ -63,8 +55,37 @@ const RouteScreen = ({ route, navigation }) => {
     }
     setLoading(false);
   };
+
+  const fetchServicesAndPrices = async () => {
+    try {
+      const response = await axios.get(
+        `http://192.168.88.169:3000/booking-traditional/services-with-prices`,
+        {
+          params: {
+            pickupLocation: `${pickupLocation.latitude},${pickupLocation.longitude}`,
+            destinationLocation: `${destinationLocation.latitude},${destinationLocation.longitude}`,
+            isAdvanceBooking: false, // Hoặc điều chỉnh dựa trên yêu cầu thực tế
+            isBadWeather: false, // Hoặc điều chỉnh dựa trên điều kiện thời tiết
+          },
+        }
+      );
+      setServices(response.data);
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error fetching services and prices:", error);
+    }
+  };
+
   const handleBackPress = () => {
     navigation.goBack();
+  };
+  const formatCurrency = (amount) => {
+    if (!amount) return "Không có giá";
+    const numericAmount = parseInt(amount, 10);
+    return numericAmount.toLocaleString("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    });
   };
   return (
     <View style={styles.container}>
@@ -83,11 +104,32 @@ const RouteScreen = ({ route, navigation }) => {
           longitudeDelta: 0.01,
         }}
       >
+        <Marker
+          coordinate={{
+            latitude: pickupLocation.latitude,
+            longitude: pickupLocation.longitude,
+          }}
+          title="Pickup Location"
+          description={pickupLocation.address || "Pickup Location"}
+          pinColor="green"
+        />
+
+        <Marker
+          coordinate={{
+            latitude: destinationLocation.latitude,
+            longitude: destinationLocation.longitude,
+          }}
+          title="Drop-off Location"
+          description={destinationLocation.address || "Drop-off Location"}
+          pinColor="red"
+        />
+
+        {/* Route Path */}
         {routeData && (
           <Polyline
             coordinates={routeData}
-            strokeColor="#000"
-            strokeWidth={6}
+            strokeColor="blue"
+            strokeWidth={8}
           />
         )}
       </MapView>
@@ -96,71 +138,38 @@ const RouteScreen = ({ route, navigation }) => {
           style={styles.rideOptions}
           showsHorizontalScrollIndicator={false}
         >
-          <TouchableOpacity style={styles.option}>
-            <View style={styles.optionInfo}>
-              <Image
-                source={require("../assets/bike-icon.png")}
-                style={styles.serviceIcon}
-              />
-              <Text style={styles.optionTitle}>FlexiBike</Text>
-              <Icon
-                name="user"
-                type="font-awesome"
-                style={styles.seatIcon}
-                size={16}
-                color={"#FFC323"}
-              />
-              <Text style={styles.optionSeats}>1</Text>
-            </View>
-            <View style={styles.optionPrice}>
-              <Text style={styles.discountPrice}>44.000đ</Text>
-              <Text style={styles.actualPrice}>33.000đ</Text>
-            </View>
-          </TouchableOpacity>
+          {services.length === 0 ? (
+            <ActivityIndicator size="large" color="#00ff00" />
+          ) : (
+            services.map((service) => (
+              <TouchableOpacity key={service._id} style={styles.option}>
+                <View style={styles.optionInfo}>
+                  <Image
+                    source={
+                      images[service.image] || require("../assets/car-icon.png")
+                    } // Dùng fallback nếu không có hình ảnh
+                    style={styles.serviceIcon}
+                  />
+                  <Text style={styles.optionTitle}>{service.name}</Text>
+                  <Icon
+                    name="user"
+                    type="font-awesome"
+                    style={styles.seatIcon}
+                    size={16}
+                    color={"#FFC323"}
+                  />
+                  <Text style={styles.optionSeats}>{service.seat}</Text>
+                </View>
 
-          <TouchableOpacity style={styles.option}>
-            <View style={styles.optionInfo}>
-              <Image
-                source={require("../assets/car-icon.png")}
-                style={styles.serviceIcon}
-              />
-              <Text style={styles.optionTitle}>FlexiCar</Text>
-              <Icon
-                name="user"
-                type="font-awesome"
-                style={styles.seatIcon}
-                size={16}
-                color={"#FFC323"}
-              />
-              <Text style={styles.optionSeats}>4</Text>
-            </View>
-            <View style={styles.optionPrice}>
-              <Text style={styles.discountPrice}>42.000đ</Text>
-              <Text style={styles.actualPrice}>32.000đ</Text>
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.option}>
-            <View style={styles.optionInfo}>
-              <Image
-                source={require("../assets/car-icon.png")}
-                style={styles.serviceIcon}
-              />
-              <Text style={styles.optionTitle}>FlexiCar</Text>
-              <Icon
-                name="user"
-                type="font-awesome"
-                style={styles.seatIcon}
-                size={16}
-                color={"#FFC323"}
-              />
-              <Text style={styles.optionSeats}> 7</Text>
-            </View>
-            <View style={styles.optionPrice}>
-              <Text style={styles.discountPrice}>101.000đ</Text>
-              <Text style={styles.actualPrice}>76.000đ</Text>
-            </View>
-          </TouchableOpacity>
+                <Text style={styles.actualPrice}>
+                  {service.calculatedFare !== null &&
+                  service.calculatedFare !== undefined
+                    ? formatCurrency(service.calculatedFare)
+                    : "Không có giá"}
+                </Text>
+              </TouchableOpacity>
+            ))
+          )}
         </ScrollView>
 
         {/* Payment and Booking */}

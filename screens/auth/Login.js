@@ -12,6 +12,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
+import { useAuth } from "../../provider/AuthProvider";
 
 export default function Login({ navigation }) {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -20,6 +21,7 @@ export default function Login({ navigation }) {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { authenticate } = useAuth();
 
   const validateForm = () => {
     const newErrors = {};
@@ -43,22 +45,23 @@ export default function Login({ navigation }) {
 
     if (validateForm()) {
       setIsLoading(true);
-
       const loginData = {
         phone: phoneNumber,
         password: password,
+
         role: "1",
       };
       console.log("🚀 ~ handleSubmit ~ loginData:", loginData);
-
       try {
         const response = await axios.post(
-          "http://192.168.88.142:3000/auth/login",
+          "http://192.168.88.169:3000/auth/login",
           loginData
         );
-
         if (response.data.token) {
-          console.log("Login successful, token:", response.data.token);
+          await authenticate({
+            token: response.data.token,
+            user: response.data.user,
+          });
           navigation.navigate("Home");
         }
       } catch (error) {

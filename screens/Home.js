@@ -12,12 +12,14 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import BottomNavigation from "./layouts/BottomNavigation";
 import ServiceIcons from "./layouts/ServiceIcons";
+import { useAuth } from "../provider/AuthProvider";
 
 const Home = ({ navigation }) => {
+  const { authState } = useAuth();
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.qrButton}>
             <Ionicons name="qr-code-outline" size={24} color="black" />
@@ -32,10 +34,8 @@ const Home = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* Service Icons */}
         <ServiceIcons />
 
-        {/* Cards */}
         <View style={styles.cardsContainer}>
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Activate</Text>
@@ -49,13 +49,11 @@ const Home = ({ navigation }) => {
           </View>
         </View>
 
-        {/* Book Now Section */}
         <View style={styles.bookNowContainer}>
           <Text style={styles.bookNowTitle}>ĐẶT XE NGAY</Text>
           <Ionicons name="arrow-forward-outline" size={24} color="black" />
         </View>
 
-        {/* Promotion Section */}
         <View style={styles.promotionsContainer}>
           <TouchableOpacity style={styles.promotionItem}>
             <Image

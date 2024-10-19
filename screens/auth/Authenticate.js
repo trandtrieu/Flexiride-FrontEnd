@@ -11,13 +11,11 @@ export default function WelcomeScreen({ navigation }) {
         </Text>
       </View>
 
-      {/* Illustration at the center */}
       <Image
         source={require("../../assets/illustration.png")}
         style={styles.illustration}
       />
 
-      {/* Login Button */}
       <TouchableOpacity
         style={styles.loginButton}
         onPress={() => navigation.navigate("LoginOptions")}
@@ -25,7 +23,6 @@ export default function WelcomeScreen({ navigation }) {
         <Text style={styles.loginButtonText}>Đăng nhập</Text>
       </TouchableOpacity>
 
-      {/* Register Button */}
       <TouchableOpacity
         style={styles.registerButton}
         onPress={() => navigation.navigate("Register")}
@@ -34,15 +31,6 @@ export default function WelcomeScreen({ navigation }) {
           Bạn mới biết đến FRide? Hãy đăng ký!
         </Text>
       </TouchableOpacity>
-
-      {/* <Image
-        source={require("../../assets/auth_background1.png")}
-        style={styles.leftImage}
-      />
-      <Image
-        source={require("../../assets/auth_background2.png")}
-        style={styles.rightImage}
-      /> */}
     </View>
   );
 }

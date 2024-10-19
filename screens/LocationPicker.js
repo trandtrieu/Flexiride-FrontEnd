@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -32,7 +32,6 @@ const LocationPicker = ({ navigation, route }) => {
 
   useEffect(() => {
     getCurrentLocation();
-    console.log("running");
   }, []);
 
   useEffect(() => {
@@ -46,76 +45,81 @@ const LocationPicker = ({ navigation, route }) => {
 
     return unsubscribe;
   }, [navigation, route.params?.newPickupLocation]);
-  const debouncedFetchPlacePredictions = _.debounce(async (input) => {
-    if (input.length > 1) {
-      const results = await fetchPlacePredictions(input);
-      setPredictions(results);
-    } else {
-      setPredictions([]);
-    }
-  }, 1000);
-  const fetchPlacePredictions = async (input) => {
-    if (predictionCache[input]) {
-      return predictionCache[input];
-    }
-    if (!currentLocation) {
-      console.log("Vị trí hiện tại không có sẵn");
-      return [];
-    }
 
-    const { latitude, longitude } = currentLocation;
-    const url = `https://maps.vietmap.vn/api/autocomplete/v3?apikey=${VIETMAP_API_KEY}&text=${input}&focus=${latitude},${longitude}`;
-
-    setLoading(true);
-
-    try {
-      const response = await fetch(url);
-
-      if (!response.ok) {
-        throw new Error(`API request failed with status: ${response.status}`);
+  const fetchPlacePredictions = useCallback(
+    _.debounce(async (input) => {
+      if (input.length < 3) {
+        setPredictions([]);
+        return;
       }
 
-      const data = await response.json();
-      predictionCache[input] = data;
-      if (!data || data.length === 0) {
-        console.log("No predictions found");
+      if (predictionCache[input]) {
+        return predictionCache[input];
+      }
+
+      if (!currentLocation) {
+        console.log("Vị trí hiện tại không có sẵn");
         return [];
       }
 
-      const predictionsWithDistance = await Promise.all(
-        data.map(async (prediction) => {
-          if (!prediction.ref_id) {
-            return { ...prediction, distance: null };
-          }
+      const { latitude, longitude } = currentLocation;
+      const url = `https://maps.vietmap.vn/api/autocomplete/v3?apikey=${VIETMAP_API_KEY}&text=${input}&focus=${latitude},${longitude}`;
+      console.log("call api");
 
-          // Fetch details using the ref_id to get lat/lng
-          const locationDetails = await fetchPlaceDetails(prediction.ref_id);
-          if (locationDetails && locationDetails.lat && locationDetails.lng) {
-            const distance = calculateDistance(
-              latitude,
-              longitude,
-              locationDetails.lat,
-              locationDetails.lng
-            );
-            return {
-              ...prediction,
-              distance,
-              lat: locationDetails.lat,
-              lng: locationDetails.lng,
-            };
-          } else {
-            return { ...prediction, distance: null };
-          }
-        })
-      );
+      setLoading(true);
 
-      return predictionsWithDistance;
-    } catch (error) {
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  };
+      try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error(`API request failed with status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        predictionCache[input] = data;
+
+        if (!data || data.length === 0) {
+          console.log("No predictions found");
+          return [];
+        }
+
+        const predictionsWithDistance = await Promise.all(
+          data.map(async (prediction) => {
+            if (!prediction.ref_id) {
+              return { ...prediction, distance: null };
+            }
+
+            // Fetch details using the ref_id to get lat/lng
+            const locationDetails = await fetchPlaceDetails(prediction.ref_id);
+            if (locationDetails && locationDetails.lat && locationDetails.lng) {
+              const distance = calculateDistance(
+                latitude,
+                longitude,
+                locationDetails.lat,
+                locationDetails.lng
+              );
+              return {
+                ...prediction,
+                distance,
+                lat: locationDetails.lat,
+                lng: locationDetails.lng,
+              };
+            } else {
+              return { ...prediction, distance: null };
+            }
+          })
+        );
+
+        setPredictions(predictionsWithDistance); // Cập nhật state với kết quả mới
+      } catch (error) {
+        console.error("Error fetching place predictions:", error);
+        setPredictions([]); // Xử lý lỗi và làm rỗng kết quả dự đoán
+      } finally {
+        setLoading(false);
+      }
+    }, 3000), // Sử dụng debounce với thời gian chờ là 3 giây
+    [currentLocation]
+  );
 
   const fetchPlaceDetails = async (placeId) => {
     const url = `https://maps.vietmap.vn/api/place/v3?apikey=${VIETMAP_API_KEY}&refid=${placeId}`;
@@ -174,7 +178,7 @@ const LocationPicker = ({ navigation, route }) => {
     } else {
       setPickup(text);
       setIsPickupFocused(true);
-      debouncedFetchPlacePredictions(text);
+      fetchPlacePredictions(text);
     }
   };
 
@@ -184,7 +188,7 @@ const LocationPicker = ({ navigation, route }) => {
     } else {
       setDestination(text);
       setIsPickupFocused(false);
-      debouncedFetchPlacePredictions(text);
+      fetchPlacePredictions(text);
     }
   };
 
@@ -565,7 +569,8 @@ const LocationPicker = ({ navigation, route }) => {
                     <TouchableOpacity
                       key={index}
                       style={styles.locationItem}
-                      onPress={() => handleNearbyPlaceSelect(place)}
+                      // onPress={() => handleNearbyPlaceSelect(place)}
+                      onPress={() => handlePredictionSelect(place)}
                     >
                       <View style={styles.iconWrapper}>
                         <Icon
