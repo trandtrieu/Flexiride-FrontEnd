@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   Image,
 } from "react-native";
-import MapView, { Marker, Polyline } from "react-native-maps";
+import MapView, { Callout, Marker, Polyline } from "react-native-maps";
 import { VIETMAP_API_KEY } from "@env";
 import axios from "axios";
 import polyline from "@mapbox/polyline";
@@ -22,6 +22,8 @@ const RouteScreen = ({ route, navigation }) => {
   const [loading, setLoading] = useState(false);
   const mapRef = useRef(null);
   const [services, setServices] = useState([]);
+  const [distance, setDistance] = useState(0);
+  const [estimatedTime, setEstimatedTime] = useState("");
   const images = {
     "bike-icon.png": require("../assets/bike-icon.png"),
     "car-icon.png": require("../assets/car-icon.png"),
@@ -29,6 +31,7 @@ const RouteScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     calculateRoute();
+    calculateDistanceAndTime(pickupLocation, destinationLocation);
     fetchServicesAndPrices();
   }, [pickupLocation, destinationLocation]);
   const calculateRoute = async () => {
@@ -87,6 +90,85 @@ const RouteScreen = ({ route, navigation }) => {
       currency: "VND",
     });
   };
+  const calculateDistanceAndTime = (pickup, destination) => {
+    const R = 6371; // Radius of the earth in km
+    const dLat = toRad(destination.latitude - pickup.latitude);
+    const dLon = toRad(destination.longitude - pickup.longitude);
+    const lat1 = toRad(pickup.latitude);
+    const lat2 = toRad(destination.latitude);
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distanceInKm = R * c;
+
+    setDistance(distanceInKm.toFixed(1));
+
+    const averageSpeed = 40;
+
+    const timeInHours = distanceInKm / averageSpeed;
+    const timeInMinutes = timeInHours * 60;
+    const hours = Math.floor(timeInHours);
+    const minutes = Math.round(timeInMinutes % 60);
+
+    if (hours >= 1) {
+      setEstimatedTime(`${hours} giờ ${minutes} phút`);
+    } else {
+      setEstimatedTime(`${minutes} phút`);
+    }
+  };
+
+  const toRad = (Value) => {
+    return (Value * Math.PI) / 180;
+  };
+  const handleBookingRequest = async () => {
+    try {
+      // Tạo booking request
+      const bookingResponse = await axios.post(
+        "http://192.168.88.169:3000/booking-traditional/create",
+        {
+          account_id: "12345",
+          longitude_from: pickupLocation.longitude,
+          latitude_from: pickupLocation.latitude,
+          longitude_to: destinationLocation.longitude,
+          latitude_to: destinationLocation.latitude,
+          service_id: selectedServiceId,
+          price: selectedServicePrice,
+          departure: new Date().toISOString(),
+        }
+      );
+
+      console.log("Booking created successfully:", bookingResponse.data);
+
+      // Sau khi tạo booking thành công, quét các tài xế gần đó
+      await scanNearbyDrivers();
+    } catch (error) {
+      console.error("Error creating booking:", error);
+    }
+  };
+  const scanNearbyDrivers = async () => {
+    try {
+      const driversResponse = await axios.get(
+        `http://192.168.88.169:3000/drivers/nearby`, // API giả định để lấy danh sách tài xế gần đó
+        {
+          params: {
+            latitude: pickupLocation.latitude,
+            longitude: pickupLocation.longitude,
+            radius: 5, // Bán kính tìm kiếm (đơn vị là km)
+          },
+        }
+      );
+
+      console.log("Nearby drivers:", driversResponse.data);
+
+      // Bạn có thể hiển thị danh sách tài xế trong UI hoặc tự động chỉ định tài xế gần nhất.
+    } catch (error) {
+      console.error("Error scanning for drivers:", error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.backButtonContainer}>
@@ -109,20 +191,26 @@ const RouteScreen = ({ route, navigation }) => {
             latitude: pickupLocation.latitude,
             longitude: pickupLocation.longitude,
           }}
-          title="Pickup Location"
-          description={pickupLocation.address || "Pickup Location"}
           pinColor="green"
-        />
+        >
+          <Callout>
+            <Text>{pickupLocation.name || "Pickup Location"}</Text>
+            <Text>{pickupLocation.address || "Địa điểm đón"}</Text>
+          </Callout>
+        </Marker>
 
         <Marker
           coordinate={{
             latitude: destinationLocation.latitude,
             longitude: destinationLocation.longitude,
           }}
-          title="Drop-off Location"
-          description={destinationLocation.address || "Drop-off Location"}
           pinColor="red"
-        />
+        >
+          <Callout>
+            <Text>{destinationLocation.name || "Drop-off Location"}</Text>
+            <Text>{destinationLocation.address || "Địa điểm đến"}</Text>
+          </Callout>
+        </Marker>
 
         {/* Route Path */}
         {routeData && (
@@ -133,6 +221,11 @@ const RouteScreen = ({ route, navigation }) => {
           />
         )}
       </MapView>
+
+      <View style={styles.distanceContainer}>
+        <Text style={styles.distanceText}>Khoảng cách: {distance} km</Text>
+        <Text style={styles.infoText}>Thời gian ước tính: {estimatedTime}</Text>
+      </View>
       <View style={styles.optionsContainer}>
         <ScrollView
           style={styles.rideOptions}
@@ -175,9 +268,12 @@ const RouteScreen = ({ route, navigation }) => {
         {/* Payment and Booking */}
         <View style={styles.paymentOptions}>
           <TouchableOpacity style={styles.bookNowButton}>
-            <Text style={styles.bookNowText}>GrabNow</Text>
+            <Text style={styles.bookNowText}>FlexiNow</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.bookButton}>
+          <TouchableOpacity
+            style={styles.bookButton}
+            onPress={handleBookingRequest}
+          >
             <Text style={styles.bookButtonText}>Đặt Xe</Text>
           </TouchableOpacity>
         </View>
@@ -252,9 +348,8 @@ const styles = StyleSheet.create({
     color: "#888",
   },
   actualPrice: {
-    fontSize: 16,
+    fontSize: 13,
     color: "#000",
-    fontWeight: "bold",
   },
   paymentOptions: {
     flexDirection: "row",
@@ -290,6 +385,17 @@ const styles = StyleSheet.create({
   serviceIcon: {
     width: 40,
     height: 40,
+  },
+  distanceContainer: {
+    padding: 10,
+    backgroundColor: "#ccc",
+    alignItems: "center",
+  },
+  distanceText: {
+    fontSize: 14,
+  },
+  infoText: {
+    fontSize: 14,
   },
 });
 
