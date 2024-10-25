@@ -64,7 +64,7 @@ const LocationPicker = ({ navigation, route }) => {
 
       const { latitude, longitude } = currentLocation;
       const url = `https://maps.vietmap.vn/api/autocomplete/v3?apikey=${VIETMAP_API_KEY}&text=${input}&focus=${latitude},${longitude}`;
-      console.log("call api");
+      console.log("call api" + url);
 
       setLoading(true);
 

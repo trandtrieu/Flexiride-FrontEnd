@@ -19,6 +19,7 @@ import LocationPicker from "./screens/LocationPicker";
 import MapScreen from "./screens/MapScreen";
 import RouteScreen from "./screens/RouteScreen";
 import { AuthProvider } from "./provider/AuthProvider";
+import TestMap from "./screens/TestMap";
 
 export default function App() {
   const Stack = createNativeStackNavigator();
@@ -94,6 +95,11 @@ export default function App() {
           <Stack.Screen
             name="RouteScreen"
             component={RouteScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="TestMap"
+            component={TestMap}
             options={{ headerShown: false }}
           />
         </Stack.Navigator>
