@@ -1,12 +1,12 @@
 import axios from 'axios';
 
-const domain = 'http://localhost:3000'; // Thay thế bằng URL API thực tế
+const domain = 'http://localhost:3000/booking-carpool'; // Add /booking-carpool to the base URL
 
-// Token cho khách hàng và tài xế
-const CUSTOMER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGU4ZjQxYWMyYWNiODM1ZmY5MGRmNCIsImVtYWlsIjoidGhpbmhAZXhhbXBsZS5jb20iLCJpYXQiOjE3MjkzMjYwMDgsImV4cCI6MTcyOTMyOTYwOH0.YgeOzbec5XWGQn8W5pLRQESNiQC_Z_WD7M2-SzlHJII';
-const DRIVER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGZkNDcyMmZiOGM0MDZhMjJmZDExZSIsImVtYWlsIjoidGhpbmhAZXhhbXBsZS5jb20iLCJpYXQiOjE3MjkxODE0ODEsImV4cCI6MTcyOTE4NTA4MX0.z4jztfXpzF6Lx9X2XEN5qZ4sneMXiHm838lI2Cq__lI';
+// Tokens for customer and driver
+const CUSTOMER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGU4ZjQxYWMyYWNiODM1ZmY5MGRmNCIsImVtYWlsIjoidGhpbmhAZXhhbXBsZS5jb20iLCJpYXQiOjE3Mjk0MzQ4MjksImV4cCI6MTcyOTQzODQyOX0.x_mexDlSDPUd8AK5H7PAH1-Dl-9-5MsS-DLeQ7a_A1A';
+const DRIVER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGZkNDcyMmZiOGM0MDZhMjJmZDExZSIsImVtYWlsIjoidGhpbmhAZXhhbXBsZS5jb20iLCJpYXQiOjE3Mjk1MjQ2OTEsImV4cCI6MTcyOTUyODI5MX0.mzPthidm563cNdUEAmOEPjIvWZuzDeZ8XnQ-SO4BrRk';
 
-// Cấu hình axios để sử dụng token tương ứng cho khách hàng
+// Configure axios instances with tokens for customer and driver
 const customerApi = axios.create({
   baseURL: domain,
   headers: {
@@ -14,7 +14,6 @@ const customerApi = axios.create({
   },
 });
 
-// Cấu hình axios để sử dụng token tương ứng cho tài xế
 const driverApi = axios.create({
   baseURL: domain,
   headers: {
@@ -22,18 +21,20 @@ const driverApi = axios.create({
   },
 });
 
-// API dành cho khách hàng
-export const createCarpoolRequest = (data) => customerApi.post('/booking-carpool/create-request', data);
-export const getAvailableRides = (params) => customerApi.get('/booking-carpool/available-rides', { params });
+// API for customers
+export const createCarpoolRequest = (data) => customerApi.post('/create-request', data);
+export const getAvailableRides = (params) => customerApi.get('/available-rides', { params });
 
-export const joinCarpoolRequest = (requestId) => customerApi.post(`/booking-carpool/join-request/${requestId}`);
-export const cancelCarpoolRequest = (requestId) => customerApi.post(`/booking-carpool/unjoin-request/${requestId}`);
+export const joinCarpoolRequest = (requestId, location) => customerApi.post(`/join-request/${requestId}`, location);
+export const cancelCarpoolRequest = (requestId) => customerApi.post(`/unjoin-request/${requestId}`);
 
-export const getCustomerRides = () => customerApi.get('/booking-carpool/my-rides');
+export const getCustomerRides = () => customerApi.get('/my-rides');
 export const getCustomerNotifications = () => customerApi.get('/notification/');
 
-// API dành cho tài xế
-export const getDriverAvailableRides = () => driverApi.get('/available-rides');
+// API for drivers
+export const getDriverAvailableRides = () => driverApi.get('/driver-rides/get-request');
 export const acceptCarpoolRequest = (requestId) => driverApi.post(`/accept-request/${requestId}`);
 export const getDriverRides = () => driverApi.get('/driver-rides');
 export const updatePickupProgress = (rideId, customerId) => driverApi.put(`/driver-rides/${rideId}/pickup/${customerId}`);
+export const getCustomerStatusPickup = (rideId) => driverApi.get(`/driver-rides/${rideId}`);
+

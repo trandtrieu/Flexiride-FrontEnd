@@ -24,6 +24,13 @@ export default function WelcomeScreen({ navigation }) {
       </TouchableOpacity>
 
       <TouchableOpacity
+        style={styles.loginButton}
+        onPress={() => navigation.navigate("ServiceSelection")}
+      >
+        <Text style={styles.loginButtonText}>Zô</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
         style={styles.registerButton}
         onPress={() => navigation.navigate("Register")}
       >
