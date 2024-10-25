@@ -25,6 +25,13 @@ export default function WelcomeScreen({ navigation }) {
         <Text style={styles.loginButtonText}>Đăng nhập</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity
+        style={styles.loginButton}
+        onPress={() => navigation.navigate("ServiceSelection")}
+      >
+        <Text style={styles.loginButtonText}>Zô</Text>
+      </TouchableOpacity>
+
       {/* Register Button */}
       <TouchableOpacity
         style={styles.registerButton}

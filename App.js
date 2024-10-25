@@ -14,6 +14,23 @@ import Authenticate from "./screens/auth/Authenticate";
 import EnterNameScreen from "./screens/auth/EnterNameScreen";
 import VerifyWithSelfie from "./screens/auth/VerifyWithSelfie";
 
+// BookingCarpool
+import { ServiceSelectionScreen } from "./screens/bookingCarpool/ServiceSelectionScreen";
+import { CarpoolRequestScreen } from "./screens/bookingCarpool/CarpoolRequestScreen";
+import { AvailableRidesScreen } from "./screens/bookingCarpool/AvailableRidesScreen";
+import { ConfirmBookingScreen } from "./screens/bookingCarpool/ConfirmBookingScreen";
+import { ManageBookingScreen } from "./screens/bookingCarpool/ManageBookingScreen";
+import { NotificationsScreen } from "./screens/bookingCarpool/NotificationsScreen";
+import { SucessfullScreen } from "./screens/bookingCarpool/SuccessfullSceen";
+
+import { DriverAvailableRidesScreen } from "./screens/bookingCarpoolDriver/DriverAvailableRidesScreen";
+import { ManageDriverRidesScreen } from "./screens/bookingCarpoolDriver/ManageDriverRidesScreen";
+import { PickupProgressScreen } from "./screens/bookingCarpoolDriver/PickupProgressScreen";
+
+
+
+
+
 export default function App() {
   const Stack = createNativeStackNavigator();
   return (
@@ -64,6 +81,22 @@ export default function App() {
           component={VerifyWithSelfie}
           options={{ headerShown: false }}
         />
+
+        {/* màn hình cho booking carpool  */}
+        <Stack.Screen name="ServiceSelection" component={ServiceSelectionScreen} />
+        <Stack.Screen name="CarpoolRequest" component={CarpoolRequestScreen} />
+        <Stack.Screen name="Sucessfull" component={SucessfullScreen} />
+        <Stack.Screen name="AvailableRides" component={AvailableRidesScreen} />
+        <Stack.Screen name="ConfirmBooking" component={ConfirmBookingScreen} />
+        <Stack.Screen name="ManageBooking" component={ManageBookingScreen} />
+        <Stack.Screen name="Notifications" component={NotificationsScreen} />
+
+        <Stack.Screen name="DriverAvailableRides" component={DriverAvailableRidesScreen} />
+        <Stack.Screen name="ManageDriverRides" component={ManageDriverRidesScreen} />
+        <Stack.Screen name="PickupProgress" component={PickupProgressScreen} />
+        {/* màn hình cho booking carpool  */}
+
+
       </Stack.Navigator>
     </NavigationContainer>
   );

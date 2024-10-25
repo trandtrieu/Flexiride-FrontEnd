@@ -13,6 +13,7 @@ export const AvailableRidesScreen = ({ route, navigation }) => {
         setLoading(true);
         console.log('Search Params:', searchParams);
 
+        // Gọi API để lấy danh sách các chuyến đi
         const response = searchParams
           ? await getAvailableRides(searchParams)
           : await getAvailableRides();
@@ -29,20 +30,30 @@ export const AvailableRidesScreen = ({ route, navigation }) => {
     };
 
     fetchRides();
-  }, []);
+  }, [searchParams]);
 
-  const handleJoinRequest = async (requestId) => {
+  const handleJoinRequest = async (requestId, location) => {
     try {
-      await joinCarpoolRequest(requestId);
+      console.log("ID REQUEST: ", requestId);
+      console.log("Location: ", location);
+
+      // Gọi API joinCarpoolRequest và truyền location
+      await joinCarpoolRequest(requestId, { location });
+      Alert.alert('Thành công', 'Bạn đã tham gia vào chuyến đi thành công');
       navigation.navigate('ManageBooking');
     } catch (error) {
-      console.error('Error joining request:', error);
-      Alert.alert('Lỗi', error.response.data.message);
+      console.error('Error joining request:', error.response?.data || error);
+      Alert.alert('Lỗi', error.response?.data?.message || 'Có lỗi xảy ra');
     }
   };
 
   const formatCurrency = (value) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
   };
 
   if (loading) {
@@ -59,21 +70,24 @@ export const AvailableRidesScreen = ({ route, navigation }) => {
           <View style={styles.card}>
             <Text style={styles.location}>{`Từ: ${item.start_location}`}</Text>
             <Text style={styles.location}>{`Đến: ${item.end_location}`}</Text>
-            <Text style={styles.time}>{`Giờ khởi hành: ${item.time_start}`}</Text>
-            <Text style={styles.time}>{`Số lượng khách: ${item.account_id.length}/4`}</Text>
+            <Text style={styles.time}>{`Giờ khởi hành: ${new Date(item.time_start).toLocaleTimeString()}`}</Text>
+            <Text style={styles.time}>
+              {`Số lượng khách: ${Array.isArray(item.pickup_location) ? item.pickup_location.length : 0}/4`}
+            </Text>
             <Text style={styles.time}>
               {`Tài xế: ${item.driver_id ? "đã nhận" : "chưa nhận"}`}
             </Text>
             <Text style={styles.price}>
-              {`Giá mỗi khách: ${formatCurrency(item.price / item.account_id.length)}`}
+              {`Giá mỗi khách: ${formatCurrency(item.price / (item.pickup_location?.length || 1))}`}
             </Text>
 
             <TouchableOpacity
               style={styles.joinButton}
-              onPress={() => handleJoinRequest(item._id)}
+              onPress={() => handleJoinRequest(item._id, searchParams.location)}
             >
               <Text style={styles.joinButtonText}>Tham gia</Text>
             </TouchableOpacity>
+
           </View>
         )}
         ListEmptyComponent={<Text style={styles.emptyText}>Không có chuyến xe nào phù hợp</Text>}

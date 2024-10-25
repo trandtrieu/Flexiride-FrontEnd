@@ -15,19 +15,34 @@ export const ManageBookingScreen = ({ navigation }) => {
       setRides(response.data);
       console.log(response.data);
     } catch (error) {
-      console.error('Failed to fetch rides:', error);
-      Alert.alert('Error', 'Unable to load rides. Please try again later.');
+      console.error('Error fetching rides:', error);
     }
+  };
+
+  const formatTime = (timeString) => {
+    const date = new Date(timeString);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
   };
 
   const handleCancelRequest = async (requestId) => {
     try {
       await cancelCarpoolRequest(requestId);
       Alert.alert('Success', 'Ride request canceled successfully.');
-      fetchCustomerRides(); 
+      fetchCustomerRides();
     } catch (error) {
-      console.error('Error canceling request:', error);
-      Alert.alert('Lỗi', error.response?.data?.message || 'An error occurred. Please try again.');
+      console.error('Error cancelling request:', error);
+      Alert.alert('Error', 'Unable to cancel the request.');
     }
   };
 
@@ -38,12 +53,14 @@ export const ManageBookingScreen = ({ navigation }) => {
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <View style={styles.card}>
-            <Text>Từ: {item.start_location}</Text>
-            <Text>Đến: {item.end_location}</Text>
-            <Text>Ngày xuất phát: {new Date(item.date).toLocaleDateString()}</Text>
-            <Text>Thời gian khởi hành: {(item.time_start)}</Text>
-            <Text>Trạng thái: {item.status}</Text>
-            <Text>{item.price / (item.customer || 1)} VNĐ mỗi khách</Text>
+            <Text style={styles.rideDetails}>Từ: {item.start_location}</Text>
+            <Text style={styles.rideDetails}>Đến: {item.end_location}</Text>
+            <Text style={styles.rideDetails}>Ngày xuất phát: {new Date(item.date).toLocaleDateString()}</Text>
+            <Text style={styles.rideDetails}>Thời gian khởi hành: {formatTime(item.time_start)}</Text>
+            <Text style={styles.rideDetails}>Trạng thái: {item.status}</Text>
+            <Text style={styles.priceText}>
+              {formatCurrency(item.price / (item.customer || 1))} mỗi khách
+            </Text>
 
             {item.status === "pending" && (
               <TouchableOpacity
@@ -65,7 +82,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f0f2f5', // Softer background for better contrast
+    backgroundColor: '#f0f2f5',
   },
   card: {
     backgroundColor: '#ffffff',
@@ -77,11 +94,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 6,
     elevation: 4,
-    borderColor: '#ddd', // Subtle border for better separation
+    borderColor: '#ddd',
     borderWidth: 1,
   },
   cancelButton: {
-    backgroundColor: '#ff4d4f', // A brighter red for a more modern touch
+    backgroundColor: '#ff4d4f',
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: 'center',
@@ -90,14 +107,14 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     color: '#ffffff',
     fontSize: 16,
-    fontWeight: '600', // Semi-bold for better readability
+    fontWeight: '600',
   },
   emptyText: {
     textAlign: 'center',
     fontSize: 18,
     color: '#888',
     marginTop: 30,
-    fontStyle: 'italic', // Adds a more empathetic feel to the empty state message
+    fontStyle: 'italic',
   },
   rideDetails: {
     fontSize: 16,
@@ -106,10 +123,10 @@ const styles = StyleSheet.create({
   },
   priceText: {
     fontSize: 16,
-    color: '#28a745', // Green to signify the cost positively
+    color: '#28a745',
     fontWeight: '600',
+    marginBottom: 10,
   },
 });
-
 
 export default ManageBookingScreen;
