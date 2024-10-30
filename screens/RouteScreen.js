@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import {
   View,
   Text,
@@ -7,15 +7,23 @@ import {
   ActivityIndicator,
   Image,
   Alert,
+  Modal,
+  TextInput,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import MapView, { Callout, Marker, Polyline } from "react-native-maps";
 import { VIETMAP_API_KEY } from "@env";
+import { IP_ADDRESS } from "@env";
+import { Ionicons } from "@expo/vector-icons";
+
 import axios from "axios";
 import polyline from "@mapbox/polyline";
 import { ScrollView } from "react-native";
 import { Icon } from "react-native-elements";
 import { formatCurrency } from "../utils/formatPrice";
 import io from "socket.io-client";
+import LocationContext from "../provider/LocationCurrentProvider";
 const RouteScreen = ({ route, navigation }) => {
   const pickupLocation = {
     latitude: 16.011807933073875,
@@ -30,7 +38,10 @@ const RouteScreen = ({ route, navigation }) => {
     name: "Sân bay Tân Sơn Nhất",
     address: "Trường Sơn, Phường 2, Tân Bình, TP.HCM",
   };
-
+  // const {
+  //   pickupLocation = defaultPickupLocation,
+  //   destinationLocation = defaultDestinationLocation,
+  // } = route.params || {};
   const [routeData, setRouteData] = useState(null);
   const [loading, setLoading] = useState(false);
   const mapRef = useRef(null);
@@ -42,6 +53,14 @@ const RouteScreen = ({ route, navigation }) => {
   const [isBooking, setIsBooking] = useState(false);
   const socket = useRef(null);
   const bookingTimeout = useRef(null);
+  const currentLocation = useContext(LocationContext);
+  const [selectedMethod, setSelectedMethod] = useState(
+    route.params?.selectedMethod || "cash"
+  );
+
+  const [note, setNote] = useState(""); // State for storing note
+  const [noteModalVisible, setNoteModalVisible] = useState(false);
+  const openNoteModal = () => setNoteModalVisible(true);
 
   const images = {
     "bike-icon.png": require("../assets/bike-icon.png"),
@@ -49,22 +68,54 @@ const RouteScreen = ({ route, navigation }) => {
   };
 
   useEffect(() => {
-    // Thiết lập socket kết nối
-    socket.current = io("http://192.168.88.142:3000", {
+    // Chỉ kết nối socket một lần khi component mount
+    socket.current = io(`http://${IP_ADDRESS}:3000`, {
       transports: ["websocket"],
+      query: { customerId: "670bdfc8b65786a7225f39a1" },
     });
 
-    socket.current.on("rideAccepted", (data) => {
+    socket.current.on("connect", () => {
+      console.log("Customer connected:", socket.current.id);
+    });
+
+    // Lắng nghe sự kiện "rideAccepted" từ tài xế
+    const handleRideAccepted = (data) => {
       clearTimeout(bookingTimeout.current);
       Alert.alert(
         "Yêu cầu được chấp nhận",
         `Tài xế ${data.driverId} đã nhận chuyến!`
       );
       setIsBooking(false);
+    };
+    socket.current.on("rideAccepted", handleRideAccepted);
+
+    // Lắng nghe sự kiện "requestExpired" khi yêu cầu hết hạn
+    // const handleRequestExpired = () => {
+    //   clearTimeout(bookingTimeout.current);
+    //   Alert.alert(
+    //     "Yêu cầu hết hạn",
+    //     "Không có tài xế nào nhận được yêu cầu của bạn."
+    //   );
+    //   setIsBooking(false);
+    // };
+    // socket.current.on("requestExpired", handleRequestExpired);
+
+    // Xóa listener khi component unmount
+    return () => {
+      socket.current.off("rideAccepted", handleRideAccepted);
+      // socket.current.off("requestExpired", handleRequestExpired);
+      socket.current.disconnect();
+    };
+  }, []);
+  useEffect(() => {
+    // Kết nối socket và lắng nghe sự kiện
+    socket.current.on("requestExpired", () => {
+      clearTimeout(bookingTimeout.current);
+      setIsBooking(false);
     });
 
     return () => {
-      socket.current.disconnect();
+      socket.current.off("requestExpired");
     };
   }, []);
 
@@ -86,8 +137,7 @@ const RouteScreen = ({ route, navigation }) => {
         longitude: point[1],
       }));
       setRouteData(coordinates);
-      console.warn("running");
-      // Auto zoom to fit the route on the map
+
       mapRef.current.fitToCoordinates(coordinates, {
         edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
         animated: true,
@@ -101,7 +151,7 @@ const RouteScreen = ({ route, navigation }) => {
   const fetchServicesAndPrices = async () => {
     try {
       const response = await axios.get(
-        `http://192.168.88.142:3000/booking-traditional/services-with-prices`,
+        `http://${IP_ADDRESS}:3000/booking-traditional/services-with-prices`,
         {
           params: {
             pickupLocation: `${pickupLocation.latitude},${pickupLocation.longitude}`,
@@ -175,6 +225,8 @@ const RouteScreen = ({ route, navigation }) => {
       destinationLocation,
       serviceId: selectedServiceId,
       price: selectedServicePrice,
+      paymentMethod: selectedMethod,
+      note: note || "",
     });
 
     // Đặt khoảng thời gian chờ phản hồi từ tài xế
@@ -184,192 +236,215 @@ const RouteScreen = ({ route, navigation }) => {
         "Không có tài xế khả dụng",
         "Hiện không có tài xế nào chấp nhận yêu cầu của bạn."
       );
-    }, 5000);
+    }, 15000);
   };
-
-  const handleBookingRequest2 = async () => {
-    if (!selectedServiceId) {
-      alert("Vui lòng chọn một dịch vụ trước khi đặt xe");
-      return;
-    }
-
-    setIsBooking(true); // Bắt đầu quá trình đặt xe
-    try {
-      const bookingResponse = await axios.post(
-        "http://192.168.88.142:3000/booking-traditional/create",
-        {
-          account_id: "671663e2957fd498c071db5f",
-          longitude_from: pickupLocation.longitude,
-          latitude_from: pickupLocation.latitude,
-          longitude_to: destinationLocation.longitude,
-          latitude_to: destinationLocation.latitude,
-          service_id: selectedServiceId,
-          price: selectedServicePrice,
-          departure: new Date().toISOString(),
-        }
-      );
-
-      console.log("Booking created successfully:", bookingResponse.data);
-      alert("Yêu cầu đặt xe đã được tạo thành công");
-
-      // Quét các tài xế gần đó
-      await scanNearbyDrivers();
-    } catch (error) {
-      console.error("Error creating booking:", error);
-      alert("Đã xảy ra lỗi khi tạo yêu cầu đặt xe");
-    } finally {
-      setIsBooking(false); // Hoàn thành quá trình đặt xe
-    }
+  const handlePaymentMethodPress = () => {
+    navigation.navigate("PaymentMethod", {
+      selectedMethod,
+      onSelectMethod: (method) => setSelectedMethod(method),
+    });
   };
-
-  const scanNearbyDrivers = async () => {
-    try {
-      const driversResponse = await axios.get(
-        `http://192.168.88.142:3000/booking-traditional/drivers/nearby`,
-        {
-          params: {
-            latitude: pickupLocation.latitude,
-            longitude: pickupLocation.longitude,
-            radius: 50000, // Bán kính tìm kiếm trong km
-          },
-        }
-      );
-
-      if (driversResponse.data.length > 0) {
-        const nearestDriver = driversResponse.data[0]; // Lấy tài xế gần nhất (có thể cải tiến bằng thuật toán tìm tài xế gần nhất)
-        alert(
-          `Yêu cầu đặt xe đã được gửi đến tài xế gần nhất: ${nearestDriver.account_id}`
-        );
-      } else {
-        alert("Hiện không có tài xế nào gần bạn.");
-      }
-
-      console.log("Nearby drivers:", driversResponse.data);
-    } catch (error) {
-      console.error("Error scanning for drivers:", error);
-    }
+  const handleSaveNote = () => {
+    Keyboard.dismiss();
+    setNoteModalVisible(false);
   };
-
   return (
-    <View style={styles.container}>
-      <View style={styles.backButtonContainer}>
-        <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
-          <Icon name="arrow-back" type="ionicon" color="#000" size={25} />
-        </TouchableOpacity>
-      </View>
-      <MapView
-        ref={mapRef}
-        style={styles.map}
-        initialRegion={{
-          latitude: pickupLocation.latitude,
-          longitude: pickupLocation.longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        }}
-      >
-        <Marker
-          coordinate={{
-            latitude: pickupLocation.latitude,
-            longitude: pickupLocation.longitude,
-          }}
-          pinColor="green"
-        >
-          <Callout>
-            <Text>{pickupLocation.name || "Pickup Location"}</Text>
-            <Text>{pickupLocation.address || "Địa điểm đón"}</Text>
-          </Callout>
-        </Marker>
-
-        <Marker
-          coordinate={{
-            latitude: destinationLocation.latitude,
-            longitude: destinationLocation.longitude,
-          }}
-          pinColor="red"
-        >
-          <Callout>
-            <Text>{destinationLocation.name || "Drop-off Location"}</Text>
-            <Text>{destinationLocation.address || "Địa điểm đến"}</Text>
-          </Callout>
-        </Marker>
-
-        {/* Route Path */}
-        {routeData && (
-          <Polyline
-            coordinates={routeData}
-            strokeColor="blue"
-            strokeWidth={8}
-          />
-        )}
-      </MapView>
-
-      <View style={styles.distanceContainer}>
-        <Text style={styles.distanceText}>Khoảng cách: {distance} km</Text>
-        <Text style={styles.infoText}>Thời gian ước tính: {estimatedTime}</Text>
-      </View>
-      <View style={styles.optionsContainer}>
-        <ScrollView
-          style={styles.rideOptions}
-          showsHorizontalScrollIndicator={false}
-        >
-          {services.length === 0 ? (
-            <ActivityIndicator size="large" color="#00ff00" />
-          ) : (
-            services.map((service) => (
-              <TouchableOpacity
-                key={service._id}
-                style={[
-                  styles.option,
-                  service._id === selectedServiceId && styles.selectedOption, // Thêm style cho dịch vụ được chọn
-                ]}
-                onPress={() => {
-                  setSelectedServiceId(service._id);
-                  setSelectedServicePrice(service.calculatedFare);
-                }}
-              >
-                <View style={styles.optionInfo}>
-                  <Image
-                    source={
-                      images[service.image] || require("../assets/car-icon.png")
-                    }
-                    style={styles.serviceIcon}
-                  />
-                  <Text style={styles.optionTitle}>{service.name}</Text>
-                  <Icon
-                    name="user"
-                    type="font-awesome"
-                    style={styles.seatIcon}
-                    size={16}
-                    color={"#FFC323"}
-                  />
-                  <Text style={styles.optionSeats}>{service.seat}</Text>
-                </View>
-                <Text style={styles.actualPrice}>
-                  {service.calculatedFare
-                    ? formatCurrency(service.calculatedFare)
-                    : "Không có giá"}
-                </Text>
-              </TouchableOpacity>
-            ))
-          )}
-        </ScrollView>
-
-        {/* Payment and Booking */}
-        <View style={styles.paymentOptions}>
-          <TouchableOpacity
-            style={styles.bookButton}
-            onPress={handleBookingRequest}
-            disabled={isBooking} // Vô hiệu hóa nút khi đang đặt xe
-          >
-            {isBooking ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text style={styles.bookButtonText}>Đặt Xe</Text>
-            )}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <View style={styles.backButtonContainer}>
+          <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
+            <Icon name="arrow-back" type="ionicon" color="#000" size={25} />
           </TouchableOpacity>
         </View>
+        <MapView
+          ref={mapRef}
+          style={styles.map}
+          initialRegion={{
+            latitude: pickupLocation.latitude,
+            longitude: pickupLocation.longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          }}
+        >
+          <Marker
+            coordinate={{
+              latitude: currentLocation.latitude,
+              longitude: currentLocation.longitude,
+            }}
+            pinColor="blue"
+            title="Vị trí của bạn"
+            description="Đây là vị trí hiện tại của bạn"
+          />
+
+          <Marker
+            coordinate={{
+              latitude: pickupLocation.latitude,
+              longitude: pickupLocation.longitude,
+            }}
+            pinColor="green"
+          >
+            <Callout>
+              <Text>{pickupLocation.name || "Pickup Location"}</Text>
+              <Text>{pickupLocation.address || "Địa điểm đón"}</Text>
+            </Callout>
+          </Marker>
+
+          <Marker
+            coordinate={{
+              latitude: destinationLocation.latitude,
+              longitude: destinationLocation.longitude,
+            }}
+            pinColor="red"
+          >
+            <Callout>
+              <Text>{destinationLocation.name || "Drop-off Location"}</Text>
+              <Text>{destinationLocation.address || "Địa điểm đến"}</Text>
+            </Callout>
+          </Marker>
+
+          {/* Route Path */}
+          {routeData && (
+            <Polyline
+              coordinates={routeData}
+              strokeColor="blue"
+              strokeWidth={8}
+            />
+          )}
+        </MapView>
+
+        <View style={styles.distanceContainer}>
+          <Text style={styles.distanceText}>Khoảng cách: {distance} km</Text>
+          <Text style={styles.infoText}>
+            Thời gian ước tính: {estimatedTime}
+          </Text>
+        </View>
+        <View style={styles.optionsContainer}>
+          <ScrollView
+            style={styles.rideOptions}
+            showsHorizontalScrollIndicator={false}
+          >
+            {services.length === 0 ? (
+              <ActivityIndicator size="large" color="#00ff00" />
+            ) : (
+              services.map((service) => (
+                <TouchableOpacity
+                  key={service._id}
+                  style={[
+                    styles.option,
+                    service._id === selectedServiceId && styles.selectedOption, // Thêm style cho dịch vụ được chọn
+                  ]}
+                  onPress={() => {
+                    setSelectedServiceId(service._id);
+                    setSelectedServicePrice(service.calculatedFare);
+                  }}
+                >
+                  <View style={styles.optionInfo}>
+                    <Image
+                      source={
+                        images[service.image] ||
+                        require("../assets/car-icon.png")
+                      }
+                      style={styles.serviceIcon}
+                    />
+                    <Text style={styles.optionTitle}>{service.name}</Text>
+                    <Icon
+                      name="user"
+                      type="font-awesome"
+                      style={styles.seatIcon}
+                      size={16}
+                      color={"#FFC323"}
+                    />
+                    <Text style={styles.optionSeats}>{service.seat}</Text>
+                  </View>
+                  <Text style={styles.actualPrice}>
+                    {service.calculatedFare
+                      ? formatCurrency(service.calculatedFare)
+                      : "Không có giá"}
+                  </Text>
+                </TouchableOpacity>
+              ))
+            )}
+          </ScrollView>
+          <View style={styles.paymentContainer}>
+            <View style={styles.row}>
+              <View style={styles.iconContainer}>
+                <TouchableOpacity
+                  style={styles.methodRow}
+                  onPress={handlePaymentMethodPress}
+                >
+                  <Text style={styles.methodText}>
+                    {selectedMethod === "momo" ? "MoMo" : "Tiền mặt"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.detailsContainer}>
+                <View style={styles.codeRow}>
+                  <Ionicons name="checkmark-circle" size={16} color="green" />
+                  <Text style={styles.codeText}>CLMGBDNALFR17HJDSJ</Text>
+                </View>
+              </View>
+
+              <TouchableOpacity style={styles.moreOptions}>
+                <Ionicons name="ellipsis-horizontal" size={24} color="black" />
+              </TouchableOpacity>
+            </View>
+          </View>
+          {/* Payment and Booking */}
+          <View style={styles.paymentOptions}>
+            <TouchableOpacity
+              style={styles.addNoteButton}
+              onPress={() => setNoteModalVisible(true)} // Open modal for note
+            >
+              <Text style={styles.addNoteButtonText}>Thêm Ghi Chú</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.bookButton}
+              onPress={handleBookingRequest}
+              disabled={isBooking} // Vô hiệu hóa nút khi đang đặt xe
+            >
+              {isBooking ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <>
+                  <Text style={styles.bookButtonText}>Đặt Xe</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+          <Modal
+            visible={noteModalVisible}
+            transparent={true}
+            animationType="slide"
+            onRequestClose={() => setNoteModalVisible(false)}
+          >
+            <View style={styles.modalContainer}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Ghi chú cho tài xế</Text>
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={() => setNoteModalVisible(false)}
+                >
+                  <Text style={styles.saveButtonText}>Lưu Ghi Chú</Text>
+                </TouchableOpacity>
+                <TextInput
+                  style={styles.noteInput}
+                  placeholder="Nhập ghi chú..."
+                  value={note}
+                  onChangeText={setNote}
+                  multiline
+                />
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={handleSaveNote}
+                >
+                  <Text style={styles.saveButtonText}>Lưu Ghi Chú</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -393,7 +468,7 @@ const styles = StyleSheet.create({
     flex: 3,
   },
   optionsContainer: {
-    flex: 2,
+    flex: 3,
     backgroundColor: "#fff",
     paddingHorizontal: 15,
     paddingVertical: 10,
@@ -472,11 +547,13 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
   },
+
   bookButtonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
   },
+
   serviceIcon: {
     width: 40,
     height: 40,
@@ -491,6 +568,90 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 14,
+  },
+  paymentContainer: {
+    padding: 10,
+    alignItems: "center",
+    flexDirection: "row",
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  iconContainer: {
+    paddingRight: 10,
+  },
+  detailsContainer: {
+    flex: 1,
+  },
+  methodText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  codeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  codeText: {
+    fontSize: 14,
+    color: "gray",
+    marginLeft: 4,
+  },
+  moreOptions: {
+    paddingLeft: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "80%",
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 15,
+  },
+  noteInput: {
+    width: "100%",
+    height: 100,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 5,
+    textAlignVertical: "top",
+    marginBottom: 20,
+  },
+  saveButton: {
+    backgroundColor: "#00BFA5",
+    padding: 10,
+    borderRadius: 5,
+    width: "100%",
+    alignItems: "center",
+  },
+  saveButtonText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  addNoteButton: {
+    backgroundColor: "#E0F7FA",
+    padding: 15,
+    borderRadius: 40,
+    marginRight: 10,
+    alignItems: "center",
+  },
+  addNoteButtonText: {
+    color: "#00796B",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 
