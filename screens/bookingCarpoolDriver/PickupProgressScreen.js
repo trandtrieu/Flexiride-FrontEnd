@@ -1,12 +1,13 @@
 // screens/PickupProgressScreen.js
 import React, { useState, useEffect } from 'react';
 import { View, FlatList, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Linking } from 'react-native';
-import { updatePickupProgress, getCustomerStatusPickup } from '../../service/BookingCarpoolApi';
+import { updatePickupProgress, getCustomerStatusPickup, updateStartStatusRequest, updateCompleteStatusRequest } from '../../service/BookingCarpoolApi';
 
 export const PickupProgressScreen = ({ route }) => {
   const { rideInfor } = route.params;
   const [loading, setLoading] = useState(false);
   const [rides, setRides] = useState([]);
+  const [rideStatus, setRideStatus] = useState(rideInfor.status); // Thêm state để lưu trạng thái chuyến xe
 
   useEffect(() => {
     fetchRides();
@@ -36,6 +37,30 @@ export const PickupProgressScreen = ({ route }) => {
         );
       })
       .catch((err) => console.log(err));
+  };
+
+  const handleStartTrip = () => {
+    updateStartStatusRequest(rideInfor._id)
+      .then(() => {
+        setRideStatus('ongoing'); 
+        handleNavigate(rideInfor.end_location);
+      })
+      .catch((err) => {
+        console.log(err);
+        alert('Có lỗi xảy ra khi bắt đầu chuyến xe. Vui lòng thử lại!');
+      });
+  };
+
+  const handleCompleteTrip = () => {
+    updateCompleteStatusRequest(rideInfor._id)
+      .then(() => {
+        setRideStatus('completed'); 
+        fetchRides(); 
+      })
+      .catch((err) => {
+        console.log(err);
+        alert('Có lỗi xảy ra khi kết thúc chuyến xe. Vui lòng thử lại!');
+      });
   };
 
   const handleNavigate = (location) => {
@@ -78,7 +103,19 @@ export const PickupProgressScreen = ({ route }) => {
         <Text style={styles.detailText}>Ngày: <Text style={styles.highlightText}>{formatDate(rideInfor.date)}</Text></Text>
         <Text style={styles.detailText}>Thời gian: <Text style={styles.highlightText}>{formatTime(rideInfor.time_start)}</Text></Text>
         <Text style={styles.detailText}>Giá: <Text style={styles.priceText}>{formatPrice(rideInfor.price)} VNĐ</Text></Text>
-        <Text style={styles.detailText}>Trạng thái: <Text style={{ color: '#4CAF50' }}>{rideInfor.status}</Text></Text>
+        <Text style={styles.detailText}>Trạng thái: <Text style={{ color: '#4CAF50' }}>{rideStatus}</Text></Text>
+        
+        {rideStatus === 'accepted' && (
+          <TouchableOpacity style={styles.navigateButton} onPress={handleStartTrip}>
+            <Text style={styles.buttonText}>Lẹt gô</Text>
+          </TouchableOpacity>
+        )}
+        
+        {rideStatus === 'ongoing' && (
+          <TouchableOpacity style={styles.navigateButton} onPress={handleCompleteTrip}>
+            <Text style={styles.buttonText}>Kết thúc chuyến</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* List of pickup locations */}
@@ -102,18 +139,12 @@ export const PickupProgressScreen = ({ route }) => {
                 {item.pickedUp ? ' Đã đón' : ' Chưa đón'}
               </Text>
             </Text>
-            {!item.pickedUp && (
+            {rideStatus !== 'completed' && !item.pickedUp && (
               <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                  style={styles.pickupButton}
-                  onPress={() => handlePickupCustomer(item.account_id._id)}
-                >
+                <TouchableOpacity style={styles.pickupButton} onPress={() => handlePickupCustomer(item.account_id._id)}>
                   <Text style={styles.buttonText}>Đã đón</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.navigateButton}
-                  onPress={() => handleNavigate(item.location)}
-                >
+                <TouchableOpacity style={styles.navigateButton} onPress={() => handleNavigate(item.location)}>
                   <Text style={styles.buttonText}>Chỉ đường</Text>
                 </TouchableOpacity>
               </View>

@@ -12,7 +12,7 @@ export const CarpoolRequestScreen = ({ navigation }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [timeStart, setTimeStart] = useState(new Date());
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [price, setPrice] = useState('500000');
+  const [price, setPrice] = useState('800000');
 
   const centralProvinces = [
     { label: 'Đà Nẵng', value: 'Đà Nẵng' },
