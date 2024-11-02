@@ -8,9 +8,9 @@ const Splash = ({ navigation }) => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (authState.isAuthenticated && authState.token) {
-        navigation.replace("RouteScreen");
+        navigation.replace("Home");
       } else {
-        navigation.replace("RouteScreen");
+        navigation.replace("Home");
       }
     }, 1000);
 

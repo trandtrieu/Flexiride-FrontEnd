@@ -5,13 +5,14 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { createCarpoolRequest } from '../../service/BookingCarpoolApi';
 
 export const CarpoolRequestScreen = ({ navigation }) => {
+  const [locationDetail, setLocationDetail] = useState('');
   const [startLocation, setStartLocation] = useState('');
   const [endLocation, setEndLocation] = useState('');
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [timeStart, setTimeStart] = useState(new Date());
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [price, setPrice] = useState('500000');
+  const [price, setPrice] = useState('800000');
 
   const centralProvinces = [
     { label: 'Đà Nẵng', value: 'Đà Nẵng' },
@@ -28,6 +29,7 @@ export const CarpoolRequestScreen = ({ navigation }) => {
 
   const handleCreateRequest = async () => {
     const requestData = {
+      location: locationDetail,
       start_location: startLocation,
       end_location: endLocation,
       date: date.toISOString().split('T')[0],
@@ -36,6 +38,9 @@ export const CarpoolRequestScreen = ({ navigation }) => {
     };
     try {
       const response = await createCarpoolRequest(requestData);
+      console.log("=================Check=======================")
+      console.log(requestData);
+      console.log("=================End=======================")
       if (response.data.allowCreateNew) {
         navigation.navigate('Sucessfull');
       }
@@ -69,11 +74,19 @@ export const CarpoolRequestScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <RNPickerSelect
+        onValueChange={setStartLocation}
+        items={centralProvinces}
+        value={startLocation || ''}
+        style={pickerSelectStyles}
+        placeholder={{ label: 'Di chuyển từ...', value: '' }}
+      />
+
       <TextInput
         style={styles.input}
-        placeholder="Điểm đón"
-        value={startLocation}
-        onChangeText={setStartLocation}
+        placeholder="Điểm đón cụ thể..."
+        value={locationDetail}
+        onChangeText={setLocationDetail}
       />
 
       <RNPickerSelect
