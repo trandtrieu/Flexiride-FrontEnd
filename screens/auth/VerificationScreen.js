@@ -83,11 +83,12 @@ const VerificationScreen = ({ navigation, route }) => {
     if (code === check) {
       try {
         const response = await axios.post(
-          "http://localhost:3000/auth/register",
+          "http://localhost:3000/auth/register-customer",
           {
             phone: toPhone,
             email: account.email,
             password: account.password,
+            role: 1
           }
         );
 
@@ -127,7 +128,7 @@ const VerificationScreen = ({ navigation, route }) => {
           onChangeText={setCode}
           keyboardType="number-pad"
           maxLength={6}
-          placeholder="123456"
+          placeholder=""
         />
         {code.length > 0 && (
           <TouchableOpacity onPress={() => setCode("")}>
