@@ -26,22 +26,30 @@ import io from "socket.io-client";
 import LocationContext from "../provider/LocationCurrentProvider";
 const RouteScreen = ({ route, navigation }) => {
   const pickupLocation = {
-    latitude: 16.011807933073875,
-    longitude: 108.25719691474046,
+    latitude: 16.016146937915956,
+    longitude: 108.25449279979946,
     name: "Nhà Thờ Đức Bà",
     address: "01 Công Xã Paris, Bến Nghé, Quận 1, TP.HCM",
   };
 
   const destinationLocation = {
-    latitude: 10.823099,
-    longitude: 106.629664,
+    latitude: 15.885061835679398,
+    longitude: 108.34858744965153,
     name: "Sân bay Tân Sơn Nhất",
     address: "Trường Sơn, Phường 2, Tân Bình, TP.HCM",
   };
+
+  const currentLocation = {
+    latitude: 16.016146937915956,
+    longitude: 108.25449279979946,
+  };
+
   // const {
   //   pickupLocation = defaultPickupLocation,
   //   destinationLocation = defaultDestinationLocation,
   // } = route.params || {};
+  // const currentLocation = useContext(LocationContext);
+
   const [routeData, setRouteData] = useState(null);
   const [loading, setLoading] = useState(false);
   const mapRef = useRef(null);
@@ -53,7 +61,6 @@ const RouteScreen = ({ route, navigation }) => {
   const [isBooking, setIsBooking] = useState(false);
   const socket = useRef(null);
   const bookingTimeout = useRef(null);
-  const currentLocation = useContext(LocationContext);
   const [selectedMethod, setSelectedMethod] = useState(
     route.params?.selectedMethod || "cash"
   );
@@ -80,6 +87,16 @@ const RouteScreen = ({ route, navigation }) => {
 
     // Lắng nghe sự kiện "rideAccepted" từ tài xế
     const handleRideAccepted = (data) => {
+      console.log("🚀 ~ handleRideAccepted ~ data:", data);
+      console.log(
+        "🚀 ~ handleRideAccepted ~ data.requestDetailId:",
+        data.requestDetailId
+      );
+      console.log("🚀 ~ handleRideAccepted ~ data.driverId:", data.driverId);
+      navigation.navigate("RideTrackingScreen", {
+        requestId: data.requestDetailId,
+        driverId: data.driverId,
+      });
       clearTimeout(bookingTimeout.current);
       Alert.alert(
         "Yêu cầu được chấp nhận",
@@ -88,17 +105,6 @@ const RouteScreen = ({ route, navigation }) => {
       setIsBooking(false);
     };
     socket.current.on("rideAccepted", handleRideAccepted);
-
-    // Lắng nghe sự kiện "requestExpired" khi yêu cầu hết hạn
-    // const handleRequestExpired = () => {
-    //   clearTimeout(bookingTimeout.current);
-    //   Alert.alert(
-    //     "Yêu cầu hết hạn",
-    //     "Không có tài xế nào nhận được yêu cầu của bạn."
-    //   );
-    //   setIsBooking(false);
-    // };
-    // socket.current.on("requestExpired", handleRequestExpired);
 
     // Xóa listener khi component unmount
     return () => {
@@ -541,7 +547,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   bookButton: {
-    backgroundColor: "#00BFA5",
+    backgroundColor: "#fbc02d",
     padding: 15,
     borderRadius: 40,
     flex: 1,

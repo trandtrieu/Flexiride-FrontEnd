@@ -23,6 +23,8 @@ import TestMap from "./screens/TestMap";
 import { LocationProvider } from "./provider/LocationCurrentProvider";
 import { SocketProvider } from "./provider/SocketProvider";
 import PaymentMethodsScreen from "./screens/PaymentMethod";
+import RideTrackingScreen from "./screens/RideTrackingScreen";
+import ChatScreenCustomer from "./screens/ChatScreen";
 
 export default function App() {
   const Stack = createNativeStackNavigator();
@@ -110,6 +112,16 @@ export default function App() {
               <Stack.Screen
                 name="PaymentMethod"
                 component={PaymentMethodsScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="RideTrackingScreen"
+                component={RideTrackingScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="ChatScreenCustomer"
+                component={ChatScreenCustomer}
                 options={{ headerShown: false }}
               />
             </Stack.Navigator>
