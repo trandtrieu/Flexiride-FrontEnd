@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -16,7 +16,9 @@ import { useAuth } from "../provider/AuthProvider";
 
 const Home = ({ navigation }) => {
   const { authState } = useAuth();
-
+  useEffect(() => {
+    console.log("token  : " + authState.token);
+  }, []);
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>

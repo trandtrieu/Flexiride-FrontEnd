@@ -21,9 +21,8 @@ import axios from "axios";
 import polyline from "@mapbox/polyline";
 import { ScrollView } from "react-native";
 import { Icon } from "react-native-elements";
-import { formatCurrency } from "../utils/formatPrice";
 import io from "socket.io-client";
-import LocationContext from "../provider/LocationCurrentProvider";
+import LocationContext from "../../provider/LocationCurrentProvider";
 const RouteScreen = ({ route, navigation }) => {
   const pickupLocation = {
     latitude: 16.016146937915956,
@@ -70,8 +69,8 @@ const RouteScreen = ({ route, navigation }) => {
   const openNoteModal = () => setNoteModalVisible(true);
 
   const images = {
-    "bike-icon.png": require("../assets/bike-icon.png"),
-    "car-icon.png": require("../assets/car-icon.png"),
+    "bike-icon.png": require("../../assets/bike-icon.png"),
+    "car-icon.png": require("../../assets/car-icon.png"),
   };
 
   useEffect(() => {
@@ -348,7 +347,7 @@ const RouteScreen = ({ route, navigation }) => {
                     <Image
                       source={
                         images[service.image] ||
-                        require("../assets/car-icon.png")
+                        require("../../assets/car-icon.png")
                       }
                       style={styles.serviceIcon}
                     />

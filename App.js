@@ -13,18 +13,16 @@ import LoginOptions from "./screens/auth/LoginOptions";
 import Authenticate from "./screens/auth/Authenticate";
 import EnterNameScreen from "./screens/auth/EnterNameScreen";
 import VerifyWithSelfie from "./screens/auth/VerifyWithSelfie";
-import BikeBook from "./screens/BikeBookScreen";
-import SearchScreen from "./screens/SearchScreen";
-import LocationPicker from "./screens/LocationPicker";
-import MapScreen from "./screens/MapScreen";
-import RouteScreen from "./screens/RouteScreen";
 import { AuthProvider } from "./provider/AuthProvider";
-import TestMap from "./screens/TestMap";
 import { LocationProvider } from "./provider/LocationCurrentProvider";
 import { SocketProvider } from "./provider/SocketProvider";
-import PaymentMethodsScreen from "./screens/PaymentMethod";
-import RideTrackingScreen from "./screens/RideTrackingScreen";
-import ChatScreenCustomer from "./screens/ChatScreen";
+import BikeBook from "./screens/bookingTraditional/BikeBookScreen";
+import ChatScreenCustomer from "./screens/bookingTraditional/ChatScreen";
+import PaymentMethodsScreen from "./screens/bookingTraditional/PaymentMethod";
+import RouteScreen from "./screens/bookingTraditional/RouteScreen";
+import MapScreen from "./screens/bookingTraditional/MapScreen";
+import RideTrackingScreen from "./screens/bookingTraditional/RideTrackingScreen";
+import LocationPicker from "./screens/bookingTraditional/LocationPicker";
 
 export default function App() {
   const Stack = createNativeStackNavigator();
@@ -85,11 +83,6 @@ export default function App() {
                 options={{ headerShown: false }}
               />
               <Stack.Screen
-                name="SearchScreen"
-                component={SearchScreen}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
                 name="LocationPicker"
                 component={LocationPicker}
                 options={{ headerShown: false }}
@@ -104,11 +97,7 @@ export default function App() {
                 component={RouteScreen}
                 options={{ headerShown: false }}
               />
-              <Stack.Screen
-                name="TestMap"
-                component={TestMap}
-                options={{ headerShown: false }}
-              />
+
               <Stack.Screen
                 name="PaymentMethod"
                 component={PaymentMethodsScreen}

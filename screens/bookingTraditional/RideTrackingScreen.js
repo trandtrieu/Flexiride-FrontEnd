@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -7,10 +7,12 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, Polyline } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
-import { IP_ADDRESS } from "@env";
+import io from "socket.io-client";
+import { IP_ADDRESS, VIETMAP_API_KEY } from "@env";
+import polyline from "@mapbox/polyline";
 
 const RideTrackingScreen = ({ route, navigation }) => {
   const { requestId, driverId } = route.params;
@@ -18,64 +20,106 @@ const RideTrackingScreen = ({ route, navigation }) => {
   const [dropoffLocation, setDropoffLocation] = useState(null);
   const [driverLocation, setDriverLocation] = useState(null);
   const [driverDetails, setDriverDetails] = useState({});
+  const [routeCoordinates, setRouteCoordinates] = useState([]);
+  const socket = useRef(null);
 
   useEffect(() => {
-    const fetchRequestDetails = async () => {
+    const fetchInitialData = async () => {
       try {
-        const response = await axios.get(
+        const requestResponse = await axios.get(
           `http://${IP_ADDRESS}:3000/booking-traditional/request/${requestId}`
         );
-        if (response.data) {
-          console.log("Request Details:", response.data);
 
+        if (requestResponse.data) {
           setPickupLocation({
-            latitude: response.data.latitude_from,
-            longitude: response.data.longitude_from,
+            latitude: requestResponse.data.latitude_from,
+            longitude: requestResponse.data.longitude_from,
           });
           setDropoffLocation({
-            latitude: response.data.latitude_to,
-            longitude: response.data.longitude_to,
+            latitude: requestResponse.data.latitude_to,
+            longitude: requestResponse.data.longitude_to,
           });
         }
-      } catch (error) {
-        console.error("Error fetching request details:", error);
-      }
-    };
 
-    const fetchDriverLocation = async () => {
-      try {
-        const response = await axios.get(
+        const driverResponse = await axios.get(
           `http://${IP_ADDRESS}:3000/booking-traditional/location/driver/${driverId}`
         );
-        if (response.data && response.data.location) {
-          console.log("Driver Location Data:", response.data);
 
+        if (driverResponse.data && driverResponse.data.location) {
           setDriverLocation({
-            latitude: response.data.location.coordinates[1],
-            longitude: response.data.location.coordinates[0],
+            latitude: driverResponse.data.location.coordinates[1],
+            longitude: driverResponse.data.location.coordinates[0],
           });
-          setDriverDetails(response.data.driverDetails);
+          setDriverDetails(driverResponse.data.driverDetails);
+
+          // Vẽ tuyến đường từ tài xế đến khách hàng
+          calculateRoute(
+            driverResponse.data.location.coordinates[1],
+            driverResponse.data.location.coordinates[0]
+          );
         }
       } catch (error) {
-        console.error("Error fetching driver location:", error);
+        console.error("Error fetching initial data:", error);
       }
     };
 
-    fetchRequestDetails();
-    fetchDriverLocation();
+    fetchInitialData();
+
+    // Sử dụng WebSocket để nhận cập nhật vị trí theo thời gian thực
+    socket.current = io(`http://${IP_ADDRESS}:3000`, {
+      transports: ["websocket"],
+      query: { driverId },
+    });
+
+    socket.current.on("updateDriverLocation", (newLocation) => {
+      setDriverLocation({
+        latitude: newLocation.coordinates[1],
+        longitude: newLocation.coordinates[0],
+      });
+      calculateRoute(newLocation.coordinates[1], newLocation.coordinates[0]);
+    });
+
+    return () => {
+      socket.current.disconnect();
+    };
   }, [requestId, driverId]);
+
+  // Hàm tính toán và vẽ tuyến đường sử dụng Vietmap API
+  const calculateRoute = async (driverLat, driverLng) => {
+    if (!pickupLocation) return;
+
+    try {
+      console.log("api soute is running");
+      const response = await axios.get(
+        `https://maps.vietmap.vn/api/route?apikey=${VIETMAP_API_KEY}&point=${driverLat},${driverLng}&point=${pickupLocation.latitude},${pickupLocation.longitude}&vehicle=car&points_encoded=true`
+      );
+
+      if (response.data && response.data.paths.length > 0) {
+        const decodedPoints = polyline.decode(response.data.paths[0].points);
+        const coordinates = decodedPoints.map((point) => ({
+          latitude: point[0],
+          longitude: point[1],
+        }));
+        setRouteCoordinates(coordinates);
+      }
+      console.log("🚀 ~ calculateRoute ~ coordinates:", routeCoordinates);
+    } catch (error) {
+      console.error("Error calculating route:", error);
+    }
+  };
+  16.01316200564292, 108.25569720860112;
+  const handleChat = () => {
+    navigation.navigate("ChatScreenCustomer", {
+      userId: "670bdfc8b65786a7225f39a1",
+      role: "customer",
+      driverId,
+      roomId: requestId,
+    });
+  };
 
   if (!pickupLocation || !dropoffLocation || !driverLocation) {
     return <Text>Loading...</Text>;
   }
-  const handleChat = () => {
-    navigation.navigate("ChatScreenCustomer", {
-      userId: "670bdfc8b65786a7225f39a1", // Replace this with the actual user ID
-      role: "customer", // or "driver" based on the user's role
-      driverId: "6720c996743774e812904a02", // Replace this with the ID of the driver or customer
-      roomId: "1245",
-    });
-  };
 
   return (
     <View style={styles.container}>
@@ -89,10 +133,21 @@ const RideTrackingScreen = ({ route, navigation }) => {
         }}
       >
         <Marker coordinate={pickupLocation} title="Pickup Location" />
-        <Marker coordinate={dropoffLocation} title="Drop-off Location" />
-        <Marker coordinate={driverLocation} title="Driver" pinColor="blue">
-          <Image source={{ uri: driverDetails.avatar }} style={styles.avatar} />
+        <Marker
+          coordinate={dropoffLocation}
+          title="Drop-off Location"
+          pinColor="blue"
+        />
+        <Marker coordinate={driverLocation} title="Driver" pinColor="yellow">
+          <Ionicons name="navigate-circle" size={35} color="blue" />
         </Marker>
+        {routeCoordinates.length > 0 && (
+          <Polyline
+            coordinates={routeCoordinates}
+            strokeColor="blue"
+            strokeWidth={5}
+          />
+        )}
       </MapView>
 
       <View style={styles.driverInfoContainer}>
@@ -100,7 +155,6 @@ const RideTrackingScreen = ({ route, navigation }) => {
         <Text style={styles.subStatusText}>
           Bến Xe Mỹ Đình - Cổng Nguyễn Hoàng
         </Text>
-
         <View style={styles.driverDetails}>
           <Image
             source={{ uri: driverDetails.avatar }}
@@ -121,10 +175,7 @@ const RideTrackingScreen = ({ route, navigation }) => {
         </View>
 
         <View style={styles.actions}>
-          <TouchableOpacity
-            style={styles.chatButton}
-            onPress={() => handleChat()} // Calls handleChat on press
-          >
+          <TouchableOpacity style={styles.chatButton} onPress={handleChat}>
             <Ionicons name="chatbubble-outline" size={24} color="black" />
             <Text style={styles.actionText}>Chat với tài xế</Text>
           </TouchableOpacity>
