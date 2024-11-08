@@ -17,19 +17,24 @@ import { Icon } from "react-native-elements";
 import { formatCurrency } from "../utils/formatPrice";
 import io from "socket.io-client";
 const RouteScreen = ({ route, navigation }) => {
-  const pickupLocation = {
-    latitude: 16.011807933073875,
-    longitude: 108.25719691474046,
-    name: "Nhà Thờ Đức Bà",
-    address: "01 Công Xã Paris, Bến Nghé, Quận 1, TP.HCM",
-  };
+  // const pickupLocation = {
+  //   latitude: 16.011807933073875,
+  //   longitude: 108.25719691474046,
+  //   name: "Nhà Thờ Đức Bà",
+  //   address: "01 Công Xã Paris, Bến Nghé, Quận 1, TP.HCM",
+  // };
 
-  const destinationLocation = {
-    latitude: 10.823099,
-    longitude: 106.629664,
-    name: "Sân bay Tân Sơn Nhất",
-    address: "Trường Sơn, Phường 2, Tân Bình, TP.HCM",
-  };
+  const {
+    pickupLocation = defaultPickupLocation,
+    destinationLocation = defaultDestinationLocation,
+  } = route.params || {}
+
+  // const destinationLocation = {
+  //   latitude: 10.823099,
+  //   longitude: 106.629664,
+  //   name: "Sân bay Tân Sơn Nhất",
+  //   address: "Trường Sơn, Phường 2, Tân Bình, TP.HCM",
+  // };
 
   const [routeData, setRouteData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -50,7 +55,7 @@ const RouteScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     // Thiết lập socket kết nối
-    socket.current = io("http://192.168.88.142:3000", {
+    socket.current = io("http://192.168.0.96:3000", {
       transports: ["websocket"],
     });
 
@@ -101,7 +106,7 @@ const RouteScreen = ({ route, navigation }) => {
   const fetchServicesAndPrices = async () => {
     try {
       const response = await axios.get(
-        `http://192.168.88.142:3000/booking-traditional/services-with-prices`,
+        `http://192.168.0.96:3000/booking-traditional/services-with-prices`,
         {
           params: {
             pickupLocation: `${pickupLocation.latitude},${pickupLocation.longitude}`,
@@ -196,7 +201,7 @@ const RouteScreen = ({ route, navigation }) => {
     setIsBooking(true); // Bắt đầu quá trình đặt xe
     try {
       const bookingResponse = await axios.post(
-        "http://192.168.88.142:3000/booking-traditional/create",
+        "http://192.168.0.96:3000/booking-traditional/create",
         {
           account_id: "671663e2957fd498c071db5f",
           longitude_from: pickupLocation.longitude,
@@ -225,7 +230,7 @@ const RouteScreen = ({ route, navigation }) => {
   const scanNearbyDrivers = async () => {
     try {
       const driversResponse = await axios.get(
-        `http://192.168.88.142:3000/booking-traditional/drivers/nearby`,
+        `http://192.168.0.96:3000/booking-traditional/drivers/nearby`,
         {
           params: {
             latitude: pickupLocation.latitude,
@@ -364,7 +369,7 @@ const RouteScreen = ({ route, navigation }) => {
             {isBooking ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <Text style={styles.bookButtonText}>Đặt Xe</Text>
+              <Text style={styles.bookButtonText}>Tiến Hành Thuê Tài Xế</Text>
             )}
           </TouchableOpacity>
         </View>

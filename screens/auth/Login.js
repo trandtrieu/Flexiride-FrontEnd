@@ -54,7 +54,7 @@ export default function Login({ navigation }) {
       console.log("🚀 ~ handleSubmit ~ loginData:", loginData);
       try {
         const response = await axios.post(
-          "http://192.168.88.169:3000/auth/login",
+          "http://192.168.0.96:3000/auth/login",
           loginData
         );
         if (response.data.token) {

@@ -20,6 +20,8 @@ import MapScreen from "./screens/MapScreen";
 import RouteScreen from "./screens/RouteScreen";
 import { AuthProvider } from "./provider/AuthProvider";
 import TestMap from "./screens/TestMap";
+import HireDriver from "./screens/hireDriver/HireDriverScreen"
+
 
 export default function App() {
   const Stack = createNativeStackNavigator();
@@ -102,6 +104,12 @@ export default function App() {
             component={TestMap}
             options={{ headerShown: false }}
           />
+          <Stack.Screen
+            name="HireDriver"
+            component={HireDriver}
+            options={{ headerShown: false }}
+          />
+
         </Stack.Navigator>
       </NavigationContainer>
     </AuthProvider>
