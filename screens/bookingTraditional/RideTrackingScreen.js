@@ -22,6 +22,10 @@ const RideTrackingScreen = ({ route, navigation }) => {
   const [driverDetails, setDriverDetails] = useState({});
   const [routeCoordinates, setRouteCoordinates] = useState([]);
   const socket = useRef(null);
+  const lastLocationRef = useRef(null);
+
+  // Distance threshold for recalculating the route (in meters)
+  const distanceThreshold = 100;
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -44,18 +48,20 @@ const RideTrackingScreen = ({ route, navigation }) => {
         const driverResponse = await axios.get(
           `http://${IP_ADDRESS}:3000/booking-traditional/location/driver/${driverId}`
         );
-
+        console.log("");
         if (driverResponse.data && driverResponse.data.location) {
-          setDriverLocation({
+          const initialDriverLocation = {
             latitude: driverResponse.data.location.coordinates[1],
             longitude: driverResponse.data.location.coordinates[0],
-          });
+          };
+          setDriverLocation(initialDriverLocation);
           setDriverDetails(driverResponse.data.driverDetails);
+          lastLocationRef.current = initialDriverLocation;
 
-          // Vẽ tuyến đường từ tài xế đến khách hàng
+          // Calculate initial route
           calculateRoute(
-            driverResponse.data.location.coordinates[1],
-            driverResponse.data.location.coordinates[0]
+            initialDriverLocation.latitude,
+            initialDriverLocation.longitude
           );
         }
       } catch (error) {
@@ -65,18 +71,23 @@ const RideTrackingScreen = ({ route, navigation }) => {
 
     fetchInitialData();
 
-    // Sử dụng WebSocket để nhận cập nhật vị trí theo thời gian thực
+    // Initialize WebSocket for real-time location updates
     socket.current = io(`http://${IP_ADDRESS}:3000`, {
       transports: ["websocket"],
       query: { driverId },
     });
 
     socket.current.on("updateDriverLocation", (newLocation) => {
-      setDriverLocation({
+      const newDriverLocation = {
         latitude: newLocation.coordinates[1],
         longitude: newLocation.coordinates[0],
-      });
-      calculateRoute(newLocation.coordinates[1], newLocation.coordinates[0]);
+      };
+
+      // Only update route if the driver has moved more than the threshold
+      if (shouldRecalculateRoute(newDriverLocation)) {
+        setDriverLocation(newDriverLocation);
+        calculateRoute(newDriverLocation.latitude, newDriverLocation.longitude);
+      }
     });
 
     return () => {
@@ -84,12 +95,44 @@ const RideTrackingScreen = ({ route, navigation }) => {
     };
   }, [requestId, driverId]);
 
-  // Hàm tính toán và vẽ tuyến đường sử dụng Vietmap API
+  // Function to determine if route recalculation is needed
+  const shouldRecalculateRoute = (newLocation) => {
+    if (!lastLocationRef.current) return true;
+
+    const distance = calculateDistance(
+      lastLocationRef.current.latitude,
+      lastLocationRef.current.longitude,
+      newLocation.latitude,
+      newLocation.longitude
+    );
+
+    if (distance > distanceThreshold) {
+      lastLocationRef.current = newLocation; // Update last location
+      return true;
+    }
+    return false;
+  };
+
+  // Function to calculate distance between two points (in meters)
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371000; // Radius of the Earth in meters
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * (Math.PI / 180)) *
+        Math.cos(lat2 * (Math.PI / 180)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  // Function to calculate and draw route using VietMap API
   const calculateRoute = async (driverLat, driverLng) => {
     if (!pickupLocation) return;
 
     try {
-      console.log("api soute is running");
       const response = await axios.get(
         `https://maps.vietmap.vn/api/route?apikey=${VIETMAP_API_KEY}&point=${driverLat},${driverLng}&point=${pickupLocation.latitude},${pickupLocation.longitude}&vehicle=car&points_encoded=true`
       );
@@ -102,12 +145,11 @@ const RideTrackingScreen = ({ route, navigation }) => {
         }));
         setRouteCoordinates(coordinates);
       }
-      console.log("🚀 ~ calculateRoute ~ coordinates:", routeCoordinates);
     } catch (error) {
       console.error("Error calculating route:", error);
     }
   };
-  16.01316200564292, 108.25569720860112;
+
   const handleChat = () => {
     navigation.navigate("ChatScreenCustomer", {
       userId: "670bdfc8b65786a7225f39a1",

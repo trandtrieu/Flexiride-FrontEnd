@@ -83,7 +83,6 @@ const RouteScreen = ({ route, navigation }) => {
 
     // Lắng nghe sự kiện "rideAccepted" từ tài xế
     const handleRideAccepted = (data) => {
-      console.log("🚀 ~ handleRideAccepted ~ data:", data);
       console.log(
         "🚀 ~ handleRideAccepted ~ data.requestDetailId:",
         data.requestDetailId
