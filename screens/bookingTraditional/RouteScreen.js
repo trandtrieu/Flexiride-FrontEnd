@@ -25,8 +25,8 @@ import io from "socket.io-client";
 import LocationContext from "../../provider/LocationCurrentProvider";
 const RouteScreen = ({ route, navigation }) => {
   const pickupLocation = {
-    latitude: 16.016146937915956,
-    longitude: 108.25449279979946,
+    latitude: 15.859470334040234,
+    longitude: 108.38923349939493,
     name: "Nhà Thờ Đức Bà",
     address: "01 Công Xã Paris, Bến Nghé, Quận 1, TP.HCM",
   };
@@ -39,14 +39,11 @@ const RouteScreen = ({ route, navigation }) => {
   };
 
   const currentLocation = {
-    latitude: 16.016146937915956,
-    longitude: 108.25449279979946,
+    latitude: 15.859470334040234,
+    longitude: 108.38923349939493,
   };
 
-  // const {
-  //   pickupLocation = defaultPickupLocation,
-  //   destinationLocation = defaultDestinationLocation,
-  // } = route.params || {};
+  // const { pickupLocation, destinationLocation } = route.params || {};
   // const currentLocation = useContext(LocationContext);
 
   const [routeData, setRouteData] = useState(null);
