@@ -82,7 +82,7 @@ const MapScreen = ({ navigation, route }) => {
   };
 
   const handleConfirmLocation = () => {
-    navigation.navigate("RouteScreen", {
+    navigation.navigate("RouteHireScreen", {
       pickupLocation: selectedPickupLocation,
       destinationLocation: destinationLocation,
     });

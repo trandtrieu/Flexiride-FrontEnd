@@ -49,6 +49,16 @@ const Home = ({ navigation }) => {
           </View>
         </View>
 
+        <View style={styles.cardsContainer}>
+          <View style={styles.card}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("ElectronicContract")}
+            >
+              <Text style={styles.serviceText}>Test Chữ Ký</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         <View style={styles.bookNowContainer}>
           <Text style={styles.bookNowTitle}>ĐẶT XE NGAY</Text>
           <Ionicons name="arrow-forward-outline" size={24} color="black" />
