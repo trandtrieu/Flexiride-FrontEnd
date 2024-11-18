@@ -34,6 +34,8 @@ import { ConfirmBookingScreen } from "./screens/bookingCarpool/ConfirmBookingScr
 import { ManageBookingScreen } from "./screens/bookingCarpool/ManageBookingScreen";
 import { NotificationsScreen } from "./screens/bookingCarpool/NotificationsScreen";
 import { SucessfullScreen } from "./screens/bookingCarpool/SuccessfullSceen";
+import { FeedbackScreen } from "./screens/bookingCarpool/FeedbackScreen";
+import { TypeService } from "./screens/bookingCarpool/TypeService";
 
 import { DriverAvailableRidesScreen } from "./screens/bookingCarpoolDriver/DriverAvailableRidesScreen";
 import { ManageDriverRidesScreen } from "./screens/bookingCarpoolDriver/ManageDriverRidesScreen";
@@ -74,6 +76,9 @@ export default function App() {
               <Stack.Screen name="ConfirmBooking" component={ConfirmBookingScreen} />
               <Stack.Screen name="ManageBooking" component={ManageBookingScreen} />
               <Stack.Screen name="Notifications" component={NotificationsScreen} />
+              <Stack.Screen name="FeedbackScreen" component={FeedbackScreen} />
+              <Stack.Screen name="TypeService" component={TypeService}/>
+              
 
               {/* Screens for booking carpool driver */}
               <Stack.Screen name="DriverAvailableRides" component={DriverAvailableRidesScreen} />

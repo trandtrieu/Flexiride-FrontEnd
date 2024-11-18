@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-const domain = 'https://testapibooking.azurewebsites.net/booking-carpool'; // Add /booking-carpool to the base URL
+const domain = 'http://localhost:3000/booking-carpool'; // Add /booking-carpool to the base URL
 
 // Tokens for customer and driver
-const CUSTOMER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGU4ZjQxYWMyYWNiODM1ZmY5MGRmNCIsImVtYWlsIjoidGhpbmhAZXhhbXBsZS5jb20iLCJpYXQiOjE3Mjk5MjQ0NTUsImV4cCI6MTcyOTkyODA1NX0.GviKu0mVIa3y8XiRJHqyx6FDqo2MeC1z5tkEWPAtIuM';
-const DRIVER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGZkNDcyMmZiOGM0MDZhMjJmZDExZSIsImVtYWlsIjoidGhpbmhAZXhhbXBsZS5jb20iLCJpYXQiOjE3Mjk5MjQ0MjcsImV4cCI6MTcyOTkyODAyN30.rxcR_1uwgFUpC1MkSjutXKVjoEocMagghDDL-x_la4k';
+const CUSTOMER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGU4ZjQxYWMyYWNiODM1ZmY5MGRmNCIsImVtYWlsIjoidHRoaW5oMjQwMjIwMDJAZ21haWwuY29tIiwiaWF0IjoxNzMxODUyNzA1LCJleHAiOjE3MzE4NTYzMDV9.iLjDAVNQHbVhiNzFuLylKFx3mucL6wTZzvmIvlXUPW8';
+const DRIVER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGZkNDcyMmZiOGM0MDZhMjJmZDExZSIsImVtYWlsIjoidGhpbmhAZXhhbXBsZS5jb20iLCJpYXQiOjE3MzE4NDk1NTYsImV4cCI6MTczMTg1MzE1Nn0.6l2M0fTlFR91Xo5pd9oCnlRhYhZrhJvJUjV0t73_FMo';
 
 // Configure axios instances with tokens for customer and driver
 const customerApi = axios.create({
@@ -30,6 +30,7 @@ export const cancelCarpoolRequest = (requestId) => customerApi.post(`/unjoin-req
 
 export const getCustomerRides = () => customerApi.get('/my-rides');
 export const getCustomerNotifications = () => customerApi.get('/notification/');
+export const submitFeedback = (driverIid, feedbackData) =>  customerApi.post(`/feedback/${driverIid}`, feedbackData);
 
 // API for drivers
 export const getDriverAvailableRides = () => driverApi.get('/driver-rides/get-request');

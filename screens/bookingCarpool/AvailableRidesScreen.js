@@ -20,10 +20,9 @@ export const AvailableRidesScreen = ({ route, navigation }) => {
 
         console.log('API Response:', response.data);
         setRides(response.data);
-        Alert.alert('Call OK', 'Dữ liệu đã được tải thành công');
       } catch (error) {
         console.error('Error fetching rides:', error.response?.data || error);
-        Alert.alert('Lỗi rồi', 'Không thể tải dữ liệu');
+        Alert.alert('Lỗi', 'Không thể tải dữ liệu.');
       } finally {
         setLoading(false);
       }
@@ -32,18 +31,26 @@ export const AvailableRidesScreen = ({ route, navigation }) => {
     fetchRides();
   }, [searchParams]);
 
-  const handleJoinRequest = async (requestId, location) => {
+  const handleJoinRequest = async (requestId, searchParams) => {
     try {
-      console.log("ID REQUEST: ", requestId);
-      console.log("Location: ", location);
+      const { location, longitude, latitude } = searchParams || {};
 
-      // Gọi API joinCarpoolRequest và truyền location
-      await joinCarpoolRequest(requestId, { location });
-      Alert.alert('Thành công', 'Bạn đã tham gia vào chuyến đi thành công');
+      if (!location || !longitude || !latitude) {
+        Alert.alert('Lỗi', 'Thông tin vị trí không đầy đủ để tham gia chuyến đi.');
+        return;
+      }
+
+      console.log('Request ID:', requestId);
+      console.log('Location:', location, 'Longitude:', longitude, 'Latitude:', latitude);
+
+      // Gọi API joinCarpoolRequest với các tham số cần thiết
+      await joinCarpoolRequest(requestId, { location, longitude, latitude });
+
+      Alert.alert('Thành công', 'Bạn đã tham gia vào chuyến đi thành công.');
       navigation.navigate('ManageBooking');
     } catch (error) {
       console.error('Error joining request:', error.response?.data || error);
-      Alert.alert('Lỗi', error.response?.data?.message || 'Có lỗi xảy ra');
+      Alert.alert('Lỗi', error.response?.data?.message || 'Có lỗi xảy ra.');
     }
   };
 
@@ -70,12 +77,15 @@ export const AvailableRidesScreen = ({ route, navigation }) => {
           <View style={styles.card}>
             <Text style={styles.location}>{`Từ: ${item.start_location}`}</Text>
             <Text style={styles.location}>{`Đến: ${item.end_location}`}</Text>
-            <Text style={styles.time}>{`Giờ khởi hành: ${new Date(item.time_start).toLocaleTimeString()}`}</Text>
+            <Text style={styles.time}>{`Giờ khởi hành: ${new Date(item.time_start).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}`}</Text>
             <Text style={styles.time}>
               {`Số lượng khách: ${Array.isArray(item.pickup_location) ? item.pickup_location.length : 0}/4`}
             </Text>
             <Text style={styles.time}>
-              {`Tài xế: ${item.driver_id ? "đã nhận" : "chưa nhận"}`}
+              {`Tài xế: ${item.driver_id ? 'đã nhận' : 'chưa nhận'}`}
             </Text>
             <Text style={styles.price}>
               {`Giá mỗi khách: ${formatCurrency(item.price / (item.pickup_location?.length || 1))}`}
@@ -83,11 +93,10 @@ export const AvailableRidesScreen = ({ route, navigation }) => {
 
             <TouchableOpacity
               style={styles.joinButton}
-              onPress={() => handleJoinRequest(item._id, searchParams.location)}
+              onPress={() => handleJoinRequest(item._id, searchParams)}
             >
               <Text style={styles.joinButtonText}>Tham gia</Text>
             </TouchableOpacity>
-
           </View>
         )}
         ListEmptyComponent={<Text style={styles.emptyText}>Không có chuyến xe nào phù hợp</Text>}

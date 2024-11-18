@@ -1,10 +1,18 @@
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Text, StyleSheet, Platform, Alert } from 'react-native';
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  Alert,
+} from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { createCarpoolRequest } from '../../service/BookingCarpoolApi';
 
-export const CarpoolRequestScreen = ({ navigation }) => {
+export const CarpoolRequestScreen = ({ navigation, route }) => {
+  const { serviceId } = route.params; // Nhận serviceId từ navigation
   const [locationDetail, setLocationDetail] = useState('');
   const [startLocation, setStartLocation] = useState('');
   const [endLocation, setEndLocation] = useState('');
@@ -14,33 +22,33 @@ export const CarpoolRequestScreen = ({ navigation }) => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [price, setPrice] = useState('800000');
 
+  // Set cứng tọa độ
+  const longitude = 108.22787; // Ví dụ: Tọa độ của Đà Nẵng
+  const latitude = 16.061074; // Ví dụ: Tọa độ của Đà Nẵng
+
   const centralProvinces = [
     { label: 'Đà Nẵng', value: 'Đà Nẵng' },
     { label: 'Thừa Thiên Huế', value: 'Thừa Thiên Huế' },
     { label: 'Quảng Nam', value: 'Quảng Nam' },
     { label: 'Quảng Ngãi', value: 'Quảng Ngãi' },
-    { label: 'Bình Định', value: 'Bình Định' },
-    { label: 'Phú Yên', value: 'Phú Yên' },
-    { label: 'Khánh Hòa', value: 'Khánh Hòa' },
-    { label: 'Ninh Thuận', value: 'Ninh Thuận' },
-    { label: 'Quảng Bình', value: 'Quảng Bình' },
-    { label: 'Quảng Trị', value: 'Quảng Trị' },
   ];
 
+  // Xử lý tạo yêu cầu
   const handleCreateRequest = async () => {
     const requestData = {
       location: locationDetail,
+      longitude,
+      latitude,
       start_location: startLocation,
       end_location: endLocation,
       date: date.toISOString().split('T')[0],
       time_start: timeStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       price,
+      service_id: serviceId,
     };
+
     try {
       const response = await createCarpoolRequest(requestData);
-      console.log("=================Check=======================")
-      console.log(requestData);
-      console.log("=================End=======================")
       if (response.data.allowCreateNew) {
         navigation.navigate('Sucessfull');
       }
@@ -61,15 +69,20 @@ export const CarpoolRequestScreen = ({ navigation }) => {
     }
   };
 
+  // Xử lý tìm kiếm chuyến đi
   const handleFindRequest = () => {
-    const requestData = {
+    const searchParams = {
+      location: locationDetail,
+      longitude,
+      latitude,
       start_location: startLocation,
       end_location: endLocation,
       date: date.toISOString().split('T')[0],
       time_start: timeStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      price,
+      service_id: serviceId,
     };
-    navigation.navigate('AvailableRides', { searchParams: requestData });
+
+    navigation.navigate('AvailableRides', { searchParams });
   };
 
   return (
@@ -168,11 +181,6 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 15,
     backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 1 },
-    shadowRadius: 5,
-    elevation: 2,
   },
   text: {
     fontSize: 16,
@@ -187,14 +195,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#007bff',
     paddingVertical: 15,
     borderRadius: 8,
-    flex: 1,
     alignItems: 'center',
-    marginHorizontal: 5,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 3,
+    width: '48%',
   },
   buttonText: {
     color: '#fff',

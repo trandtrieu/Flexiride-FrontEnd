@@ -8,7 +8,7 @@ export const ServiceSelectionScreen = ({ navigation }) => {
       <Text>Customer</Text>
       <Button
         title="Đặt xe ghép"
-        onPress={() => navigation.navigate('CarpoolRequest')}
+        onPress={() => navigation.navigate('TypeService')}
       />
 
       <Button
