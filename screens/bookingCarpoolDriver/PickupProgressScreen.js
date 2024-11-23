@@ -64,9 +64,27 @@ export const PickupProgressScreen = ({ route }) => {
   };
 
   const handleNavigate = (location) => {
-    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
-    Linking.openURL(url).catch((err) => console.error('Failed to open map:', err));
+    const { latitude: pickupLatitude, longitude: pickupLongitude } = rideInfor.start_location;
+    const { latitude: destinationLatitude, longitude: destinationLongitude } = rideInfor.end_location;
+  
+    navigation.navigate("VietMapNavigationScreen", {
+      currentLocation: {
+        latitude: pickupLatitude,
+        longitude: pickupLongitude,
+      },
+      pickupLocation: {
+        latitude: location.latitude || pickupLatitude,
+        longitude: location.longitude || pickupLongitude,
+      },
+      destinationLocation: {
+        latitude: destinationLatitude,
+        longitude: destinationLongitude,
+      },
+      status: rideInfor.status,
+      rideInfor: rideInfor,
+    });
   };
+  
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);

@@ -15,6 +15,9 @@ export const TypeService = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Chọn loại dịch vụ</Text>
+      <Text style={styles.subtitle}>
+        Vui lòng chọn một loại dịch vụ phù hợp với nhu cầu của bạn:
+      </Text>
       {services.map((service) => (
         <TouchableOpacity
           key={service.id}
@@ -34,26 +37,39 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#f4f6fc',
   },
   title: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
-    marginBottom: 20,
+    color: '#2c3e50',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#7f8c8d',
+    marginBottom: 30,
+    textAlign: 'center',
   },
   serviceButton: {
-    backgroundColor: '#007bff',
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    marginBottom: 15,
+    backgroundColor: '#3498db',
+    paddingVertical: 18,
+    paddingHorizontal: 25,
+    borderRadius: 15,
+    marginBottom: 20,
     width: '100%',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 3,
   },
   serviceText: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
 });
 

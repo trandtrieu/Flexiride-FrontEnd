@@ -7,8 +7,9 @@ import {
   StyleSheet,
   Alert,
   TextInput,
-  Picker,
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+
 import { useFocusEffect } from '@react-navigation/native';
 import { getCustomerRides, cancelCarpoolRequest } from '../../service/BookingCarpoolApi';
 

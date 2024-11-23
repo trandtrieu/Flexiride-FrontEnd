@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-const domain = 'http://localhost:3000/booking-carpool'; // Add /booking-carpool to the base URL
+const domain = 'http://192.168.111.52:3000/booking-carpool'; // Add /booking-carpool to the base URL
 
 // Tokens for customer and driver
-const CUSTOMER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGU4ZjQxYWMyYWNiODM1ZmY5MGRmNCIsImVtYWlsIjoidHRoaW5oMjQwMjIwMDJAZ21haWwuY29tIiwiaWF0IjoxNzMxODUyNzA1LCJleHAiOjE3MzE4NTYzMDV9.iLjDAVNQHbVhiNzFuLylKFx3mucL6wTZzvmIvlXUPW8';
-const DRIVER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGZkNDcyMmZiOGM0MDZhMjJmZDExZSIsImVtYWlsIjoidGhpbmhAZXhhbXBsZS5jb20iLCJpYXQiOjE3MzE4NDk1NTYsImV4cCI6MTczMTg1MzE1Nn0.6l2M0fTlFR91Xo5pd9oCnlRhYhZrhJvJUjV0t73_FMo';
+const CUSTOMER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3M2RkNGRkZjJmNWQyM2M1Yzg3YzY0NSIsImVtYWlsIjoidHRoaW5oMjQwMjIwMDJAZ21haWwuY29tIiwiaWF0IjoxNzMyMTA3MTU3LCJleHAiOjE3MzIxMTA3NTd9.G9GWz2vom4Ss3X62ovdKqYsG0W66VNgViVJcSwDCL0g';
+const DRIVER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGZkNDcyMmZiOGM0MDZhMjJmZDExZSIsImVtYWlsIjoidGhpbmhAZXhhbXBsZS5jb20iLCJpYXQiOjE3MzIxMDg0NjIsImV4cCI6MTczMjExMjA2Mn0.HdhdEQGuyxU4Q2Xuu9dHtgSrdlxjQexiS7a6IzRMOyI';
 
 // Configure axios instances with tokens for customer and driver
 const customerApi = axios.create({
