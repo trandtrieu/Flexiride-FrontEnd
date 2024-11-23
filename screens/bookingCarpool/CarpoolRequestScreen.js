@@ -1,19 +1,16 @@
-import React, { useState } from 'react';
-import {
-  View,
-  TextInput,
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  Alert,
-} from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, TextInput, TouchableOpacity, Text, StyleSheet, Alert, ScrollView, Keyboard } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { createCarpoolRequest } from '../../service/BookingCarpoolApi';
+import _ from 'lodash';
+import { VIETMAP_API_KEY } from '@env';
 
 export const CarpoolRequestScreen = ({ navigation, route }) => {
   const { serviceId } = route.params; // Nhận serviceId từ navigation
   const [locationDetail, setLocationDetail] = useState('');
+  const [predictions, setPredictions] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState(null);
   const [startLocation, setStartLocation] = useState('');
   const [endLocation, setEndLocation] = useState('');
   const [date, setDate] = useState(new Date());
@@ -21,6 +18,7 @@ export const CarpoolRequestScreen = ({ navigation, route }) => {
   const [timeStart, setTimeStart] = useState(new Date());
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [price, setPrice] = useState('800000');
+  const [isInputFocused, setIsInputFocused] = useState(false);
 
   // Set cứng tọa độ
   const longitude = 108.22787; // Ví dụ: Tọa độ của Đà Nẵng
@@ -33,56 +31,81 @@ export const CarpoolRequestScreen = ({ navigation, route }) => {
     { label: 'Quảng Ngãi', value: 'Quảng Ngãi' },
   ];
 
-  // Xử lý tạo yêu cầu
-  const handleCreateRequest = async () => {
-    const requestData = {
-      location: locationDetail,
-      longitude,
-      latitude,
-      start_location: startLocation,
-      end_location: endLocation,
-      date: date.toISOString().split('T')[0],
-      time_start: timeStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      price,
-      service_id: serviceId,
-    };
+  // Debounce để tránh gọi API liên tục
+  const fetchPredictions = useCallback(
+    _.debounce(async (input) => {
+      if (input.length < 3) {
+        setPredictions([]);
+        return;
+      }
 
-    try {
-      const response = await createCarpoolRequest(requestData);
-      if (response.data.allowCreateNew) {
-        navigation.navigate('Sucessfull');
+      const query = startLocation ? `${input}, ${startLocation}` : input;
+      const url = `https://maps.vietmap.vn/api/autocomplete/v3?apikey=${VIETMAP_API_KEY}&text=${encodeURIComponent(query)}`;
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data && data.length > 0) {
+          setPredictions(data);
+        }
+      } catch (error) {
+        console.error('Error fetching predictions:', error);
+        setPredictions([]);
       }
-    } catch (error) {
-      if (error.response?.data?.message === "You already have a similar pending request for this ride within ±1 hours.") {
-        Alert.alert(
-          'Yêu cầu đã tồn tại',
-          'Yêu cầu tương tự đã tồn tại trong hệ thống. Chúng tôi sẽ hiển thị các chuyến đi tương tự để bạn lựa chọn.',
-          [{ text: 'OK', onPress: () => navigation.navigate('AvailableRides', { searchParams: requestData }) }]
-        );
-      } else {
-        Alert.alert(
-          'Lỗi',
-          'Không thể tạo yêu cầu. Chúng tôi sẽ hiển thị các chuyến đi tương tự để bạn lựa chọn.',
-          [{ text: 'OK', onPress: () => navigation.navigate('AvailableRides', { searchParams: requestData }) }]
-        );
-      }
-    }
+    }, 2000),
+    [startLocation]
+  );
+
+  const handleLocationDetailChange = (text) => {
+    setLocationDetail(text);
+    setIsInputFocused(true);
+    fetchPredictions(text);
   };
 
-  // Xử lý tìm kiếm chuyến đi
-  const handleFindRequest = () => {
-    const searchParams = {
-      location: locationDetail,
-      longitude,
-      latitude,
-      start_location: startLocation,
-      end_location: endLocation,
-      date: date.toISOString().split('T')[0],
-      time_start: timeStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      service_id: serviceId,
-    };
+  const handlePredictionSelect = (prediction) => {
+    console.log('Handle prediction:', prediction);
+    setLocationDetail(prediction.display);
+    setSelectedLocation(prediction);
+    setPredictions([]);
+    setIsInputFocused(false);
+    Keyboard.dismiss(); // Ẩn bàn phím khi chọn gợi ý
+  };
 
-    navigation.navigate('AvailableRides', { searchParams });
+  const handleCreateRequest = async () => {
+    if (!locationDetail || !startLocation || !endLocation || !date || !timeStart || !price) {
+      Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin trước khi tạo yêu cầu.');
+      return;
+    }
+
+    if (selectedLocation?.ref_id) {
+      const placeUrl = `https://maps.vietmap.vn/api/place/v3?apikey=${VIETMAP_API_KEY}&refid=${selectedLocation.ref_id}`;
+      try {
+        const placeResponse = await fetch(placeUrl);
+        const placeData = await placeResponse.json();
+        if (placeData && placeData.lat && placeData.lng) {
+          const requestData = {
+            location: locationDetail,
+            longitude: placeData.lng,
+            latitude: placeData.lat,
+            start_location: startLocation,
+            end_location: endLocation,
+            date: date.toISOString().split('T')[0],
+            time_start: timeStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            price,
+          };
+
+          const response = await createCarpoolRequest(requestData);
+          if (response.data.allowCreateNew) {
+            navigation.navigate('Sucessfull');
+          }
+        }
+      } catch (error) {
+        console.error('Error creating carpool request:', error);
+        Alert.alert('Lỗi', 'Không thể tạo yêu cầu.');
+      }
+    } else {
+      Alert.alert('Lỗi', 'Không tìm thấy vị trí cụ thể. Vui lòng chọn lại.');
+    }
   };
 
   return (
@@ -99,8 +122,25 @@ export const CarpoolRequestScreen = ({ navigation, route }) => {
         style={styles.input}
         placeholder="Điểm đón cụ thể..."
         value={locationDetail}
-        onChangeText={setLocationDetail}
+        onChangeText={handleLocationDetailChange}
+        onFocus={() => setIsInputFocused(true)}
+        onBlur={() => setIsInputFocused(false)}
       />
+
+      {/* Hiển thị khung gợi ý chỉ khi đang nhập */}
+      {predictions.length > 0 && (
+        <ScrollView style={styles.suggestionContainer}>
+          {predictions.map((prediction, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => handlePredictionSelect(prediction)}
+              style={styles.suggestionItem}
+            >
+              <Text>{prediction.display}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      )}
 
       <RNPickerSelect
         onValueChange={setEndLocation}
@@ -160,9 +200,6 @@ export const CarpoolRequestScreen = ({ navigation, route }) => {
         <TouchableOpacity style={styles.button} onPress={handleCreateRequest}>
           <Text style={styles.buttonText}>Tạo yêu cầu</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={handleFindRequest}>
-          <Text style={styles.buttonText}>Tìm kiếm</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -182,13 +219,23 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     backgroundColor: '#fff',
   },
+  suggestionContainer: {
+    maxHeight: 150,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    padding: 8,
+    marginBottom: 15,
+  },
+  suggestionItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
   text: {
     fontSize: 16,
     color: '#333',
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     marginTop: 10,
   },
   button: {
@@ -196,7 +243,6 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 8,
     alignItems: 'center',
-    width: '48%',
   },
   buttonText: {
     color: '#fff',
