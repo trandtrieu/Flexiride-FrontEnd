@@ -48,7 +48,7 @@ const StaticContent = ({ navigation }) => (
         {/* Menu Tabs */}
         <ServiceIcons />
 
-        {/* Search Box */}
+        {/* Lấy vị trí */}
         <TouchableOpacity
             style={styles.searchContainer}
             onPress={() => navigation.navigate("LocationPicker")}

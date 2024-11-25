@@ -73,7 +73,7 @@ const RouteScreen = ({ route, navigation }) => {
     // Chỉ kết nối socket một lần khi component mount
     socket.current = io(`http://${IP_ADDRESS}:3000`, {
       transports: ["websocket"],
-      query: { customerId: "670bdfc8b65786a7225f39a1" },
+      query: { customerId: "6738dd3df211814d9c027e86" },
     });
 
     socket.current.on("connect", () => {
@@ -153,7 +153,7 @@ const RouteScreen = ({ route, navigation }) => {
   const fetchServicesAndPrices = async () => {
     try {
       const response = await axios.get(
-        `http://${IP_ADDRESS}:3000/booking-traditional/services-with-prices`,
+        `http://${IP_ADDRESS}:3000/booking-traditional/service-with-prices`,
         {
           params: {
             pickupLocation: `${pickupLocation.latitude},${pickupLocation.longitude}`,
@@ -222,7 +222,7 @@ const RouteScreen = ({ route, navigation }) => {
 
     setIsBooking(true);
     socket.current.emit("customerRequest", {
-      customerId: "670bdfc8b65786a7225f39a1",
+      customerId: "6738dd3df211814d9c027e86",
       pickupLocation,
       destinationLocation,
       serviceId: selectedServiceId,

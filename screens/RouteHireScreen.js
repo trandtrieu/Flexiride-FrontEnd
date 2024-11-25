@@ -157,7 +157,7 @@ const RouteHireScreen = ({ route, navigation }) => {
     const fetchServicesAndPrices = async () => {
         try {
             const response = await axios.get(
-                `http://${IP_ADDRESS}:3000/booking-traditional/services-with-prices`,
+                `http://${IP_ADDRESS}:3000/booking-traditional/service-with-prices`,
                 {
                     params: {
                         pickupLocation: `${pickupLocation.latitude},${pickupLocation.longitude}`,
@@ -345,6 +345,7 @@ const RouteHireScreen = ({ route, navigation }) => {
                         Thời gian ước tính: {estimatedTime}
                     </Text>
                 </View>
+                {/* Option Service */}
                 <View style={styles.optionsContainer}>
                     <ScrollView
                         style={styles.rideOptions}

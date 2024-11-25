@@ -12,11 +12,8 @@ import { Icon } from "react-native-elements";
 import { VIETMAP_API_KEY } from "@env";
 
 const MapScreen = ({ navigation, route }) => {
-  const { pickupLocation, destinationLocation, onSelectPickupLocation } =
-    route.params;
-
-  const [selectedPickupLocation, setSelectedPickupLocation] =
-    useState(pickupLocation);
+  const { pickupLocation, destinationLocation, onSelectPickupLocation } = route.params;
+  const [selectedPickupLocation, setSelectedPickupLocation] = useState(pickupLocation);
   const [nearbyPlaces, setNearbyPlaces] = useState([]);
   const [loading, setLoading] = useState(false);
   const mapRef = useRef(null);
@@ -82,7 +79,7 @@ const MapScreen = ({ navigation, route }) => {
   };
 
   const handleConfirmLocation = () => {
-    navigation.navigate("RouteHireScreen", {
+    navigation.navigate("RouteScreen", {
       pickupLocation: selectedPickupLocation,
       destinationLocation: destinationLocation,
     });

@@ -40,8 +40,15 @@ import { TypeService } from "./screens/bookingCarpool/TypeService";
 import { DriverAvailableRidesScreen } from "./screens/bookingCarpoolDriver/DriverAvailableRidesScreen";
 import { ManageDriverRidesScreen } from "./screens/bookingCarpoolDriver/ManageDriverRidesScreen";
 import { PickupProgressScreen } from "./screens/bookingCarpoolDriver/PickupProgressScreen";
+// HireDriver
 import ElectronicContractScreen from "./screens/hireDriver/ElectronicContractScreen";
 import RouteHireScreen from "./screens/RouteHireScreen";
+import HireDriverServiceOption from "./screens/hireDriver/HireDriverServiceOptionScreen"
+import HireDriverRequestScreen from "./screens/hireDriver/HireDriverRequestScreen"
+
+
+
+
 export default function App() {
   const Stack = createNativeStackNavigator();
 
@@ -77,8 +84,8 @@ export default function App() {
               <Stack.Screen name="ManageBooking" component={ManageBookingScreen} />
               <Stack.Screen name="Notifications" component={NotificationsScreen} />
               <Stack.Screen name="FeedbackScreen" component={FeedbackScreen} />
-              <Stack.Screen name="TypeService" component={TypeService}/>
-              
+              <Stack.Screen name="TypeService" component={TypeService} />
+
 
               {/* Screens for booking carpool driver */}
               <Stack.Screen name="DriverAvailableRides" component={DriverAvailableRidesScreen} />
@@ -88,6 +95,8 @@ export default function App() {
               <Stack.Screen name="HireDriver" component={HireDriver} options={{ headerShown: false }} />
               <Stack.Screen name="ElectronicContract" component={ElectronicContractScreen} options={{ headerShown: false }} />
               <Stack.Screen name="RouteHireScreen" component={RouteHireScreen} options={{ headerShown: false }} />
+              <Stack.Screen name="HireDriverServiceOption" component={HireDriverServiceOption} options={{ headerShown: false }} />
+              <Stack.Screen name="HireDriverRequestScreen" component={HireDriverRequestScreen} options={{ headerShown: false }} />
 
 
             </Stack.Navigator>

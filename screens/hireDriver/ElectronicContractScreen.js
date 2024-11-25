@@ -19,10 +19,38 @@ const ElectronicContractScreen = ({ navigation, route }) => {
         }
         // Nội dung hợp đồng
         const contractDetails = `
-        Họ và tên khách hàng: Phạm Hưng Thịnh
+        Bên khách hàng:
+        Họ và tên: Phạm Hưng Thịnh
+        Giới tính: Nam
+        Số điện thoại: 0708171467
         Địa chỉ: Hải Châu, Đà Nẵng
-        Họ và tên tài xế: Nguyễn Văn Anh
-        Nội dung hợp đồng: ... (điều khoản ở đây)
+        --------------------------
+        Bên tài xế:
+        Họ và tên: Nguyễn Văn Anh
+        Giới tính: Nam
+        Số điện thoại: 0935536285
+        Địa chỉ: Hoà Hải, Ngũ Hành Sơn, Đà Nẵng
+
+        Thoả thuận ký hợp đồng điện tử và cam kết làm đúng những điều khoản sau đây:
+
+        1. Trách nhiệm và Nghĩa vụ của Tài xế
+Nghĩa vụ trong suốt dịch vụ: Tài xế phải tuân thủ luật giao thông, đảm bảo an toàn cho khách hàng và phương tiện của khách hàng. Phải lái xe an toàn, không sử dụng chất kích thích hoặc đồ uống có cồn trong quá trình làm việc, đồng thời tôn trọng quyền riêng tư và lịch trình của khách hàng.
+Chi phí phát sinh do vi phạm giao thông: Mọi vi phạm giao thông do lỗi của tài xế sẽ do tài xế tự chịu trách nhiệm.
+
+        2. Quyền và Trách nhiệm của Khách hàng
+Trách nhiệm đảm bảo dịch vụ suôn sẻ: Khách hàng phải đảm bảo xe sẵn sàng sử dụng, cung cấp các thông tin cần thiết về lịch trình, điểm đến, và đảm bảo phương tiện trong trạng thái vận hành tốt.
+Quyền yêu cầu bồi thường: Nếu tài xế vi phạm các điều khoản trong hợp đồng, khách hàng có quyền yêu cầu hoàn lại tiền hoặc bồi thường nếu có thiệt hại. Tuy nhiên, mức bồi thường sẽ được quyết định dựa trên quy định của hệ thống FRide.
+
+        3. Phạm vi Dịch vụ
+Trách nhiệm trong dịch vụ thuê tài xế: Dịch vụ bao gồm việc đưa đón, điều khiển phương tiện cho khách hàng và các nhu cầu bổ sung liên quan đến di chuyển. Dịch vụ không bao gồm các nhiệm vụ cá nhân khác như vận chuyển hàng hóa riêng của tài xế.
+Giới hạn về thời gian và phạm vi di chuyển: Dịch vụ chỉ áp dụng trong phạm vi các tỉnh Đà Nẵng và khu vực lân cận, và thời gian làm việc sẽ được quy định trong ứng dụng.
+
+        4. Sự cố và Tranh chấp
+Trách nhiệm khi xảy ra sự cố: Nếu có tai nạn hoặc sự cố kỹ thuật trong lúc tài xế điều khiển phương tiện, tài xế sẽ chịu trách nhiệm. Trong trường hợp đặc biệt, hệ thống sẽ xem xét hỗ trợ giải quyết.
+Giải quyết tranh chấp: Tranh chấp sẽ được xử lý thông qua đội ngũ hỗ trợ khách hàng của FRide.
+
+        Hai bên liên quan sẽ đồng ý và thoả thuận cam kết như trên.
+
     `;
 
         // Gọi API gửi email
@@ -99,7 +127,9 @@ const ElectronicContractScreen = ({ navigation, route }) => {
                 </View>
                 <View style={styles.section}>
                     <Text style={styles.subtitle}>Điều khoản:</Text>
-                    <Text>1. Trách nhiệm và Nghĩa vụ của Tài xế...</Text>
+                    <Text>1. Trách nhiệm và Nghĩa vụ của Tài xế
+                        Nghĩa vụ trong suốt dịch vụ: Tài xế phải tuân thủ luật giao thông, đảm bảo an toàn cho khách hàng và phương tiện của khách hàng. Phải lái xe an toàn, không sử dụng chất kích thích hoặc đồ uống có cồn trong quá trình làm việc, đồng thời tôn trọng quyền riêng tư và lịch trình của khách hàng.
+                        Chi phí phát sinh do vi phạm giao thông: Mọi vi phạm giao thông do lỗi của tài xế sẽ do tài xế tự chịu trách nhiệm.</Text>
                     <Text>2. Quyền và Trách nhiệm của Khách hàng...</Text>
                     <Text>3. Phạm vi Dịch vụ...</Text>
                     <Text>4. Sự cố và Tranh chấp...</Text>
