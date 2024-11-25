@@ -31,7 +31,7 @@ export const PickupProgressScreen = ({ route }) => {
     const url = `https://maps.vietmap.vn/api/search/v3?apikey=${VIETMAP_API_KEY}&focus=10.75887508,106.67538868&text=Công Ty Cổ Phần Ứng Dụng Bản Đồ Việt,HCM`;
 
 
-    
+
     try {
       const response = await fetch(url);
       const data = await response.json();
@@ -86,50 +86,58 @@ export const PickupProgressScreen = ({ route }) => {
   };
 
   const handleNavigate = async (customerAddress) => {
-    const customerCoordinates = await fetchCustomerCoordinates(customerAddress);
-    if (!customerCoordinates) {
-      Alert.alert('Lỗi', 'Không thể tìm thấy vị trí khách hàng.');
-      return;
+    const customerCoordinates = {
+      name: customerAddress.account_id.name,
+      latitude: customerAddress.latitude,
+      longitude: customerAddress.longitude,
     }
+    console.log("rideInfor: ", rideInfor)
 
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Lỗi', 'Quyền truy cập vị trí bị từ chối.');
-      return;
-    }
+    console.log("rideInfor: ", customerCoordinates)
+    // const customerCoordinates = await fetchCustomerCoordinates(customerAddress);
+    // if (!customerCoordinates) {
+    //   Alert.alert('Lỗi', 'Không thể tìm thấy vị trí khách hàng.');
+    //   return;
+    // }
 
-    const location = await Location.getCurrentPositionAsync({});
-    const driverCoordinates = {
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-    };
+    // let { status } = await Location.requestForegroundPermissionsAsync();
+    // if (status !== 'granted') {
+    //   Alert.alert('Lỗi', 'Quyền truy cập vị trí bị từ chối.');
+    //   return;
+    // }
 
-    const tspUrl = `https://maps.vietmap.vn/api/tsp?api-version=1.1&apikey=${VIETMAP_API_KEY}&point=${driverCoordinates.latitude},${driverCoordinates.longitude}&point=${customerCoordinates.latitude},${customerCoordinates.longitude}&roundtrip=false`;
+    // const location = await Location.getCurrentPositionAsync({});
+    // const driverCoordinates = {
+    //   latitude: location.coords.latitude,
+    //   longitude: location.coords.longitude,
+    // };
 
-    try {
-      const response = await fetch(tspUrl);
-      const data = await response.json();
+    // const tspUrl = `https://maps.vietmap.vn/api/tsp?api-version=1.1&apikey=${VIETMAP_API_KEY}&point=${driverCoordinates.latitude},${driverCoordinates.longitude}&point=${customerCoordinates.latitude},${customerCoordinates.longitude}&roundtrip=false`;
 
-      if (data.paths && data.paths.length > 0) {
-        const routePoints = data.paths[0].points;
+    // try {
+    //   const response = await fetch(tspUrl);
+    //   const data = await response.json();
 
-        // navigation.navigate('PickupCustomerMap', {
-        //   customerLocation: customerCoordinates,
-        //   driverLocation: driverCoordinates,
-        //   routePoints: routePoints,
-        // });
-        console.log("================navigating======================")
-        console.log("customerCoordinates: ", customerCoordinates)
-        console.log("driverCoordinates: ", driverCoordinates)
-        console.log("routePoints: ", routePoints)
-      } else {
-        Alert.alert('Lỗi', 'Không thể tính toán lộ trình đến khách hàng.');
-      }
-    } catch (error) {
-      console.error('Error calculating route:', error);
-    }
+    //   if (data.paths && data.paths.length > 0) {
+    //     const routePoints = data.paths[0].points;
+
+    //     // navigation.navigate('PickupCustomerMap', {
+    //     //   customerLocation: customerCoordinates,
+    //     //   driverLocation: driverCoordinates,
+    //     //   routePoints: routePoints,
+    //     // });
+    //     console.log("================navigating======================")
+    //     console.log("customerCoordinates: ", customerCoordinates)
+    //     console.log("driverCoordinates: ", driverCoordinates)
+    //     console.log("routePoints: ", routePoints)
+    //   } else {
+    //     Alert.alert('Lỗi', 'Không thể tính toán lộ trình đến khách hàng.');
+    //   }
+    // } catch (error) {
+    //   console.error('Error calculating route:', error);
+    // }
   };
-  
+
 
   const formatDate = (dateString) => new Date(dateString).toLocaleDateString('vi-VN');
   const formatTime = (timeString) => new Date(timeString).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
@@ -147,7 +155,6 @@ export const PickupProgressScreen = ({ route }) => {
   return (
     <View style={styles.container}>
       <View style={styles.rideDetails}>
-        <Text style={styles.customerInfo}>ID: <Text style={styles.highlightText}>{rideInfor._id}</Text></Text>
         <Text style={styles.detailText}>Đi từ: <Text style={styles.highlightText}>{rideInfor.start_location}</Text></Text>
         <Text style={styles.detailText}>Đến: <Text style={styles.highlightText}>{rideInfor.end_location}</Text></Text>
         <Text style={styles.detailText}>Ngày: <Text style={styles.highlightText}>{formatDate(rideInfor.date)}</Text></Text>
@@ -176,6 +183,12 @@ export const PickupProgressScreen = ({ route }) => {
             <Text style={styles.customerInfo}>Khách: <Text style={styles.highlightText}>{item.account_id.name}</Text></Text>
             <Text style={styles.customerInfo}>Số điện thoại: <Text style={styles.highlightText}>{item.account_id.phone}</Text></Text>
             <Text style={styles.customerInfo}>Địa chỉ: <Text style={styles.highlightText}>{item.location}</Text></Text>
+            <Text style={styles.customerInfo}>
+              Số tiền cần trả: 
+              <Text style={styles.priceText}>
+                {formatPrice(Math.round(rideInfor.price / rides.length))} VNĐ
+              </Text>
+            </Text>
             <Text style={styles.statusText}>
               Trạng thái:
               <Text style={{ color: item.pickedUp ? '#4CAF50' : '#F44336' }}>
@@ -187,7 +200,7 @@ export const PickupProgressScreen = ({ route }) => {
                 <TouchableOpacity style={styles.pickupButton} onPress={() => handlePickupCustomer(item.account_id._id)}>
                   <Text style={styles.buttonText}>Đã đón</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.navigateButton} onPress={() => handleNavigate(item.location)}>
+                <TouchableOpacity style={styles.navigateButton} onPress={() => handleNavigate(item)}>
                   <Text style={styles.buttonText}>Chỉ đường</Text>
                 </TouchableOpacity>
               </View>

@@ -21,7 +21,7 @@ import Geolocation from "@react-native-community/geolocation";
 import translationGuide from "./trans";
 
 const CarpoolNavigation = ({ navigation, route }) => {
-    const { currentLocation, pickupLocation, destinationLocation, status, rideInfor } =
+    const { currentLocation, destinationLocation, status, rideInfor } =
         route.params || {};
 
     const [instructionText, setInstructionText] = useState("");
@@ -65,56 +65,44 @@ const CarpoolNavigation = ({ navigation, route }) => {
         }
     };
     useEffect(() => {
-        try {
-            console.log("Current Location:", currentLocation);
-            console.log("Pickup Location:", pickupLocation);
-            console.log("Destination Location:", destinationLocation);
-            console.log("status:", status);
-
+        if (currentLocation && destinationLocation) {
             createRoute();
-        } catch (error) {
-            console.error("Error in useEffect:", error);
+        } else {
+            Alert.alert("Thông báo", "Dữ liệu không đầy đủ để tạo tuyến đường.");
+            setIsLoading(false);
         }
-    }, [currentLocation, pickupLocation, destinationLocation, status]);
+    }, [currentLocation, destinationLocation]);
     const createRoute = async () => {
-        if (!currentLocation || !pickupLocation || !destinationLocation) {
+        if (!currentLocation || !destinationLocation) {
             Alert.alert("Thông báo", "Thiếu dữ liệu để tạo tuyến đường.");
             setIsLoading(false);
             return;
         }
 
-        let destination = null;
-        if (["confirmed", "on the way", "arrived"].includes(status)) {
-            destination = pickupLocation;
-        } else if (["picked up", "on trip"].includes(status)) {
-            destination = destinationLocation;
-        }
-
-        if (destination && currentLocation) {
+        try {
             console.log("🚀 ~ createRoute ~ currentLocation:", currentLocation);
-            console.log("🚀 ~ createRoute ~ destination:", destination);
-            try {
-                await VietMapNavigationController.buildRoute(
-                    [
-                        { lat: currentLocation.latitude, long: currentLocation.longitude },
-                        { lat: destination.latitude, long: destination.longitude },
-                    ],
-                    "driving-traffic"
-                );
+            console.log("🚀 ~ createRoute ~ destinationLocation:", destinationLocation);
 
-                console.log("Route data:", route);
+            await VietMapNavigationController.buildRoute(
+                [
+                    { lat: currentLocation.latitude, long: currentLocation.longitude },
+                    { lat: destinationLocation.latitude, long: destinationLocation.longitude },
+                ],
+                "driving-traffic"
+            );
 
-                if (!route) {
-                    throw new Error("Route không hợp lệ hoặc API không phản hồi.", error);
-                } else {
-                    setRouteData(route);
-                }
-            } catch (error) {
-                // console.error("Lỗi khi tạo tuyến đường:", error);
-                Alert.alert("Lỗi", "Không thể tạo tuyến đường.");
-            } finally {
-                setIsLoading(false);
+            console.log("Route data:", route);
+
+            if (!route) {
+                throw new Error("Route không hợp lệ hoặc API không phản hồi.", error);
+            } else {
+                setRouteData(route);
             }
+        } catch (error) {
+            console.error("Lỗi khi tạo tuyến đường:", error);
+            Alert.alert("Lỗi", "Không thể tạo tuyến đường.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -139,7 +127,7 @@ const CarpoolNavigation = ({ navigation, route }) => {
             }
         };
         initializeRoute();
-    }, [currentLocation, pickupLocation, destinationLocation, status]);
+    }, [currentLocation, destinationLocation, status]);
 
     const getGuideText = (modifier, type) => {
         if (modifier && type) {

@@ -2,9 +2,9 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 const services = [
-  { id: '6713ed463526cf13c53cb3be', name: 'Xe ghép 4 chỗ' },
-  { id: '6720efb1e61ab7d2e924219b', name: 'Xe ghép 7 chỗ' },
-  { id: '6720efc9e61ab7d2e924219c', name: 'Xe ghép limousine' },
+  { id: '67414fb314fada16bde3ada7', name: 'Xe ghép 4 chỗ' },
+  { id: '67414fbd14fada16bde3adaa', name: 'Xe ghép 7 chỗ' },
+  { id: '67414fe614fada16bde3adad', name: 'Xe ghép limousine' },
 ];
 
 export const TypeService = ({ navigation }) => {

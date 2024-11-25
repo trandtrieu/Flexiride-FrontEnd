@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, FlatList, Text, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import { getDriverAvailableRides, acceptCarpoolRequest } from '../../service/BookingCarpoolApi';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export const DriverAvailableRidesScreen = ({ navigation }) => {
   const [rides, setRides] = useState([]);
@@ -38,14 +39,48 @@ export const DriverAvailableRidesScreen = ({ navigation }) => {
   };
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN');
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date)) throw new Error('Invalid Date');
+      return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    } catch (error) {
+      console.error('Error formatting date:', error.message);
+      return 'Invalid Date';
+    }
   };
 
   const formatTime = (timeString) => {
-    const date = new Date(timeString);
-    return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    try {
+      // Loại bỏ ký tự ":00" không cần thiết và khoảng trắng
+      const cleanedTimeString = timeString.replace(/\s*:\d{2}$/, '').trim();
+
+      // Kiểm tra xem có chứa AM/PM không
+      const isPM = cleanedTimeString.toLowerCase().includes('pm');
+      const isAM = cleanedTimeString.toLowerCase().includes('am');
+
+      // Loại bỏ AM/PM nếu có
+      const timeWithoutMeridiem = cleanedTimeString.replace(/am|pm/gi, '').trim();
+
+      // Tách giờ và phút
+      const [hours, minutes] = timeWithoutMeridiem.split(':').map((t) => parseInt(t, 10));
+
+      if (isNaN(hours) || isNaN(minutes)) throw new Error('Invalid Time Format');
+
+      // Chuyển đổi giờ sang định dạng 24 giờ nếu cần
+      let formattedHours = hours;
+      if (isPM && hours < 12) formattedHours += 12;
+      if (isAM && hours === 12) formattedHours = 0;
+
+      // Đảm bảo giờ và phút hiển thị 2 chữ số
+      const formattedTime = `${formattedHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      return formattedTime;
+    } catch (error) {
+      console.error('Error formatting time:', error.message);
+      return 'Invalid Time';
+    }
   };
+
+
 
   const formatPrice = (price) => {
     return price.toLocaleString('vi-VN');
@@ -60,6 +95,32 @@ export const DriverAvailableRidesScreen = ({ navigation }) => {
     );
   }
 
+  const renderRideCard = (item) => (
+    <View style={styles.card}>
+      {/* Chia thành hai phần: trái và phải */}
+      <View style={styles.leftSection}>
+        <Text style={styles.rideInfo}>Đi từ: {item.start_location}</Text>
+        <Text style={styles.rideInfo}>Đến: {item.end_location}</Text>
+        <Text style={styles.rideInfo}>Ngày Xuất phát: {formatDate(item.date)}</Text>
+        <Text style={styles.rideInfo}>Thời gian xuất phát: {item.time_start}</Text>
+        <Text style={styles.rideInfo}>Giá: {formatPrice(item.price)} VNĐ</Text>
+        <TouchableOpacity
+          style={styles.acceptButton}
+          onPress={() => handleAcceptRequest(item.id)}
+          disabled={accepting === item.id}
+        >
+          <Text style={styles.buttonText}>
+            {accepting === item.id ? 'Processing...' : 'Nhận chuyến'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.rightSection}>
+        <Icon name="account-multiple" size={40} color="#4CAF50" />
+        <Text style={styles.numberCustomerText}>{item.numberCustomer} khách</Text>
+      </View>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       {rides.length === 0 ? (
@@ -67,54 +128,43 @@ export const DriverAvailableRidesScreen = ({ navigation }) => {
       ) : (
         <FlatList
           data={rides}
-          keyExtractor={(item, index) => item.id ? item.id : index.toString()}
+          keyExtractor={(item, index) => (item.id ? item.id : index.toString())}
           renderItem={({ item }) => (
             <View style={styles.card}>
-              <Text style={styles.rideInfo}>Đi từ: {item.start_location}</Text>
-              <Text style={styles.rideInfo}>Đến: {item.end_location}</Text>
-              <Text style={styles.rideInfo}>Ngày Xuất phát: {formatDate(item.date)}</Text>
-              <Text style={styles.rideInfo}>Thời gian xuất phát: {formatTime(item.time_start)}</Text>
-              <Text style={styles.rideInfo}>Giá: {formatPrice(item.price)} VNĐ</Text>
-              <TouchableOpacity
-                style={styles.acceptButton}
-                onPress={() => handleAcceptRequest(item.id)}
-                disabled={accepting === item.id}
-              >
-                <Text style={styles.buttonText}>
-                  {accepting === item.id ? 'Processing...' : 'Nhận chuyến'}
-                </Text>
-              </TouchableOpacity>
+              {/* Chia card thành hai phần */}
+              <View style={styles.leftSection}>
+                <Text style={styles.rideInfo}>Đi từ: {item.start_location}</Text>
+                <Text style={styles.rideInfo}>Đến: {item.end_location}</Text>
+                <Text style={styles.rideInfo}>Ngày Xuất phát: {formatDate(item.date)}</Text>
+                <Text style={styles.rideInfo}>Thời gian xuất phát: {formatTime(item.time_start)}</Text>
+                <Text style={styles.rideInfo}>Giá: {formatPrice(item.price)} VNĐ</Text>
+                <TouchableOpacity
+                  style={styles.acceptButton}
+                  onPress={() => handleAcceptRequest(item.id)}
+                  disabled={accepting === item.id}
+                >
+                  <Text style={styles.buttonText}>
+                    {accepting === item.id ? 'Processing...' : 'Nhận chuyến'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.rightSection}>
+                {/* Hiển thị số khách và biểu tượng */}
+                <Icon name="account-multiple" size={40} color="#4CAF50" />
+                <Text style={styles.numberCustomerText}>{item.numberCustomer} khách</Text>
+              </View>
             </View>
           )}
         />
       )}
     </View>
   );
+
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
-    backgroundColor: '#f5f5f5',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#333',
-  },
-  noRidesText: {
-    textAlign: 'center',
-    fontSize: 16,
-    color: '#999',
-    marginTop: 20,
-  },
   card: {
+    flexDirection: 'row', // Chia thành hai cột
     backgroundColor: '#fff',
     borderRadius: 8,
     padding: 15,
@@ -125,10 +175,25 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  leftSection: {
+    flex: 7, // Chiếm 70% chiều rộng
+    paddingRight: 10,
+  },
+  rightSection: {
+    flex: 3, // Chiếm 30% chiều rộng
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   rideInfo: {
     fontSize: 16,
     marginBottom: 5,
     color: '#333',
+  },
+  numberCustomerText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginTop: 5,
   },
   acceptButton: {
     backgroundColor: '#4CAF50',
