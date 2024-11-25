@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -13,14 +13,81 @@ import { Ionicons } from "@expo/vector-icons";
 import BottomNavigation from "./layouts/BottomNavigation";
 import ServiceIcons from "./layouts/ServiceIcons";
 import { useAuth } from "../provider/AuthProvider";
+import { IP_ADDRESS } from "@env";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
 const Home = ({ navigation }) => {
   const { authState } = useAuth();
+  const [activeRide, setActiveRide] = useState(null);
+  const [driverDetails, setDriverDetails] = useState(null);
+
+  // Load thông tin chuyến đi từ AsyncStorage
   useEffect(() => {
-    console.log("token  : " + authState.token);
+    console.log("🚀 ~ IP_ADDRESS:", IP_ADDRESS);
+
+    const loadActiveRide = async () => {
+      try {
+        const ride = await AsyncStorage.getItem("activeRide");
+        if (ride) {
+          const parsedRide = JSON.parse(ride);
+          setActiveRide(parsedRide);
+          console.log("Active Ride:", parsedRide);
+        }
+      } catch (error) {
+        console.error("Error loading active ride:", error);
+      }
+    };
+
+    loadActiveRide();
   }, []);
+  // useEffect(() => {
+  //   const clearActiveBooking = async () => {
+  //     try {
+  //       await AsyncStorage.removeItem("activeRide");
+  //       console.log("Active booking cleared successfully!");
+  //     } catch (error) {
+  //       console.error("Failed to clear active booking:", error);
+  //     }
+  //   };
+
+  //   // Gọi hàm để xóa
+  //   clearActiveBooking();
+  // }, []);
+
+  // Fetch thông tin vị trí tài xế
+  useEffect(() => {
+    const fetchDriverLocation = async () => {
+      if (activeRide?.driverId) {
+        try {
+          const response = await axios.get(
+            `http://${IP_ADDRESS}:3000/booking-traditional/location/driver/${activeRide.driverId}`
+          );
+          if (response.data && response.data.location) {
+            console.log("Driver Location Data:", response.data);
+            setDriverDetails(response.data.driverDetails);
+          }
+        } catch (error) {
+          console.error("Error fetching driver location:", error);
+        }
+      }
+    };
+
+    fetchDriverLocation();
+  }, [activeRide]);
+
+  const navigateToRide = () => {
+    if (activeRide) {
+      navigation.navigate("RideTrackingScreen", {
+        requestId: activeRide.requestId,
+        driverId: activeRide.driverId,
+      });
+    }
+  };
+
   return (
     <View style={styles.container}>
+      {/* Nội dung chính */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.qrButton}>
@@ -55,7 +122,6 @@ const Home = ({ navigation }) => {
           <Text style={styles.bookNowTitle}>ĐẶT XE NGAY</Text>
           <Ionicons name="arrow-forward-outline" size={24} color="black" />
         </View>
-
         <View style={styles.promotionsContainer}>
           <TouchableOpacity style={styles.promotionItem}>
             <Image
@@ -80,12 +146,41 @@ const Home = ({ navigation }) => {
         </View>
       </ScrollView>
 
+      {/* Thông tin chuyến đi */}
+      {activeRide && (
+        <TouchableOpacity
+          style={styles.activeRideContainer}
+          onPress={navigateToRide}
+        >
+          <View style={styles.activeRideContent}>
+            <Image
+              source={
+                driverDetails?.avatar
+                  ? { uri: driverDetails.avatar }
+                  : require("../assets/right_selfie.png")
+              }
+              style={styles.activeRideImage}
+            />
+            <View>
+              <Text style={styles.activeRideText}>
+                Tài xế: {driverDetails?.name || "Không rõ"}
+              </Text>
+              <Text style={styles.activeRideSubText}>
+                Xe: {driverDetails?.vehiclePlate || "Không rõ"}
+              </Text>
+            </View>
+          </View>
+          <Ionicons name="chevron-forward-outline" size={24} color="black" />
+        </TouchableOpacity>
+      )}
+
+      {/* Thanh điều hướng dưới cùng */}
       <BottomNavigation navigation={navigation} />
     </View>
   );
 };
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   container: {
@@ -93,7 +188,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   scrollContent: {
-    paddingBottom: 80, // Thêm khoảng trống dưới cùng để tránh bị chồng lấp bởi bottom navigation
+    paddingBottom: 80, // Tránh bị chồng lấp bởi BottomNavigation
   },
   header: {
     flexDirection: "row",
@@ -115,22 +210,6 @@ const styles = StyleSheet.create({
   },
   heartButton: {
     padding: 10,
-  },
-  servicesContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginVertical: 20,
-  },
-  serviceItem: {
-    alignItems: "center",
-  },
-  serviceIcon: {
-    width: 50,
-    height: 50,
-    marginBottom: 5,
-  },
-  serviceText: {
-    fontSize: 12,
   },
   cardsContainer: {
     flexDirection: "row",
@@ -189,6 +268,41 @@ const styles = StyleSheet.create({
     fontSize: 12,
     paddingHorizontal: 10,
     color: "#888",
+  },
+  activeRideContainer: {
+    position: "absolute",
+    bottom: 70,
+    left: 20,
+    right: 20,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+  },
+  activeRideContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  activeRideImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  activeRideText: {
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  activeRideSubText: {
+    fontSize: 12,
+    color: "#666",
   },
 });
 

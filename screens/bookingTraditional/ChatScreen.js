@@ -72,7 +72,7 @@ const ChatScreenCustomer = ({ route, navigation }) => {
         receiverId: driverId,
         timestamp: new Date().toISOString(),
       };
-      console.log("data send", messageData);
+      console.log("data send ", messageData);
 
       // Emit the message to the server
       socket.current.emit("sendMessage", messageData);

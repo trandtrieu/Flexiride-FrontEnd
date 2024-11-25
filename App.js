@@ -23,6 +23,7 @@ import RouteScreen from "./screens/bookingTraditional/RouteScreen";
 import MapScreen from "./screens/bookingTraditional/MapScreen";
 import RideTrackingScreen from "./screens/bookingTraditional/RideTrackingScreen";
 import LocationPicker from "./screens/bookingTraditional/LocationPicker";
+import ActivityScreen from "./screens/ActivityScreen";
 
 export default function App() {
   const Stack = createNativeStackNavigator();
@@ -97,7 +98,6 @@ export default function App() {
                 component={RouteScreen}
                 options={{ headerShown: false }}
               />
-
               <Stack.Screen
                 name="PaymentMethod"
                 component={PaymentMethodsScreen}
@@ -106,7 +106,12 @@ export default function App() {
               <Stack.Screen
                 name="RideTrackingScreen"
                 component={RideTrackingScreen}
-                options={{ headerShown: false }}
+                options={{ title: "Theo dõi tài xế" }}
+              />
+              <Stack.Screen
+                name="ActivityScreen"
+                component={ActivityScreen}
+                options={{ title: "Lịch sử hoạt động" }}
               />
               <Stack.Screen
                 name="ChatScreenCustomer"
