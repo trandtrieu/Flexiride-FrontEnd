@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
 import { useAuth } from "../../provider/AuthProvider";
+import { IP_ADDRESS, VIETMAP_API_KEY } from "@env";
 
 export default function Login({ navigation }) {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -54,7 +55,7 @@ export default function Login({ navigation }) {
       console.log("🚀 ~ handleSubmit ~ loginData:", loginData);
       try {
         const response = await axios.post(
-          "http://192.168.0.96:3000/auth/login",
+          `http://${IP_ADDRESS}:3000/auth/login`,
           loginData
         );
         if (response.data.token) {

@@ -21,28 +21,14 @@ import axios from "axios";
 import polyline from "@mapbox/polyline";
 import { ScrollView } from "react-native";
 import { Icon } from "react-native-elements";
-import { formatCurrency } from "../utils/formatPrice";
 import io from "socket.io-client";
-import LocationContext from "../provider/LocationCurrentProvider";
+import LocationContext from "../../provider/LocationCurrentProvider";
+import { useAuth } from "../../provider/AuthProvider";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 const RouteScreen = ({ route, navigation }) => {
-  // const pickupLocation = {
-  //   latitude: 16.011807933073875,
-  //   longitude: 108.25719691474046,
-  //   name: "Nhà Thờ Đức Bà",
-  //   address: "01 Công Xã Paris, Bến Nghé, Quận 1, TP.HCM",
-  // };
-
-  const {
-    pickupLocation = defaultPickupLocation,
-    destinationLocation = defaultDestinationLocation,
-  } = route.params || {}
-
-  // const destinationLocation = {
-  //   latitude: 10.823099,
-  //   longitude: 106.629664,
-  //   name: "Sân bay Tân Sơn Nhất",
-  //   address: "Trường Sơn, Phường 2, Tân Bình, TP.HCM",
-  // };
+  const { pickupLocation, destinationLocation } = route.params;
+  const currentLocation = useContext(LocationContext);
 
   const [routeData, setRouteData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -55,33 +41,53 @@ const RouteScreen = ({ route, navigation }) => {
   const [isBooking, setIsBooking] = useState(false);
   const socket = useRef(null);
   const bookingTimeout = useRef(null);
-  const currentLocation = useContext(LocationContext);
   const [selectedMethod, setSelectedMethod] = useState(
     route.params?.selectedMethod || "cash"
   );
+  const { authState } = useAuth();
 
   const [note, setNote] = useState(""); // State for storing note
   const [noteModalVisible, setNoteModalVisible] = useState(false);
   const openNoteModal = () => setNoteModalVisible(true);
 
   const images = {
-    "bike-icon.png": require("../assets/bike-icon.png"),
-    "car-icon.png": require("../assets/car-icon.png"),
+    "bike-icon.png": require("../../assets/bike-icon.png"),
+    "car-icon.png": require("../../assets/car-icon.png"),
   };
 
   useEffect(() => {
-    // Chỉ kết nối socket một lần khi component mount
+    console.log("IP_ADDRESS" + IP_ADDRESS);
     socket.current = io(`http://${IP_ADDRESS}:3000`, {
       transports: ["websocket"],
-      query: { customerId: "670bdfc8b65786a7225f39a1" },
+      query: { customerId: authState.userId },
     });
 
     socket.current.on("connect", () => {
       console.log("Customer connected:", socket.current.id);
     });
 
-    // Lắng nghe sự kiện "rideAccepted" từ tài xế
     const handleRideAccepted = (data) => {
+      AsyncStorage.setItem(
+        "activeRide",
+        JSON.stringify({
+          requestId: data.requestDetailId,
+          driverId: data.driverId,
+        })
+      )
+        .then(() => {
+          // Kiểm tra ngay sau khi lưu
+          AsyncStorage.getItem("activeRide").then((value) => {
+            console.log("Đã lưu activeRide: ", JSON.parse(value));
+          });
+        })
+        .catch((error) => {
+          console.error("Lỗi khi lưu activeRide:", error);
+        });
+
+      navigation.navigate("RideTrackingScreen", {
+        requestId: data.requestDetailId,
+        driverId: data.driverId,
+      });
       clearTimeout(bookingTimeout.current);
       Alert.alert(
         "Yêu cầu được chấp nhận",
@@ -91,18 +97,6 @@ const RouteScreen = ({ route, navigation }) => {
     };
     socket.current.on("rideAccepted", handleRideAccepted);
 
-    // Lắng nghe sự kiện "requestExpired" khi yêu cầu hết hạn
-    // const handleRequestExpired = () => {
-    //   clearTimeout(bookingTimeout.current);
-    //   Alert.alert(
-    //     "Yêu cầu hết hạn",
-    //     "Không có tài xế nào nhận được yêu cầu của bạn."
-    //   );
-    //   setIsBooking(false);
-    // };
-    // socket.current.on("requestExpired", handleRequestExpired);
-
-    // Xóa listener khi component unmount
     return () => {
       socket.current.off("rideAccepted", handleRideAccepted);
       // socket.current.off("requestExpired", handleRequestExpired);
@@ -122,7 +116,7 @@ const RouteScreen = ({ route, navigation }) => {
   }, []);
 
   useEffect(() => {
-    // calculateRoute();
+    calculateRoute();
     calculateDistanceAndTime(pickupLocation, destinationLocation);
     fetchServicesAndPrices();
   }, []);
@@ -153,7 +147,7 @@ const RouteScreen = ({ route, navigation }) => {
   const fetchServicesAndPrices = async () => {
     try {
       const response = await axios.get(
-        `http://${IP_ADDRESS}:3000/booking-traditional/services-with-prices`,
+        `http://${IP_ADDRESS}:3000/booking-traditional/service-with-prices`,
         {
           params: {
             pickupLocation: `${pickupLocation.latitude},${pickupLocation.longitude}`,
@@ -219,7 +213,10 @@ const RouteScreen = ({ route, navigation }) => {
       alert("Vui lòng chọn một dịch vụ trước khi đặt xe");
       return;
     }
-
+    console.log(
+      "🚀 ~ handleBookingRequest ~ selectedServiceId:",
+      selectedServiceId
+    );
     setIsBooking(true);
     socket.current.emit("customerRequest", {
       customerId: "670bdfc8b65786a7225f39a1",
@@ -344,7 +341,7 @@ const RouteScreen = ({ route, navigation }) => {
                     <Image
                       source={
                         images[service.image] ||
-                        require("../assets/car-icon.png")
+                        require("../../assets/car-icon.png")
                       }
                       style={styles.serviceIcon}
                     />
@@ -543,7 +540,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   bookButton: {
-    backgroundColor: "#00BFA5",
+    backgroundColor: "#fbc02d",
     padding: 15,
     borderRadius: 40,
     flex: 1,

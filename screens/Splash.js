@@ -10,7 +10,7 @@ const Splash = ({ navigation }) => {
       if (authState.isAuthenticated && authState.token) {
         navigation.replace("Home");
       } else {
-        navigation.replace("Home");
+        navigation.replace("Login");
       }
     }, 1000);
 
