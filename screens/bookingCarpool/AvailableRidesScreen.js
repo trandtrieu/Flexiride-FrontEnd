@@ -34,11 +34,11 @@ export const AvailableRidesScreen = ({ route, navigation }) => {
   const handleJoinRequest = async (requestId, searchParams) => {
     try {
       const { location, longitude, latitude } = searchParams || {};
-
-      if (!location || !longitude || !latitude) {
-        Alert.alert('Lỗi', 'Thông tin vị trí không đầy đủ để tham gia chuyến đi.');
-        return;
-      }
+      console.log("join ne")
+      // if (!location || !longitude || !latitude) {
+      //   Alert.alert('Lỗi', 'Thông tin vị trí không đầy đủ để tham gia chuyến đi.');
+      //   return;
+      // }
 
       console.log('Request ID:', requestId);
       console.log('Location:', location, 'Longitude:', longitude, 'Latitude:', latitude);
