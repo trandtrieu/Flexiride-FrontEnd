@@ -11,7 +11,7 @@ const Splash = ({ navigation }) => {
         // navigation.replace("LoginOptions");
         navigation.replace("Home");
       } else {
-        navigation.replace("Home");
+        navigation.replace("Login");
       }
     }, 1000);
 

@@ -21,28 +21,14 @@ import axios from "axios";
 import polyline from "@mapbox/polyline";
 import { ScrollView } from "react-native";
 import { Icon } from "react-native-elements";
-import { formatCurrency } from "../utils/formatPrice";
 import io from "socket.io-client";
-import LocationContext from "../provider/LocationCurrentProvider";
-const RouteHireScreen = ({ route, navigation }) => {
-    // const pickupLocation = {
-    //   latitude: 16.011807933073875,
-    //   longitude: 108.25719691474046,
-    //   name: "Nhà Thờ Đức Bà",
-    //   address: "01 Công Xã Paris, Bến Nghé, Quận 1, TP.HCM",
-    // };
+import LocationContext from "../../provider/LocationCurrentProvider";
+import { useAuth } from "../../provider/AuthProvider";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-    const {
-        pickupLocation = defaultPickupLocation,
-        destinationLocation = defaultDestinationLocation,
-    } = route.params || {}
-
-    // const destinationLocation = {
-    //   latitude: 10.823099,
-    //   longitude: 106.629664,
-    //   name: "Sân bay Tân Sơn Nhất",
-    //   address: "Trường Sơn, Phường 2, Tân Bình, TP.HCM",
-    // };
+const RouteScreen = ({ route, navigation }) => {
+    const { pickupLocation, destinationLocation } = route.params;
+    const currentLocation = useContext(LocationContext);
 
     const [routeData, setRouteData] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -53,39 +39,55 @@ const RouteHireScreen = ({ route, navigation }) => {
     const [selectedServiceId, setSelectedServiceId] = useState(null);
     const [selectedServicePrice, setSelectedServicePrice] = useState(null);
     const [isBooking, setIsBooking] = useState(false);
-
-    const [isContractSigned, setIsContractSigned] = useState(false); // Trạng thái hợp đồng đã ký
-    const [showModal, setShowModal] = useState(false); // Hiển thị Modal
-
     const socket = useRef(null);
     const bookingTimeout = useRef(null);
-    const currentLocation = useContext(LocationContext);
     const [selectedMethod, setSelectedMethod] = useState(
         route.params?.selectedMethod || "cash"
     );
+    const { authState } = useAuth();
 
     const [note, setNote] = useState(""); // State for storing note
     const [noteModalVisible, setNoteModalVisible] = useState(false);
     const openNoteModal = () => setNoteModalVisible(true);
 
     const images = {
-        "bike-icon.png": require("../assets/bike-icon.png"),
-        "car-icon.png": require("../assets/car-icon.png"),
+        "bike-icon.png": require("../../assets/bike-icon.png"),
+        "car-icon.png": require("../../assets/car-icon.png"),
     };
 
     useEffect(() => {
-        // Chỉ kết nối socket một lần khi component mount
+        console.log("IP_ADDRESS" + IP_ADDRESS);
         socket.current = io(`http://${IP_ADDRESS}:3000`, {
             transports: ["websocket"],
-            query: { customerId: "6738dd3df211814d9c027e86" },
+            query: { customerId: authState.userId },
         });
 
         socket.current.on("connect", () => {
             console.log("Customer connected:", socket.current.id);
         });
 
-        // Lắng nghe sự kiện "rideAccepted" từ tài xế
         const handleRideAccepted = (data) => {
+            AsyncStorage.setItem(
+                "activeRide",
+                JSON.stringify({
+                    requestId: data.requestDetailId,
+                    driverId: data.driverId,
+                })
+            )
+                .then(() => {
+                    // Kiểm tra ngay sau khi lưu
+                    AsyncStorage.getItem("activeRide").then((value) => {
+                        console.log("Đã lưu activeRide: ", JSON.parse(value));
+                    });
+                })
+                .catch((error) => {
+                    console.error("Lỗi khi lưu activeRide:", error);
+                });
+
+            navigation.navigate("RideTrackingScreen", {
+                requestId: data.requestDetailId,
+                driverId: data.driverId,
+            });
             clearTimeout(bookingTimeout.current);
             Alert.alert(
                 "Yêu cầu được chấp nhận",
@@ -95,18 +97,6 @@ const RouteHireScreen = ({ route, navigation }) => {
         };
         socket.current.on("rideAccepted", handleRideAccepted);
 
-        // Lắng nghe sự kiện "requestExpired" khi yêu cầu hết hạn
-        // const handleRequestExpired = () => {
-        //   clearTimeout(bookingTimeout.current);
-        //   Alert.alert(
-        //     "Yêu cầu hết hạn",
-        //     "Không có tài xế nào nhận được yêu cầu của bạn."
-        //   );
-        //   setIsBooking(false);
-        // };
-        // socket.current.on("requestExpired", handleRequestExpired);
-
-        // Xóa listener khi component unmount
         return () => {
             socket.current.off("rideAccepted", handleRideAccepted);
             // socket.current.off("requestExpired", handleRequestExpired);
@@ -126,7 +116,7 @@ const RouteHireScreen = ({ route, navigation }) => {
     }, []);
 
     useEffect(() => {
-        // calculateRoute();
+        calculateRoute();
         calculateDistanceAndTime(pickupLocation, destinationLocation);
         fetchServicesAndPrices();
     }, []);
@@ -157,7 +147,7 @@ const RouteHireScreen = ({ route, navigation }) => {
     const fetchServicesAndPrices = async () => {
         try {
             const response = await axios.get(
-                `http://${IP_ADDRESS}:3000/booking-traditional/service-with-prices`,
+                `http://${IP_ADDRESS}:3000/hire-driver/services-with-prices`,
                 {
                     params: {
                         pickupLocation: `${pickupLocation.latitude},${pickupLocation.longitude}`,
@@ -219,11 +209,14 @@ const RouteHireScreen = ({ route, navigation }) => {
     };
 
     const handleBookingRequest = () => {
-        // if (!selectedServiceId) {
-        //     alert("Vui lòng chọn một dịch vụ trước khi đặt xe");
-        //     return;
-        // }
-
+        if (!selectedServiceId) {
+            Alert.alert('Thông Báo!!', 'Vui lòng chọn một dịch vụ trước khi nhấn "Thuê Tài Xế"');
+            return;
+        }
+        console.log(
+            "🚀 ~ handleBookingRequest ~ selectedServiceId:",
+            selectedServiceId
+        );
         setIsBooking(true);
         socket.current.emit("customerRequest", {
             customerId: "6738dd3df211814d9c027e86",
@@ -254,27 +247,6 @@ const RouteHireScreen = ({ route, navigation }) => {
         Keyboard.dismiss();
         setNoteModalVisible(false);
     };
-
-    const navigateToContractScreen = () => {
-        navigation.navigate("ElectronicContract", {
-            onContractSigned: () => {
-                setIsContractSigned(true); // Cập nhật trạng thái khi hợp đồng được ký
-            },
-        });
-    };
-
-    const handlePress = () => {
-        if (!selectedServiceId) {
-            Alert.alert('Thông Báo!!', 'Vui lòng chọn một dịch vụ trước khi nhấn "Ký Hợp Đồng"');
-            return;
-        }
-        if (!isContractSigned) {
-            navigateToContractScreen(); // Điều hướng đến màn hình ký hợp đồng
-        } else {
-            handleBookingRequest(); // Thực hiện thuê tài xế
-        }
-    };
-
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.container}>
@@ -343,9 +315,8 @@ const RouteHireScreen = ({ route, navigation }) => {
                     <Text style={styles.distanceText}>Khoảng cách: {distance} km</Text>
                     <Text style={styles.infoText}>
                         Thời gian ước tính: {estimatedTime}
-                    </Text>/hire-driver/services-with-prices
+                    </Text>
                 </View>
-                {/* Option Service */}
                 <View style={styles.optionsContainer}>
                     <ScrollView
                         style={styles.rideOptions}
@@ -370,7 +341,7 @@ const RouteHireScreen = ({ route, navigation }) => {
                                         <Image
                                             source={
                                                 images[service.image] ||
-                                                require("../assets/car-icon.png")
+                                                require("../../assets/car-icon.png")
                                             }
                                             style={styles.serviceIcon}
                                         />
@@ -425,25 +396,20 @@ const RouteHireScreen = ({ route, navigation }) => {
                         >
                             <Text style={styles.addNoteButtonText}>Thêm Ghi Chú</Text>
                         </TouchableOpacity>
-
                         <TouchableOpacity
                             style={styles.bookButton}
-                            // onPress={handleBookingRequest}
-                            onPress={handlePress}
-                            disabled={isBooking} // Vô hiệu hóa nút khi đang đặt xe
+                            onPress={handleBookingRequest}
+                            disabled={isBooking} // Vô hiệu hóa nút khi đang Thuê Tài Xế
                         >
                             {isBooking ? (
                                 <ActivityIndicator size="small" color="#fff" />
                             ) : (
                                 <>
-                                    <Text style={styles.bookButtonText}>
-                                        {isContractSigned ? "Thuê Tài Xế" : "Xác Nhận Điều khoản"}
-                                    </Text>
+                                    <Text style={styles.bookButtonText}>Thuê Tài Xế</Text>
                                 </>
                             )}
                         </TouchableOpacity>
                     </View>
-
                     <Modal
                         visible={noteModalVisible}
                         transparent={true}
@@ -574,7 +540,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
     bookButton: {
-        backgroundColor: "#00BFA5",
+        backgroundColor: "#fbc02d",
         padding: 15,
         borderRadius: 40,
         flex: 1,
@@ -688,4 +654,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default RouteHireScreen;
+export default RouteScreen;

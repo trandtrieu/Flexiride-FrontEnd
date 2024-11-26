@@ -9,8 +9,8 @@ import {
   FlatList,
 } from "react-native";
 import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
-import BottomNavigation from "./layouts/BottomNavigation";
-import ServiceIcons from "./layouts/ServiceIcons";
+import BottomNavigation from "../layouts/BottomNavigation";
+import ServiceIcons from "../layouts/ServiceIcons";
 
 // Sample Data for locations and static content
 const locations = [

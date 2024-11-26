@@ -30,7 +30,7 @@ const ServiceIcons = () => {
       <TouchableOpacity
         style={styles.serviceItem}
         // onPress={() => navigation.navigate("HireDriverServiceOption")}
-        onPress={() => navigation.navigate("HireDriver")}
+        onPress={() => navigation.navigate("HireDriverScreen")}
       // onPress={() => navigation.navigate("LocationPicker")}
       // onPress={() => navigation.navigate("HireDriverRequestScreen")}
 
