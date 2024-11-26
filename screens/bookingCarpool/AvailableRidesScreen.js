@@ -77,10 +77,7 @@ export const AvailableRidesScreen = ({ route, navigation }) => {
           <View style={styles.card}>
             <Text style={styles.location}>{`Từ: ${item.start_location}`}</Text>
             <Text style={styles.location}>{`Đến: ${item.end_location}`}</Text>
-            <Text style={styles.time}>{`Giờ khởi hành: ${new Date(item.time_start).toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            })}`}</Text>
+            <Text style={styles.time}>{`Giờ khởi hành: ${item.time_start}`}</Text>
             <Text style={styles.time}>
               {`Số lượng khách: ${Array.isArray(item.pickup_location) ? item.pickup_location.length : 0}/4`}
             </Text>

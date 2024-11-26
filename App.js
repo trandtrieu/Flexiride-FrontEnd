@@ -37,6 +37,7 @@ import { NotificationsScreen } from "./screens/bookingCarpool/NotificationsScree
 import { SucessfullScreen } from "./screens/bookingCarpool/SuccessfullSceen";
 import { FeedbackScreen } from "./screens/bookingCarpool/FeedbackScreen";
 import { TypeService } from "./screens/bookingCarpool/TypeService";
+import RideDetailScreen from "./screens/bookingCarpool/RideDetailScreen";
 
 import { DriverAvailableRidesScreen } from "./screens/bookingCarpoolDriver/DriverAvailableRidesScreen";
 import { ManageDriverRidesScreen } from "./screens/bookingCarpoolDriver/ManageDriverRidesScreen";
@@ -50,6 +51,7 @@ import HireRouteScreen from "./screens/hireDriver/HireRouteScreen"
 import HireMapScreen from "./screens/hireDriver/HireMapScreen"
 import HireLocationPicker from "./screens/hireDriver/HireLocationPicker"
 import HireDriverScreen from "./screens/hireDriver/HireDriverScreen";
+import SingleRouteScreen from "./screens/bookingCarpool/SingleRouteScreen"
 
 export default function App() {
   const Stack = createNativeStackNavigator();
@@ -174,6 +176,7 @@ export default function App() {
               />
               <Stack.Screen name="FeedbackScreen" component={FeedbackScreen} />
               <Stack.Screen name="TypeService" component={TypeService} />
+              <Stack.Screen name="RideDetailScreen" component={RideDetailScreen} />
 
               {/* Screens for booking carpool driver */}
               <Stack.Screen
@@ -187,6 +190,10 @@ export default function App() {
               <Stack.Screen
                 name="PickupProgress"
                 component={PickupProgressScreen}
+              />
+              <Stack.Screen
+                name="SingleRoute"
+                component={SingleRouteScreen}
               />
               {/* Screens for hire driver */}
               <Stack.Screen name="HireDriverScreen" component={HireDriverScreen} options={{ headerShown: false }} />
