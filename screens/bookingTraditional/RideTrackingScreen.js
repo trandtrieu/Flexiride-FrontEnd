@@ -8,6 +8,7 @@ import {
   Alert,
   ActivityIndicator,
   Modal,
+  BackHandler,
 } from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
@@ -17,6 +18,7 @@ import { IP_ADDRESS, VIETMAP_API_KEY } from "@env";
 import polyline from "@mapbox/polyline";
 import { useAuth } from "../../provider/AuthProvider";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 
 // Utility Functions
 const fetchRequestDetails = async (requestId) => {
@@ -112,6 +114,18 @@ const RideTrackingScreen = ({ route, navigation }) => {
   const { authState } = useAuth();
   const [isModalVisible, setIsModalVisible] = useState(false); // State kiểm soát modal
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.replace("Home");
+        return true;
+      };
+      BackHandler.addEventListener("hardwareBackPress", onBackPress);
+      return () => {
+        BackHandler.removeEventListener("hardwareBackPress", onBackPress);
+      };
+    }, [navigation])
+  );
   const toggleModal = () => setIsModalVisible(!isModalVisible);
   useEffect(() => {
     const initializeData = async () => {
@@ -126,7 +140,7 @@ const RideTrackingScreen = ({ route, navigation }) => {
         setDriverDetails(driver.details);
         setDriverStatus(driver.status);
 
-        // await calculateRoute(driver.location, pickup, setRouteData);
+        await calculateRoute(driver.location, pickup, setRouteData);
       } catch (error) {
         Alert.alert("Error", error.message);
       } finally {
