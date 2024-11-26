@@ -39,8 +39,6 @@ export const ManageBookingScreen = ({ navigation }) => {
       setRides(sortedRides);
       setFilteredRides(sortedRides);
     } catch (error) {
-      console.error('Error fetching rides:', error);
-      Alert.alert('Error', 'Không thể tải danh sách chuyến đi.');
     }
   };
 
@@ -172,7 +170,10 @@ export const ManageBookingScreen = ({ navigation }) => {
         renderItem={({ item }) => {
           const maxCapacity = getVehicleCapacity(item.service_option_id);
           return (
-            <View style={styles.card}>
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => navigation.navigate('RideDetailScreen', { ride: item })}
+            >
               <View style={styles.row}>
                 <View style={styles.leftColumn}>
                   <Text style={styles.rideDetails}>Từ: {item.start_location}</Text>
@@ -184,9 +185,7 @@ export const ManageBookingScreen = ({ navigation }) => {
                       year: 'numeric',
                     })}
                   </Text>
-                  <Text style={styles.rideDetails}>
-                    Thời gian khởi hành: {item.time_start}
-                  </Text>
+                  <Text style={styles.rideDetails}>Thời gian khởi hành: {item.time_start}</Text>
                   <Text style={styles.rideDetails}>
                     Phương tiện: {getVehicleName(item.service_option_id)}
                   </Text>
@@ -218,7 +217,7 @@ export const ManageBookingScreen = ({ navigation }) => {
                   <Text style={styles.feedbackButtonText}>Phản hồi</Text>
                 </TouchableOpacity>
               )}
-            </View>
+            </TouchableOpacity>
           );
         }}
         ListEmptyComponent={<Text style={styles.emptyText}>Không có chuyến xe nào</Text>}
@@ -339,5 +338,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row', // Đặt icon và text cạnh nhau
     gap: 5, // Khoảng cách giữa icon và text
   },
-  
+
 });
