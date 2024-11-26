@@ -63,7 +63,7 @@ const RouteScreen = ({ route, navigation }) => {
     });
 
     socket.current.on("connect", () => {
-      console.log("Customer connected:", socket.current.id);
+      console.log("Customer connected: ", socket.current.id);
     });
 
     const handleRideAccepted = (data) => {

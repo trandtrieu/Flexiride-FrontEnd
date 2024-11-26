@@ -112,7 +112,7 @@ const ChatScreenCustomer = ({ route, navigation }) => {
           setDriverDetails(response.data.driverDetails);
         }
       } catch (error) {
-        console.error("Error fetching driver location:", error);
+        console.error("Error fetching driver location: ", error);
       }
     };
     fetchDriverLocation();

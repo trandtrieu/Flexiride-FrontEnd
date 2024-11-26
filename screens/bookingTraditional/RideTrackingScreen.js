@@ -16,6 +16,7 @@ import io from "socket.io-client";
 import { IP_ADDRESS, VIETMAP_API_KEY } from "@env";
 import polyline from "@mapbox/polyline";
 import { useAuth } from "../../provider/AuthProvider";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Utility Functions
 const fetchRequestDetails = async (requestId) => {
@@ -24,7 +25,6 @@ const fetchRequestDetails = async (requestId) => {
       `http://${IP_ADDRESS}:3000/booking-traditional/request/${requestId}`
     );
     if (response.data) {
-      console.log("🚀 ~ fetchRequestDetails ~ response.data :", response.data);
       return {
         pickup: {
           latitude: response.data.latitude_from,
@@ -83,7 +83,7 @@ const calculateRoute = async (driverLocation, pickupLocation, setRouteData) => {
         estimatedTime: Math.ceil(time / 1000 / 60), // Convert milliseconds to minutes
       });
     } else {
-      throw new Error("No route data available.");
+      throw new Error("No route data available .");
     }
   } catch (error) {
     console.error("Error calculating route: ", error);
@@ -126,7 +126,7 @@ const RideTrackingScreen = ({ route, navigation }) => {
         setDriverDetails(driver.details);
         setDriverStatus(driver.status);
 
-        await calculateRoute(driver.location, pickup, setRouteData);
+        // await calculateRoute(driver.location, pickup, setRouteData);
       } catch (error) {
         Alert.alert("Error", error.message);
       } finally {
@@ -176,27 +176,32 @@ const RideTrackingScreen = ({ route, navigation }) => {
           text: "Hủy chuyến",
           style: "destructive",
           onPress: () => {
-            // Thực hiện API call để hủy chuyến đi
-            axios
-              .post(`http://${IP_ADDRESS}:3000/booking-traditional/cancel`, {
+            if (socket.current) {
+              // Gửi sự kiện hủy chuyến qua socket
+              socket.current.emit("cancelRide", {
                 requestId,
-              })
-              .then(() => {
-                Alert.alert("Thành công", "Bạn đã hủy chuyến đi.");
-                navigation.goBack();
-              })
-              .catch((error) => {
-                Alert.alert(
-                  "Lỗi",
-                  "Không thể hủy chuyến đi. Vui lòng thử lại."
-                );
+                customerId: authState.userId,
               });
+
+              // Lắng nghe phản hồi từ server
+              socket.current.on("rideCanceledSuccess", (data) => {
+                AsyncStorage.removeItem("activeRide");
+                navigation.replace("Home");
+              });
+
+              socket.current.on("cancelError", (error) => {
+                Alert.alert("Lỗi", error.message);
+              });
+            } else {
+              Alert.alert("Lỗi", "Kết nối socket không khả dụng.");
+            }
           },
         },
       ],
       { cancelable: true }
     );
   };
+
   return (
     <View style={styles.container}>
       <MapView
@@ -273,6 +278,10 @@ const RideTrackingScreen = ({ route, navigation }) => {
         <TouchableOpacity style={styles.chatButton} onPress={handleChat}>
           <Ionicons name="chatbubble-outline" size={24} color="black" />
           <Text style={styles.chatText}>Liên hệ với tài xế</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.chatButton} onPress={handleCancelRide}>
+          <Ionicons name="chatbubble-outline" size={24} color="black" />
+          <Text style={styles.chatText}>Hủy chuyến</Text>
         </TouchableOpacity>
 
         <Modal
