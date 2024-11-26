@@ -5,16 +5,18 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Image,
+  ScrollView,
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
 import { useAuth } from "../../provider/AuthProvider";
+import { IP_ADDRESS } from "@env";
 
-export default function Login({ navigation }) {
+const Login = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
@@ -28,12 +30,12 @@ export default function Login({ navigation }) {
 
     // Phone number validation
     if (!/^\d{10}$/.test(phoneNumber)) {
-      newErrors.phoneNumber = "Phone number must be exactly 10 digits.";
+      newErrors.phoneNumber = "Số điện thoại phải bao gồm 10 chữ số.";
     }
 
     // Password validation
     if (!password) {
-      newErrors.password = "Password is required.";
+      newErrors.password = "Mật khẩu là bắt buộc.";
     }
 
     setErrors(newErrors);
@@ -48,13 +50,12 @@ export default function Login({ navigation }) {
       const loginData = {
         phone: phoneNumber,
         password: password,
-
         role: "1",
       };
       console.log("🚀 ~ handleSubmit ~ loginData:", loginData);
       try {
         const response = await axios.post(
-          "http://192.168.0.96:3000/auth/login",
+          `http://${IP_ADDRESS}:3000/auth/login`,
           loginData
         );
         if (response.data.token) {
@@ -66,7 +67,7 @@ export default function Login({ navigation }) {
         }
       } catch (error) {
         console.error("Error during login:", error);
-        setErrors({ general: "Invalid phone number or password" });
+        setErrors({ general: "Số điện thoại hoặc mật khẩu không đúng" });
       } finally {
         setIsLoading(false);
       }
@@ -75,21 +76,37 @@ export default function Login({ navigation }) {
 
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
+  const handleForgotPassword = () => {
+    // Implement forgot password functionality here
+  };
+
+  const handleSignUp = () => {
+    navigation.navigate("Register");
+  };
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <View style={styles.container}>
-        <Text style={styles.headerText}>Login</Text>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Đăng nhập</Text>
+          <Text style={styles.subtitle}>Chào mừng bạn trở lại FRide!</Text>
+        </View>
+
+        <Image
+          source={require("../../assets/Login_theme1.png")}
+          style={styles.logo}
+        />
 
         <TextInput
           style={styles.input}
-          placeholder="Phone Number"
+          placeholder="Số điện thoại"
+          keyboardType="phone-pad"
           value={phoneNumber}
           onChangeText={setPhoneNumber}
-          keyboardType="phone-pad"
-          placeholderTextColor="#ccc"
+          placeholderTextColor="#9e9e9e"
         />
         {hasSubmitted && errors.phoneNumber ? (
           <Text style={styles.errorText}>{errors.phoneNumber}</Text>
@@ -98,11 +115,11 @@ export default function Login({ navigation }) {
         <View style={styles.passwordContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Password"
+            placeholder="Mật khẩu"
             value={password}
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
-            placeholderTextColor="#ccc"
+            placeholderTextColor="#9e9e9e"
           />
           <TouchableOpacity
             onPress={togglePasswordVisibility}
@@ -120,46 +137,74 @@ export default function Login({ navigation }) {
         ) : null}
 
         <TouchableOpacity
-          style={styles.button}
+          onPress={handleForgotPassword}
+          style={styles.forgotPassword}
+        >
+          <Text style={styles.forgotPasswordText}>Quên mật khẩu?</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.loginButton}
           onPress={handleSubmit}
           disabled={isLoading}
         >
           {isLoading ? (
             <ActivityIndicator size="small" color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>Login</Text>
+            <Text style={styles.loginButtonText}>Đăng nhập</Text>
           )}
         </TouchableOpacity>
-      </View>
+
+        <TouchableOpacity onPress={handleSignUp}>
+          <Text style={styles.signupText}>
+            Bạn chưa có tài khoản? Đăng ký ngay
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    padding: 20,
+    paddingHorizontal: 25,
+    paddingTop: 60,
     backgroundColor: "#fff",
-    justifyContent: "center",
   },
-  headerText: {
-    fontSize: 18,
+  header: {
+    marginBottom: 30,
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 32,
     fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
+    color: "#5F3A8E",
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#5F3A8E",
+    marginTop: 5,
+  },
+  logo: {
+    alignSelf: "center",
+    marginBottom: 40,
+    width: 220,
+    height: 100,
+    resizeMode: "contain",
   },
   input: {
-    borderWidth: 1,
+    height: 50,
     borderColor: "#ccc",
-    borderRadius: 5,
-    padding: 15,
-    marginBottom: 15,
-    fontSize: 19,
-    backgroundColor: "#f9f9f9",
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 20,
+    fontSize: 16,
+    backgroundColor: "#FFFFFF",
+    marginBottom: 20,
   },
   passwordContainer: {
     position: "relative",
-    marginBottom: 15,
   },
   eyeIcon: {
     position: "absolute",
@@ -167,20 +212,36 @@ const styles = StyleSheet.create({
     top: 10,
     zIndex: 1,
   },
-  button: {
-    backgroundColor: "#4caf50",
-    padding: 15,
-    borderRadius: 5,
-    alignItems: "center",
+  forgotPassword: {
+    alignSelf: "flex-end",
+    marginBottom: 20,
   },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
+  forgotPasswordText: {
+    color: "#5F3A8E",
+    fontSize: 14,
+  },
+  loginButton: {
+    backgroundColor: "#FFC323",
+    paddingVertical: 15,
+    borderRadius: 12,
+    alignItems: "center",
+    marginBottom: 25,
+  },
+  loginButtonText: {
+    color: "white",
     fontWeight: "bold",
+    fontSize: 16,
   },
   errorText: {
     color: "red",
     fontSize: 12,
     marginBottom: 15,
   },
+  signupText: {
+    color: "#5F3A8E",
+    textAlign: "center",
+    fontSize: 14,
+  },
 });
+
+export default Login;

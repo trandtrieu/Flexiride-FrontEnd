@@ -7,9 +7,7 @@ import Home from "./screens/Home";
 import Splash from "./screens/Splash";
 
 import Login from "./screens/auth/Login";
-import VerificationScreen from "./screens/auth/VerificationScreen";
 import Register from "./screens/auth/Register";
-import LoginOptions from "./screens/auth/LoginOptions";
 import Authenticate from "./screens/auth/Authenticate";
 import EnterNameScreen from "./screens/auth/EnterNameScreen";
 import VerifyWithSelfie from "./screens/auth/VerifyWithSelfie";
@@ -20,7 +18,7 @@ import MapScreen from "./screens/MapScreen";
 import RouteScreen from "./screens/RouteScreen";
 import { AuthProvider } from "./provider/AuthProvider";
 import TestMap from "./screens/TestMap";
-import HireDriver from "./screens/hireDriver/HireDriverScreen"
+import HireDriver from "./screens/hireDriver/HireDriverScreen";
 
 import { LocationProvider } from "./provider/LocationCurrentProvider";
 import { SocketProvider } from "./provider/SocketProvider";
@@ -40,6 +38,7 @@ import { TypeService } from "./screens/bookingCarpool/TypeService";
 import { DriverAvailableRidesScreen } from "./screens/bookingCarpoolDriver/DriverAvailableRidesScreen";
 import { ManageDriverRidesScreen } from "./screens/bookingCarpoolDriver/ManageDriverRidesScreen";
 import { PickupProgressScreen } from "./screens/bookingCarpoolDriver/PickupProgressScreen";
+import InsertCode from "./screens/auth/InsertCode";
 
 export default function App() {
   const Stack = createNativeStackNavigator();
@@ -50,41 +49,130 @@ export default function App() {
         <AuthProvider>
           <NavigationContainer>
             <Stack.Navigator initialRouteName="Splash">
-              <Stack.Screen name="Splash" component={Splash} options={{ headerShown: false }} />
-              <Stack.Screen name="Authenticate" component={Authenticate} options={{ headerShown: false }} />
-              <Stack.Screen name="LoginOptions" component={LoginOptions} options={{ headerShown: false }} />
-              <Stack.Screen name="Home" component={Home} options={{ headerShown: false }} />
-              <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
-              <Stack.Screen name="Register" component={Register} options={{ headerShown: false }} />
-              <Stack.Screen name="VerificationScreen" component={VerificationScreen} options={{ headerShown: false }} />
-              <Stack.Screen name="EnterNameScreen" component={EnterNameScreen} options={{ headerShown: false }} />
-              <Stack.Screen name="VerifyWithSelfie" component={VerifyWithSelfie} options={{ headerShown: false }} />
-              <Stack.Screen name="BikeBook" component={BikeBook} options={{ headerShown: false }} />
-              <Stack.Screen name="SearchScreen" component={SearchScreen} options={{ headerShown: false }} />
-              <Stack.Screen name="LocationPicker" component={LocationPicker} options={{ headerShown: false }} />
-              <Stack.Screen name="MapScreen" component={MapScreen} options={{ headerShown: false }} />
-              <Stack.Screen name="RouteScreen" component={RouteScreen} options={{ headerShown: false }} />
-              <Stack.Screen name="TestMap" component={TestMap} options={{ headerShown: false }} />
-              <Stack.Screen name="PaymentMethod" component={PaymentMethodsScreen} options={{ headerShown: false }} />
+              <Stack.Screen
+                name="Splash"
+                component={Splash}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="Authenticate"
+                component={Authenticate}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="Home"
+                component={Home}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="Login"
+                component={Login}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="Register"
+                component={Register}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="InsertCode"
+                component={InsertCode}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="EnterNameScreen"
+                component={EnterNameScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="VerifyWithSelfie"
+                component={VerifyWithSelfie}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="BikeBook"
+                component={BikeBook}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="SearchScreen"
+                component={SearchScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="LocationPicker"
+                component={LocationPicker}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="MapScreen"
+                component={MapScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="RouteScreen"
+                component={RouteScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="TestMap"
+                component={TestMap}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="PaymentMethod"
+                component={PaymentMethodsScreen}
+                options={{ headerShown: false }}
+              />
 
               {/* Screens for booking carpool */}
-              <Stack.Screen name="ServiceSelection" component={ServiceSelectionScreen} />
-              <Stack.Screen name="CarpoolRequest" component={CarpoolRequestScreen} />
+              <Stack.Screen
+                name="ServiceSelection"
+                component={ServiceSelectionScreen}
+              />
+              <Stack.Screen
+                name="CarpoolRequest"
+                component={CarpoolRequestScreen}
+              />
               <Stack.Screen name="Sucessfull" component={SucessfullScreen} />
-              <Stack.Screen name="AvailableRides" component={AvailableRidesScreen} />
-              <Stack.Screen name="ConfirmBooking" component={ConfirmBookingScreen} />
-              <Stack.Screen name="ManageBooking" component={ManageBookingScreen} />
-              <Stack.Screen name="Notifications" component={NotificationsScreen} />
+              <Stack.Screen
+                name="AvailableRides"
+                component={AvailableRidesScreen}
+              />
+              <Stack.Screen
+                name="ConfirmBooking"
+                component={ConfirmBookingScreen}
+              />
+              <Stack.Screen
+                name="ManageBooking"
+                component={ManageBookingScreen}
+              />
+              <Stack.Screen
+                name="Notifications"
+                component={NotificationsScreen}
+              />
               <Stack.Screen name="FeedbackScreen" component={FeedbackScreen} />
-              <Stack.Screen name="TypeService" component={TypeService}/>
-              
+              <Stack.Screen name="TypeService" component={TypeService} />
 
               {/* Screens for booking carpool driver */}
-              <Stack.Screen name="DriverAvailableRides" component={DriverAvailableRidesScreen} />
-              <Stack.Screen name="ManageDriverRides" component={ManageDriverRidesScreen} />
-              <Stack.Screen name="PickupProgress" component={PickupProgressScreen} />
+              <Stack.Screen
+                name="DriverAvailableRides"
+                component={DriverAvailableRidesScreen}
+              />
+              <Stack.Screen
+                name="ManageDriverRides"
+                component={ManageDriverRidesScreen}
+              />
+              <Stack.Screen
+                name="PickupProgress"
+                component={PickupProgressScreen}
+              />
               {/* Screens for hire driver */}
-              <Stack.Screen name="HireDriver" component={HireDriver} options={{ headerShown: false }} />
+              <Stack.Screen
+                name="HireDriver"
+                component={HireDriver}
+                options={{ headerShown: false }}
+              />
             </Stack.Navigator>
           </NavigationContainer>
         </AuthProvider>

@@ -8,47 +8,79 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import axios from "axios";
+import { Picker } from "@react-native-picker/picker"; // Import Picker
+import sendEmail from "../../utils/SentEmail";
+import { generateOtpCode } from "../../utils/genCode";
+import { getAllCustomers } from "../../service/CustomerService";
 
 export default function Register({ navigation }) {
+  const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rePassword, setRePassword] = useState("");
+  const [gender, setGender] = useState("");
   const [errors, setErrors] = useState({});
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showRePassword, setShowRePassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
-  // Hàm tạo mã 6 chữ số ngẫu nhiên
-  const generateVerificationCode = () => {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-  };
-
-  const validateForm = () => {
+  const validateForm = async () => {
     const newErrors = {};
 
+    if (!name.trim()) {
+      newErrors.name = "Tên không được để trống.";
+    }
+
     if (!/^\d{10}$/.test(phoneNumber)) {
-      newErrors.phoneNumber = "Phone number must be exactly 10 digits.";
+      newErrors.phoneNumber = "Số điện thoại phải đúng 10 chữ số.";
+    } else {
+      try {
+        const existingCustomers = await getAllCustomers();
+        const phoneExists = existingCustomers.some(
+          (customer) => customer.phone === phoneNumber
+        );
+
+        if (phoneExists) {
+          newErrors.phoneNumber = "Số điện thoại này đã tồn tại.";
+        }
+      } catch (e) {
+        console.error("Failed to check existing phone number:", e);
+      }
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      newErrors.email = "Enter a valid email address.";
+      newErrors.email = "Vui lòng nhập địa chỉ email hợp lệ.";
+    } else {
+      try {
+        const existingCustomers = await getAllCustomers();
+        const emailExists = existingCustomers.some(
+          (customer) => customer.email === email
+        );
+
+        if (emailExists) {
+          newErrors.email = "Email này đã tồn tại.";
+        }
+      } catch (e) {
+        console.error("Failed to check existing email:", e);
+      }
     }
 
     if (!password) {
-      newErrors.password = "Password is required.";
+      newErrors.password = "Mật khẩu không được để trống.";
     }
 
     if (!rePassword) {
-      newErrors.rePassword = "Please confirm your password.";
+      newErrors.rePassword = "Vui lòng xác nhận mật khẩu.";
     } else if (password.trim() !== rePassword.trim()) {
-      newErrors.rePassword = "Passwords do not match.";
+      newErrors.rePassword = "Mật khẩu không khớp.";
+    }
+
+    if (!gender) {
+      newErrors.gender = "Vui lòng chọn giới tính.";
     }
 
     setErrors(newErrors);
@@ -58,25 +90,26 @@ export default function Register({ navigation }) {
   const handleSubmit = async () => {
     setHasSubmitted(true);
 
-    if (validateForm()) {
-      setIsLoading(true);
+    const isValid = await validateForm();
 
-      // Tạo đối tượng account với mã xác minh
-      const account = {
-        phone: phoneNumber,
-        email: email,
-        password: password,
-        code: generateVerificationCode(), // Tạo mã 6 số ngẫu nhiên
-      };
+    if (!isValid) {
+      return;
+    }
 
-      try {
-        setIsLoading(false);
-        navigation.navigate("VerificationScreen", { account });
-      } catch (error) {
-        console.error("Error during API call:", error);
-      } finally {
-        setIsLoading(false);
-      }
+    const account = {
+      name,
+      phone: phoneNumber,
+      email,
+      password,
+      gender,
+    };
+
+    try {
+      const otpCode = generateOtpCode();
+      await sendEmail("", email, otpCode);
+      navigation.navigate("InsertCode", { otpCode, account });
+    } catch (error) {
+      console.error("Lỗi trong quá trình gọi API:", error);
     }
   };
 
@@ -91,49 +124,77 @@ export default function Register({ navigation }) {
       <ScrollView contentContainerStyle={styles.container}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.navigate("Authenticate")}
+          onPress={() => navigation.navigate("Login")}
         >
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
 
-        <Text style={styles.headerText}>Bắt đầu </Text>
-        <Text style={styles.subText}>
-          With a valid number, you can access rides, deliveries, and our other
-          services.
-        </Text>
+        <Text style={styles.headerText}>BẮT ĐẦU</Text>
 
+        {/* Name Input */}
         <TextInput
           style={styles.input}
-          placeholder="Phone Number"
+          placeholder="Tên"
+          value={name}
+          onChangeText={setName}
+          placeholderTextColor="#aaa"
+        />
+        {hasSubmitted && errors.name && (
+          <Text style={styles.errorText}>{errors.name}</Text>
+        )}
+
+        {/* Gender Picker */}
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={gender}
+            onValueChange={(itemValue) => setGender(itemValue)}
+            style={styles.picker}
+          >
+            <Picker.Item label="Chọn giới tính" value="" />
+            <Picker.Item label="Nam" value="Nam" />
+            <Picker.Item label="Nữ" value="Nữ" />
+            <Picker.Item label="Khác" value="Khác" />
+          </Picker>
+        </View>
+        {hasSubmitted && errors.gender && (
+          <Text style={styles.errorText}>{errors.gender}</Text>
+        )}
+
+        {/* Phone Number */}
+        <TextInput
+          style={styles.input}
+          placeholder="Số điện thoại"
           value={phoneNumber}
           onChangeText={setPhoneNumber}
           keyboardType="phone-pad"
-          placeholderTextColor="#ccc"
+          placeholderTextColor="#aaa"
         />
-        {hasSubmitted && errors.phoneNumber ? (
+        {hasSubmitted && errors.phoneNumber && (
           <Text style={styles.errorText}>{errors.phoneNumber}</Text>
-        ) : null}
+        )}
 
+        {/* Email */}
         <TextInput
           style={styles.input}
           placeholder="Email"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
-          placeholderTextColor="#ccc"
+          placeholderTextColor="#aaa"
         />
-        {hasSubmitted && errors.email ? (
+        {hasSubmitted && errors.email && (
           <Text style={styles.errorText}>{errors.email}</Text>
-        ) : null}
+        )}
 
+        {/* Password */}
         <View style={styles.passwordContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Password"
+            placeholder="Mật khẩu"
             value={password}
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
-            placeholderTextColor="#ccc"
+            placeholderTextColor="#aaa"
           />
           <TouchableOpacity
             onPress={togglePasswordVisibility}
@@ -141,23 +202,24 @@ export default function Register({ navigation }) {
           >
             <Ionicons
               name={showPassword ? "eye-off" : "eye"}
-              size={32}
-              color="black"
+              size={24}
+              color="#888"
             />
           </TouchableOpacity>
         </View>
-        {hasSubmitted && errors.password ? (
+        {hasSubmitted && errors.password && (
           <Text style={styles.errorText}>{errors.password}</Text>
-        ) : null}
+        )}
 
+        {/* Confirm Password */}
         <View style={styles.passwordContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Re-Password"
+            placeholder="Nhập lại mật khẩu"
             value={rePassword}
             onChangeText={setRePassword}
             secureTextEntry={!showRePassword}
-            placeholderTextColor="#ccc"
+            placeholderTextColor="#aaa"
           />
           <TouchableOpacity
             onPress={toggleRePasswordVisibility}
@@ -165,25 +227,17 @@ export default function Register({ navigation }) {
           >
             <Ionicons
               name={showRePassword ? "eye-off" : "eye"}
-              size={32}
-              color="black"
+              size={24}
+              color="#888"
             />
           </TouchableOpacity>
         </View>
-        {hasSubmitted && errors.rePassword ? (
+        {hasSubmitted && errors.rePassword && (
           <Text style={styles.errorText}>{errors.rePassword}</Text>
-        ) : null}
+        )}
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleSubmit}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Next</Text>
-          )}
+        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+          <Text style={styles.buttonText}>Tiếp tục</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -195,31 +249,34 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 20,
     backgroundColor: "#fff",
+    justifyContent: "center",
   },
   backButton: {
     alignSelf: "flex-start",
-    marginBottom: 20,
+    marginBottom: 10,
   },
   headerText: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 20,
-  },
-  subText: {
-    fontSize: 18,
-    color: "#888",
-    marginBottom: 20,
-    textAlign: "left",
+    marginBottom: 30,
+    color: "#000",
   },
   input: {
-    borderWidth: 1,
+    borderBottomWidth: 1,
     borderColor: "#ccc",
-    borderRadius: 5,
-    padding: 15,
+    paddingVertical: 12,
     marginBottom: 15,
-    fontSize: 19,
-    backgroundColor: "#f9f9f9",
+    fontSize: 16,
+    color: "#000",
+  },
+  pickerContainer: {
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+    marginBottom: 15,
+  },
+  picker: {
+    color: "#000",
   },
   passwordContainer: {
     position: "relative",
@@ -229,13 +286,13 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 10,
     top: 10,
-    zIndex: 1,
   },
   button: {
-    backgroundColor: "#4caf50",
+    backgroundColor: "#270C6D",
     padding: 15,
-    borderRadius: 5,
+    borderRadius: 30,
     alignItems: "center",
+    marginTop: 20,
   },
   buttonText: {
     color: "#fff",
@@ -245,6 +302,6 @@ const styles = StyleSheet.create({
   errorText: {
     color: "red",
     fontSize: 12,
-    marginBottom: 15,
+    marginBottom: 5,
   },
 });
