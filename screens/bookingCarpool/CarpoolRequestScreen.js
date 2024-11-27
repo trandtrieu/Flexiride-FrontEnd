@@ -7,7 +7,7 @@ import _ from 'lodash';
 import { VIETMAP_API_KEY } from '@env';
 
 export const CarpoolRequestScreen = ({ navigation, route }) => {
-  const { serviceId } = route.params; // Nhận serviceId từ navigation
+  const { serviceId } = route.params; 
   const [locationDetail, setLocationDetail] = useState('');
   const [predictions, setPredictions] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -21,11 +21,19 @@ export const CarpoolRequestScreen = ({ navigation, route }) => {
   const [isInputFocused, setIsInputFocused] = useState(false);
 
   const centralProvinces = [
-    { label: 'Đà Nẵng', value: 'Đà Nẵng', lat: 16.047079, lng: 108.206230 },
-    { label: 'Thừa Thiên Huế', value: 'Thừa Thiên Huế', lat: 16.463713, lng: 107.590866 },
-    { label: 'Quảng Nam', value: 'Quảng Nam', lat: 15.879444, lng: 108.335000 },
-    { label: 'Quảng Ngãi', value: 'Quảng Ngãi', lat: 15.121444, lng: 108.804554 },
-  ];
+    { label: 'Hà Tĩnh', value: 'Hà Tĩnh', lat: 18.3389, lng: 105.9110 },
+    { label: 'Quảng Bình', value: 'Quảng Bình', lat: 17.4900, lng: 106.5984 },
+    { label: 'Quảng Trị', value: 'Quảng Trị', lat: 16.7425, lng: 107.3383 },
+    { label: 'Thừa Thiên Huế', value: 'Thừa Thiên Huế', lat: 16.4637, lng: 107.5909 },
+    { label: 'Đà Nẵng', value: 'Đà Nẵng', lat: 16.0471, lng: 108.2062 },
+    { label: 'Quảng Nam', value: 'Quảng Nam', lat: 15.8794, lng: 108.3350 },
+    { label: 'Quảng Ngãi', value: 'Quảng Ngãi', lat: 15.1214, lng: 108.8046 },
+    { label: 'Bình Định', value: 'Bình Định', lat: 13.7820, lng: 109.2020 },
+    { label: 'Phú Yên', value: 'Phú Yên', lat: 13.0841, lng: 109.3057 },
+    { label: 'Khánh Hòa', value: 'Khánh Hòa', lat: 12.2523, lng: 109.1967 },
+    { label: 'Ninh Thuận', value: 'Ninh Thuận', lat: 11.6000, lng: 108.9333 },
+    { label: 'Bình Thuận', value: 'Bình Thuận', lat: 10.9281, lng: 108.0965 }
+  ];  
 
   // Tính khoảng cách giữa 2 thành phố
   const haversineDistance = (coords1, coords2) => {
@@ -43,10 +51,29 @@ export const CarpoolRequestScreen = ({ navigation, route }) => {
     return R * c; // Khoảng cách tính bằng km
   };
 
-  const calculatePrice = (distance) => {
-    const pricePerKm = 10000; // Giá mỗi km (VND)
+  const calculatePrice = (distance, serviceId) => {
+    let pricePerKm;
+
+    // Kiểm tra serviceId và gán giá per km tương ứng
+    switch (serviceId) {
+      case "67414fb314fada16bde3ada7":
+        pricePerKm = 10000; // Giá cho serviceId = "67414fb314fada16bde3ada7"
+        break;
+      case "67414fbd14fada16bde3adaa":
+        pricePerKm = 13000; // Giá cho serviceId = "67414fbd14fada16bde3adaa"
+        break;
+      case "67414fe614fada16bde3adad":
+        pricePerKm = 15000; // Giá cho serviceId = "67414fe614fada16bde3adad"
+        break;
+      default:
+        pricePerKm = 10000; // Giá mặc định nếu không khớp với bất kỳ serviceId nào
+    }
+    console .log("pricePerKm: ",pricePerKm)
+    console .log("serviceId: ",serviceId)
+    // Tính giá dựa trên khoảng cách và giá per km
     return Math.round(distance * pricePerKm); // Làm tròn đến hàng đơn vị
   };
+
 
 
   useEffect(() => {
@@ -64,7 +91,7 @@ export const CarpoolRequestScreen = ({ navigation, route }) => {
           { lat: endProvince.lat, lng: endProvince.lng }
         );
 
-        const estimatedPrice = calculatePrice(distance);
+        const estimatedPrice = calculatePrice(distance, serviceId);
         setPrice(estimatedPrice.toString());
       }
     }
@@ -143,7 +170,7 @@ export const CarpoolRequestScreen = ({ navigation, route }) => {
     // }
 
     let longitudeVariable = "";
-    let latitudeVariable  = "";
+    let latitudeVariable = "";
     if (selectedLocation?.ref_id) {
       const placeUrl = `https://maps.vietmap.vn/api/place/v3?apikey=${VIETMAP_API_KEY}&refid=${selectedLocation.ref_id}`;
       try {
@@ -161,9 +188,24 @@ export const CarpoolRequestScreen = ({ navigation, route }) => {
             price,
             service_option_id: serviceId,
           };
-          longitudeVariable= placeData.lng;
-          latitudeVariable= placeData.lat;
+          longitudeVariable = placeData.lng;
+          latitudeVariable = placeData.lat;
 
+          const currentDate = new Date();
+          const inputDate = new Date(
+            date.toISOString().split('T')[0] + 'T' + timeStart.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + ':00'
+          );
+
+          const timeDifference = inputDate - currentDate; // Khoảng cách thời gian giữa inputDate và currentDate (miligiây)
+
+          // Chuyển đổi 4 giờ thành miligiây (4 * 60 * 60 * 1000)
+          const fourHoursInMillis = 4 * 60 * 60 * 1000;
+
+          // Kiểm tra nếu sự chênh lệch nhỏ hơn 4 giờ
+          if (timeDifference < fourHoursInMillis) {
+            Alert.alert('Lỗi', 'Ngày và giờ đi phải cách thời gian hiện tại ít nhất 4 giờ.');
+            return;
+          }
           const response = await createCarpoolRequest(requestData);
           if (response.data.allowCreateNew) {
             navigation.navigate('Sucessfull');
@@ -188,9 +230,6 @@ export const CarpoolRequestScreen = ({ navigation, route }) => {
           Alert.alert('Thông báo', 'Có 1 chuyến tương tự đã được tạo, hãy tham gia nó nhé');
           navigation.navigate('AvailableRides', { searchParams });
         }
-        console.log("error: ", error.response.data)
-        console.error('Error creating carpool request:', error);
-        // Alert.alert('Lỗi', 'Không thể tạo yêu cầu.');
       }
     } else {
       Alert.alert('Lỗi', 'Không tìm thấy vị trí cụ thể. Vui lòng chọn lại.');
