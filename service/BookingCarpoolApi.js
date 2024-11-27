@@ -3,8 +3,8 @@ import axios from 'axios';
 const domain = 'http://192.168.111.52:3000/booking-carpool'; // Add /booking-carpool to the base URL
 
 // Tokens for customer and driver
-const CUSTOMER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGU4ZjQxYWMyYWNiODM1ZmY5MGRmNCIsImVtYWlsIjoidGhpbmhAZXhhbXBsZS5jb20iLCJpYXQiOjE3MzA4MTk2MDcsImV4cCI6MTczMDgyMzIwN30.sJZ3XHHe68YQKbMGFQcgWj8dW9chpw-m71njJDMZk2M';
-const DRIVER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGZkNDcyMmZiOGM0MDZhMjJmZDExZSIsImVtYWlsIjoidGhpbmhAZXhhbXBsZS5jb20iLCJpYXQiOjE3MzA4MTk2MzYsImV4cCI6MTczMDgyMzIzNn0.XkAojgMxkDwM8qze2qwN2mI4MhybUSaTZ6-_NBcW7Xc';
+const CUSTOMER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3M2RkNGRkZjJmNWQyM2M1Yzg3YzY0NSIsImVtYWlsIjoidHRoaW5oMjQwMjIwMDJAZ21haWwuY29tIiwiaWF0IjoxNzMyNzExMTA0LCJleHAiOjE3MzI3MTQ3MDR9.5OBK6EYQ4QxCtWBhvLUr6R2G9LryzU_47Ynd8D1Ir40';
+const DRIVER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGZkNDcyMmZiOGM0MDZhMjJmZDExZSIsImVtYWlsIjoidGhpbmhAZXhhbXBsZS5jb20iLCJpYXQiOjE3MzI2MjYyNTIsImV4cCI6MTczMjYyOTg1Mn0.kgQNN0ULR99mDJP0CaDxc2rC1OitpHXE7xjI14_9XVg';
 
 // Configure axios instances with tokens for customer and driver
 const customerApi = axios.create({
@@ -31,6 +31,9 @@ export const cancelCarpoolRequest = (requestId) => customerApi.post(`/unjoin-req
 export const getCustomerRides = () => customerApi.get('/my-rides');
 export const getCustomerNotifications = () => customerApi.get('/notification/');
 export const submitFeedback = (driverIid, feedbackData) =>  customerApi.post(`/feedback/${driverIid}`, feedbackData);
+export const getDriverLocation = (driverIid) => customerApi.get(`/driver-location/${driverIid}`);
+export const getCustomerLocation = (requestId) => customerApi.get(`/get-location/${requestId}`);
+export const getPersonalNotification = () => customerApi.get(`/your-notification`);
 
 // API for drivers
 export const getDriverAvailableRides = () => driverApi.get('/driver-rides/get-request');

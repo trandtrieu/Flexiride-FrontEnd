@@ -42,6 +42,9 @@ import RideDetailScreen from "./screens/bookingCarpool/RideDetailScreen";
 import { DriverAvailableRidesScreen } from "./screens/bookingCarpoolDriver/DriverAvailableRidesScreen";
 import { ManageDriverRidesScreen } from "./screens/bookingCarpoolDriver/ManageDriverRidesScreen";
 import { PickupProgressScreen } from "./screens/bookingCarpoolDriver/PickupProgressScreen";
+import  ManageNotifications  from "./screens/ManageNotificationScreen";
+import  NotificationDetail  from "./screens/NotificationDetail";
+
 // HireDriver
 import ElectronicContractScreen from "./screens/hireDriver/ElectronicContractScreen";
 import RouteHireScreen from "./screens/RouteHireScreen";
@@ -205,7 +208,15 @@ export default function App() {
               <Stack.Screen name="HireMapScreen" component={HireMapScreen} options={{ headerShown: false }} />
               <Stack.Screen name="HireLocationPicker" component={HireLocationPicker} options={{ headerShown: false }} />
 
-
+              <Stack.Screen
+                name="ManageNotifications"
+                component={ManageNotifications}
+              />
+              <Stack.Screen
+                name="NotificationDetail"
+                component={NotificationDetail}
+              />
+              
             </Stack.Navigator>
           </NavigationContainer>
         </AuthProvider>

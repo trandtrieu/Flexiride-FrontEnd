@@ -98,10 +98,12 @@ const RideDetailScreen = ({ route, navigation }) => {
           </Text>
         </View>
       )}
-
-      <TouchableOpacity style={styles.routeButton} onPress={handleRoute}>
-        <Text style={styles.routeButtonText}>Kiểm tra vị trí</Text>
-      </TouchableOpacity>
+      {ride.status != "completed" && (
+        <TouchableOpacity style={styles.routeButton} onPress={handleRoute}>
+          <Text style={styles.routeButtonText}>Kiểm tra vị trí</Text>
+        </TouchableOpacity>
+      )
+      }
     </ScrollView>
   );
 };

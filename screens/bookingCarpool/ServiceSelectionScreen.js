@@ -15,6 +15,10 @@ export const ServiceSelectionScreen = ({ navigation }) => {
           title="Quản lý chuyến xe"
           onPress={() => navigation.navigate('ManageBooking')}
         />
+        {/* <Button
+          title="Quản lý chuyến xe"
+          onPress={() => navigation.navigate('ManageNotification')}
+        /> */}
       </View>      
     </View>
   );
