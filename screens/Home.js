@@ -85,12 +85,17 @@ const Home = ({ navigation }) => {
     }
   };
 
+  const testTermsScreen = () => {
+    navigation.navigate("TermsScreen")
+  }
   return (
     <View style={styles.container}>
       {/* Nội dung chính */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.qrButton}>
+          <TouchableOpacity style={styles.qrButton}
+            onPress={testTermsScreen}
+          >
             <Ionicons name="qr-code-outline" size={24} color="black" />
           </TouchableOpacity>
           <TextInput

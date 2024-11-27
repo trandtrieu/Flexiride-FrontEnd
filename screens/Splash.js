@@ -9,7 +9,7 @@ const Splash = ({ navigation }) => {
     const timeout = setTimeout(() => {
       if (authState.isAuthenticated && authState.token) {
         // navigation.replace("LoginOptions");
-        navigation.replace("Home");
+        navigation.replace("Login");
       } else {
         navigation.replace("Login");
       }
