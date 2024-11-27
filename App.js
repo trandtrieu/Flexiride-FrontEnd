@@ -39,6 +39,13 @@ import { DriverAvailableRidesScreen } from "./screens/bookingCarpoolDriver/Drive
 import { ManageDriverRidesScreen } from "./screens/bookingCarpoolDriver/ManageDriverRidesScreen";
 import { PickupProgressScreen } from "./screens/bookingCarpoolDriver/PickupProgressScreen";
 import InsertCode from "./screens/auth/InsertCode";
+import ForgotPasswordDriver from "./screens/forgot-pass/ForgotPasswordDriver";
+import EnterOtp from "./screens/forgot-pass/EnterOtp";
+import EnterNewPass from "./screens/forgot-pass/EnterNewPass";
+import ChangePassSuccess from "./screens/forgot-pass/ChangePassSuccess";
+import CustomerProfile from "./screens/profile/CustomerProfile";
+import UpdateCusInfo from "./screens/profile/UpdateCusInfo";
+import ChangePassword from "./screens/auth/ChangePassword";
 
 export default function App() {
   const Stack = createNativeStackNavigator();
@@ -173,6 +180,45 @@ export default function App() {
                 component={HireDriver}
                 options={{ headerShown: false }}
               />
+              {/* start Forgot-pass */}
+              <Stack.Screen
+                name="ForgotPasswordDriver"
+                component={ForgotPasswordDriver}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="EnterOtp"
+                component={EnterOtp}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="EnterNewPass"
+                component={EnterNewPass}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="ChangePassSuccess"
+                component={ChangePassSuccess}
+                options={{ headerShown: false }}
+              />
+              {/* end forgot pass */}
+              {/* Start profile customer */}
+              <Stack.Screen
+                name="CustomerProfile"
+                component={CustomerProfile}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="UpdateCusInfo"
+                component={UpdateCusInfo}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="ChangePassword"
+                component={ChangePassword}
+                options={{ headerShown: false }}
+              />
+              {/* end profile customer */}
             </Stack.Navigator>
           </NavigationContainer>
         </AuthProvider>

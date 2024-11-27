@@ -63,7 +63,8 @@ const Login = ({ navigation }) => {
             token: response.data.token,
             user: response.data.user,
           });
-          navigation.navigate("Home");
+          // navigation.navigate("Home");
+          navigation.navigate("CustomerProfile");
         }
       } catch (error) {
         console.error("Error during login:", error);
@@ -77,7 +78,7 @@ const Login = ({ navigation }) => {
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
   const handleForgotPassword = () => {
-    // Implement forgot password functionality here
+    navigation.navigate("ForgotPasswordDriver");
   };
 
   const handleSignUp = () => {

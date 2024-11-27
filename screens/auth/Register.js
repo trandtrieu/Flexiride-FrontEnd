@@ -29,7 +29,8 @@ export default function Register({ navigation }) {
 
   const validateForm = async () => {
     const newErrors = {};
-
+    const passwordRegex =
+      /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,12}$/;
     if (!name.trim()) {
       newErrors.name = "Tên không được để trống.";
     }
@@ -71,6 +72,9 @@ export default function Register({ navigation }) {
 
     if (!password) {
       newErrors.password = "Mật khẩu không được để trống.";
+    } else if (!passwordRegex.test(password)) {
+      newErrors.password =
+        "Mật khẩu phải từ 8-12 ký tự, bao gồm chữ hoa, số và ký tự đặc biệt.";
     }
 
     if (!rePassword) {
