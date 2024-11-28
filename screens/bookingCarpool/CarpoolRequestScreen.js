@@ -474,7 +474,7 @@ const pickerSelectStyles = StyleSheet.create({
     color: 'black',
     paddingRight: 30,
     backgroundColor: '#fff',
-    height: 48,
+    height: 55,
   },
   inputAndroid: {
     fontSize: 16,
