@@ -11,18 +11,20 @@ import Register from "./screens/auth/Register";
 import Authenticate from "./screens/auth/Authenticate";
 import EnterNameScreen from "./screens/auth/EnterNameScreen";
 import VerifyWithSelfie from "./screens/auth/VerifyWithSelfie";
-import BikeBook from "./screens/BikeBookScreen";
-import SearchScreen from "./screens/SearchScreen";
-import LocationPicker from "./screens/LocationPicker";
-import MapScreen from "./screens/MapScreen";
-import RouteScreen from "./screens/RouteScreen";
 import { AuthProvider } from "./provider/AuthProvider";
-import TestMap from "./screens/TestMap";
+// import TestMap from "./screens/TestMap";
 import HireDriver from "./screens/hireDriver/HireDriverScreen";
 
 import { LocationProvider } from "./provider/LocationCurrentProvider";
 import { SocketProvider } from "./provider/SocketProvider";
-import PaymentMethodsScreen from "./screens/PaymentMethod";
+import BikeBook from "./screens/bookingTraditional/BikeBookScreen";
+import ChatScreenCustomer from "./screens/bookingTraditional/ChatScreen";
+import PaymentMethodsScreen from "./screens/bookingTraditional/PaymentMethod";
+import RouteScreen from "./screens/bookingTraditional/RouteScreen";
+import MapScreen from "./screens/bookingTraditional/MapScreen";
+import RideTrackingScreen from "./screens/bookingTraditional/RideTrackingScreen";
+import LocationPicker from "./screens/bookingTraditional/LocationPicker";
+import ActivityScreen from "./screens/ActivityScreen";
 
 // BookingCarpool
 import { ServiceSelectionScreen } from "./screens/bookingCarpool/ServiceSelectionScreen";
@@ -34,6 +36,7 @@ import { NotificationsScreen } from "./screens/bookingCarpool/NotificationsScree
 import { SucessfullScreen } from "./screens/bookingCarpool/SuccessfullSceen";
 import { FeedbackScreen } from "./screens/bookingCarpool/FeedbackScreen";
 import { TypeService } from "./screens/bookingCarpool/TypeService";
+import RideDetailScreen from "./screens/bookingCarpool/RideDetailScreen";
 
 import { DriverAvailableRidesScreen } from "./screens/bookingCarpoolDriver/DriverAvailableRidesScreen";
 import { ManageDriverRidesScreen } from "./screens/bookingCarpoolDriver/ManageDriverRidesScreen";
@@ -46,6 +49,19 @@ import ChangePassSuccess from "./screens/forgot-pass/ChangePassSuccess";
 import CustomerProfile from "./screens/profile/CustomerProfile";
 import UpdateCusInfo from "./screens/profile/UpdateCusInfo";
 import ChangePassword from "./screens/auth/ChangePassword";
+import ManageNotifications from "./screens/ManageNotificationScreen";
+import NotificationDetail from "./screens/NotificationDetail";
+
+// HireDriver
+import ElectronicContractScreen from "./screens/hireDriver/ElectronicContractScreen";
+import RouteHireScreen from "./screens/RouteHireScreen";
+import HireDriverServiceOption from "./screens/hireDriver/HireDriverServiceOptionScreen"
+import HireDriverRequestScreen from "./screens/hireDriver/HireDriverRequestScreen"
+import HireRouteScreen from "./screens/hireDriver/HireRouteScreen"
+import HireMapScreen from "./screens/hireDriver/HireMapScreen"
+import HireLocationPicker from "./screens/hireDriver/HireLocationPicker"
+import HireDriverScreen from "./screens/hireDriver/HireDriverScreen";
+import SingleRouteScreen from "./screens/bookingCarpool/SingleRouteScreen"
 
 export default function App() {
   const Stack = createNativeStackNavigator();
@@ -66,6 +82,11 @@ export default function App() {
                 component={Authenticate}
                 options={{ headerShown: false }}
               />
+              {/* <Stack.Screen
+                name="LoginOptions"
+                component={LoginOptions}
+                options={{ headerShown: false }}
+              /> */}
               <Stack.Screen
                 name="Home"
                 component={Home}
@@ -86,6 +107,11 @@ export default function App() {
                 component={InsertCode}
                 options={{ headerShown: false }}
               />
+              {/* <Stack.Screen
+                name="VerificationScreen"
+                component={VerificationScreen}
+                options={{ headerShown: false }}
+              /> */}
               <Stack.Screen
                 name="EnterNameScreen"
                 component={EnterNameScreen}
@@ -101,11 +127,11 @@ export default function App() {
                 component={BikeBook}
                 options={{ headerShown: false }}
               />
-              <Stack.Screen
+              {/* <Stack.Screen
                 name="SearchScreen"
                 component={SearchScreen}
                 options={{ headerShown: false }}
-              />
+              /> */}
               <Stack.Screen
                 name="LocationPicker"
                 component={LocationPicker}
@@ -121,14 +147,29 @@ export default function App() {
                 component={RouteScreen}
                 options={{ headerShown: false }}
               />
-              <Stack.Screen
+              {/* <Stack.Screen
                 name="TestMap"
                 component={TestMap}
                 options={{ headerShown: false }}
-              />
+              /> */}
               <Stack.Screen
                 name="PaymentMethod"
                 component={PaymentMethodsScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="RideTrackingScreen"
+                component={RideTrackingScreen}
+                options={{ title: "Theo dõi tài xế" }}
+              />
+              <Stack.Screen
+                name="ActivityScreen"
+                component={ActivityScreen}
+                options={{ title: "Lịch sử hoạt động" }}
+              />
+              <Stack.Screen
+                name="ChatScreenCustomer"
+                component={ChatScreenCustomer}
                 options={{ headerShown: false }}
               />
 
@@ -160,6 +201,7 @@ export default function App() {
               />
               <Stack.Screen name="FeedbackScreen" component={FeedbackScreen} />
               <Stack.Screen name="TypeService" component={TypeService} />
+              <Stack.Screen name="RideDetailScreen" component={RideDetailScreen} />
 
               {/* Screens for booking carpool driver */}
               <Stack.Screen
@@ -219,6 +261,29 @@ export default function App() {
                 options={{ headerShown: false }}
               />
               {/* end profile customer */}
+              <Stack.Screen
+                name="SingleRoute"
+                component={SingleRouteScreen}
+              />
+              {/* Screens for hire driver */}
+              <Stack.Screen name="HireDriverScreen" component={HireDriverScreen} options={{ headerShown: false }} />
+              <Stack.Screen name="ElectronicContract" component={ElectronicContractScreen} options={{ headerShown: false }} />
+              <Stack.Screen name="RouteHireScreen" component={RouteHireScreen} options={{ headerShown: false }} />
+              <Stack.Screen name="HireDriverServiceOption" component={HireDriverServiceOption} options={{ headerShown: false }} />
+              <Stack.Screen name="HireDriverRequestScreen" component={HireDriverRequestScreen} options={{ headerShown: false }} />
+              <Stack.Screen name="HireRouteScreen" component={HireRouteScreen} options={{ headerShown: false }} />
+              <Stack.Screen name="HireMapScreen" component={HireMapScreen} options={{ headerShown: false }} />
+              <Stack.Screen name="HireLocationPicker" component={HireLocationPicker} options={{ headerShown: false }} />
+
+              <Stack.Screen
+                name="ManageNotifications"
+                component={ManageNotifications}
+              />
+              <Stack.Screen
+                name="NotificationDetail"
+                component={NotificationDetail}
+              />
+
             </Stack.Navigator>
           </NavigationContainer>
         </AuthProvider>

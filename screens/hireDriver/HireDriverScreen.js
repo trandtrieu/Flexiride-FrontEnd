@@ -48,10 +48,10 @@ const StaticContent = ({ navigation }) => (
         {/* Menu Tabs */}
         <ServiceIcons />
 
-        {/* Search Box */}
+        {/* Lấy vị trí */}
         <TouchableOpacity
             style={styles.searchContainer}
-            onPress={() => navigation.navigate("LocationPicker")}
+            onPress={() => navigation.navigate("HireLocationPicker")}
         >
             <Ionicons name="location-outline" size={24} color="red" />
             <TextInput
@@ -80,7 +80,7 @@ const StaticContent = ({ navigation }) => (
     </>
 );
 
-export default function HireDriver({ navigation }) {
+export default function HireDriverScreen({ navigation }) {
     return (
         <SafeAreaView style={styles.container}>
             <FlatList

@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-const domain = 'http://localhost:3000/booking-carpool'; // Add /booking-carpool to the base URL
+const domain = 'http://192.168.111.52:3000/booking-carpool'; // Add /booking-carpool to the base URL
 
 // Tokens for customer and driver
-const CUSTOMER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGU4ZjQxYWMyYWNiODM1ZmY5MGRmNCIsImVtYWlsIjoidHRoaW5oMjQwMjIwMDJAZ21haWwuY29tIiwiaWF0IjoxNzMxODUyNzA1LCJleHAiOjE3MzE4NTYzMDV9.iLjDAVNQHbVhiNzFuLylKFx3mucL6wTZzvmIvlXUPW8';
-const DRIVER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGZkNDcyMmZiOGM0MDZhMjJmZDExZSIsImVtYWlsIjoidGhpbmhAZXhhbXBsZS5jb20iLCJpYXQiOjE3MzE4NDk1NTYsImV4cCI6MTczMTg1MzE1Nn0.6l2M0fTlFR91Xo5pd9oCnlRhYhZrhJvJUjV0t73_FMo';
+const CUSTOMER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3M2RkNGRkZjJmNWQyM2M1Yzg3YzY0NSIsImVtYWlsIjoidHRoaW5oMjQwMjIwMDJAZ21haWwuY29tIiwiaWF0IjoxNzMyNzExMTA0LCJleHAiOjE3MzI3MTQ3MDR9.5OBK6EYQ4QxCtWBhvLUr6R2G9LryzU_47Ynd8D1Ir40';
+const DRIVER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGZkNDcyMmZiOGM0MDZhMjJmZDExZSIsImVtYWlsIjoidGhpbmhAZXhhbXBsZS5jb20iLCJpYXQiOjE3MzI2MjYyNTIsImV4cCI6MTczMjYyOTg1Mn0.kgQNN0ULR99mDJP0CaDxc2rC1OitpHXE7xjI14_9XVg';
 
 // Configure axios instances with tokens for customer and driver
 const customerApi = axios.create({
@@ -31,6 +31,9 @@ export const cancelCarpoolRequest = (requestId) => customerApi.post(`/unjoin-req
 export const getCustomerRides = () => customerApi.get('/my-rides');
 export const getCustomerNotifications = () => customerApi.get('/notification/');
 export const submitFeedback = (driverIid, feedbackData) =>  customerApi.post(`/feedback/${driverIid}`, feedbackData);
+export const getDriverLocation = (driverIid) => customerApi.get(`/driver-location/${driverIid}`);
+export const getCustomerLocation = (requestId) => customerApi.get(`/get-location/${requestId}`);
+export const getPersonalNotification = () => customerApi.get(`/your-notification`);
 
 // API for drivers
 export const getDriverAvailableRides = () => driverApi.get('/driver-rides/get-request');
