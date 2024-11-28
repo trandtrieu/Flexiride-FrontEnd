@@ -7,13 +7,12 @@ import Home from "./screens/Home";
 import Splash from "./screens/Splash";
 
 import Login from "./screens/auth/Login";
-import VerificationScreen from "./screens/auth/VerificationScreen";
 import Register from "./screens/auth/Register";
-import LoginOptions from "./screens/auth/LoginOptions";
 import Authenticate from "./screens/auth/Authenticate";
 import EnterNameScreen from "./screens/auth/EnterNameScreen";
 import VerifyWithSelfie from "./screens/auth/VerifyWithSelfie";
 import { AuthProvider } from "./provider/AuthProvider";
+// import TestMap from "./screens/TestMap";
 import HireDriver from "./screens/hireDriver/HireDriverScreen";
 
 import { LocationProvider } from "./provider/LocationCurrentProvider";
@@ -42,8 +41,16 @@ import RideDetailScreen from "./screens/bookingCarpool/RideDetailScreen";
 import { DriverAvailableRidesScreen } from "./screens/bookingCarpoolDriver/DriverAvailableRidesScreen";
 import { ManageDriverRidesScreen } from "./screens/bookingCarpoolDriver/ManageDriverRidesScreen";
 import { PickupProgressScreen } from "./screens/bookingCarpoolDriver/PickupProgressScreen";
-import  ManageNotifications  from "./screens/ManageNotificationScreen";
-import  NotificationDetail  from "./screens/NotificationDetail";
+import InsertCode from "./screens/auth/InsertCode";
+import ForgotPasswordDriver from "./screens/forgot-pass/ForgotPasswordDriver";
+import EnterOtp from "./screens/forgot-pass/EnterOtp";
+import EnterNewPass from "./screens/forgot-pass/EnterNewPass";
+import ChangePassSuccess from "./screens/forgot-pass/ChangePassSuccess";
+import CustomerProfile from "./screens/profile/CustomerProfile";
+import UpdateCusInfo from "./screens/profile/UpdateCusInfo";
+import ChangePassword from "./screens/auth/ChangePassword";
+import ManageNotifications from "./screens/ManageNotificationScreen";
+import NotificationDetail from "./screens/NotificationDetail";
 
 // HireDriver
 import TermsScreen from "./screens/hireDriver/TermsScreen";
@@ -75,11 +82,11 @@ export default function App() {
                 component={Authenticate}
                 options={{ headerShown: false }}
               />
-              <Stack.Screen
+              {/* <Stack.Screen
                 name="LoginOptions"
                 component={LoginOptions}
                 options={{ headerShown: false }}
-              />
+              /> */}
               <Stack.Screen
                 name="Home"
                 component={Home}
@@ -96,10 +103,15 @@ export default function App() {
                 options={{ headerShown: false }}
               />
               <Stack.Screen
+                name="InsertCode"
+                component={InsertCode}
+                options={{ headerShown: false }}
+              />
+              {/* <Stack.Screen
                 name="VerificationScreen"
                 component={VerificationScreen}
                 options={{ headerShown: false }}
-              />
+              /> */}
               <Stack.Screen
                 name="EnterNameScreen"
                 component={EnterNameScreen}
@@ -115,6 +127,11 @@ export default function App() {
                 component={BikeBook}
                 options={{ headerShown: false }}
               />
+              {/* <Stack.Screen
+                name="SearchScreen"
+                component={SearchScreen}
+                options={{ headerShown: false }}
+              /> */}
               <Stack.Screen
                 name="LocationPicker"
                 component={LocationPicker}
@@ -130,6 +147,11 @@ export default function App() {
                 component={RouteScreen}
                 options={{ headerShown: false }}
               />
+              {/* <Stack.Screen
+                name="TestMap"
+                component={TestMap}
+                options={{ headerShown: false }}
+              /> */}
               <Stack.Screen
                 name="PaymentMethod"
                 component={PaymentMethodsScreen}
@@ -194,6 +216,51 @@ export default function App() {
                 name="PickupProgress"
                 component={PickupProgressScreen}
               />
+              {/* Screens for hire driver */}
+              <Stack.Screen
+                name="HireDriver"
+                component={HireDriver}
+                options={{ headerShown: false }}
+              />
+              {/* start Forgot-pass */}
+              <Stack.Screen
+                name="ForgotPasswordDriver"
+                component={ForgotPasswordDriver}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="EnterOtp"
+                component={EnterOtp}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="EnterNewPass"
+                component={EnterNewPass}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="ChangePassSuccess"
+                component={ChangePassSuccess}
+                options={{ headerShown: false }}
+              />
+              {/* end forgot pass */}
+              {/* Start profile customer */}
+              <Stack.Screen
+                name="CustomerProfile"
+                component={CustomerProfile}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="UpdateCusInfo"
+                component={UpdateCusInfo}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="ChangePassword"
+                component={ChangePassword}
+                options={{ headerShown: false }}
+              />
+              {/* end profile customer */}
               <Stack.Screen
                 name="SingleRoute"
                 component={SingleRouteScreen}
@@ -216,7 +283,7 @@ export default function App() {
                 name="NotificationDetail"
                 component={NotificationDetail}
               />
-              
+
             </Stack.Navigator>
           </NavigationContainer>
         </AuthProvider>
