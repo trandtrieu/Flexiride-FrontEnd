@@ -219,7 +219,7 @@ const RouteScreen = ({ route, navigation }) => {
     );
     setIsBooking(true);
     socket.current.emit("customerRequest", {
-      customerId: "6738dd3df211814d9c027e86",
+      customerId: authState.userId,
       pickupLocation,
       destinationLocation,
       serviceId: selectedServiceId,

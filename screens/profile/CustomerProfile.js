@@ -233,10 +233,10 @@ const CustomerProfile = ({ route }) => {
             <Ionicons name="lock-closed-outline" size={20} color="#007BFF" />
             <Text style={styles.utilityText}>Đổi mật khẩu</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.utilityItem}>
+          {/* <TouchableOpacity style={styles.utilityItem}>
             <Ionicons name="download-outline" size={20} color="#007BFF" />
             <Text style={styles.utilityText}>Downloads</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity style={styles.utilityItem}>
             <Ionicons name="help-circle-outline" size={20} color="#007BFF" />
             <Text style={styles.utilityText}>Trợ giúp</Text>
