@@ -24,7 +24,7 @@ import { useFocusEffect } from "@react-navigation/native";
 const fetchRequestDetails = async (requestId) => {
   try {
     const response = await axios.get(
-      `http://${IP_ADDRESS}:3000/booking-traditional/request/${requestId}`
+      `https://flexiride.onrender.com/booking-traditional/request/${requestId}`
     );
     if (response.data) {
       // setDriverStatus(response.data.status);
@@ -48,7 +48,7 @@ const fetchRequestDetails = async (requestId) => {
 const fetchDriverDetails = async (driverId) => {
   try {
     const response = await axios.get(
-      `http://${IP_ADDRESS}:3000/booking-traditional/location/driver/${driverId}`
+      `https://flexiride.onrender.com/booking-traditional/location/driver/${driverId}`
     );
     if (response.data && response.data.location) {
       return {
@@ -118,7 +118,7 @@ const RideTrackingScreen = ({ route, navigation }) => {
   const fetchRequestStatus = async () => {
     try {
       const response = await axios.get(
-        `http://${IP_ADDRESS}:3000/booking-traditional/request/${requestId}`
+        `https://flexiride.onrender.com/booking-traditional/request/${requestId}`
       );
       if (response.data) {
         return response.data.status;
@@ -182,7 +182,7 @@ const RideTrackingScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     if (!socket.current) {
-      socket.current = io(`http://${IP_ADDRESS}:3000`, {
+      socket.current = io(`https://flexiride.onrender.com`, {
         transports: ["websocket"],
         query: { customerId: authState.userId },
       });
@@ -235,7 +235,7 @@ const RideTrackingScreen = ({ route, navigation }) => {
 
     initializeData();
 
-    socket.current = io(`http://${IP_ADDRESS}:3000`, {
+    socket.current = io(`https://flexiride.onrender.com`, {
       transports: ["websocket"],
       query: { driverId },
     });

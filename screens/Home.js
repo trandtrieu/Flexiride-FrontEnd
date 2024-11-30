@@ -95,7 +95,7 @@ const Home = ({ navigation }) => {
       if (activeRide?.driverId) {
         try {
           const response = await axios.get(
-            `http://${IP_ADDRESS}:3000/booking-traditional/location/driver/${activeRide.driverId}`
+            `https://flexiride.onrender.com/booking-traditional/location/driver/${activeRide.driverId}`
           );
           if (response.data && response.data.location) {
             setDriverDetails(response.data.driverDetails);

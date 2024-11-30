@@ -2,7 +2,7 @@ import axios from 'axios';
 import { IP_ADDRESS } from "@env"; // Assuming IP_ADDRESS is managed via environment variables
 
 // Configure the base domain
-const DOMAIN = `http://${IP_ADDRESS}:3000/booking-carpool`; // Use the IP from the environment variable
+const DOMAIN = `https://flexiride.onrender.com/booking-carpool`; // Use the IP from the environment variable
 
 // Function to create Axios instances with token passed as argument
 const createApiInstance = (token) => {

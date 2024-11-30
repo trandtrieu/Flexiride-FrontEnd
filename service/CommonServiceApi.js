@@ -2,7 +2,7 @@ import axios from 'axios';
 import { IP_ADDRESS } from "@env"; // Assuming IP_ADDRESS is managed via environment variables
 
 // Configure the base domain
-const DOMAIN = `http://${IP_ADDRESS}:3000/notification`; // Use the IP from the environment variable
+const DOMAIN = `https://flexiride.onrender.com/notification`; // Use the IP from the environment variable
 
 // Function to create Axios instance with token passed as argument
 const createApiInstance = (token) => {

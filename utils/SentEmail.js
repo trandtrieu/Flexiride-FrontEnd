@@ -5,7 +5,7 @@ const sendEmail = async (name, email, otpCode) => {
   console.log("API: " + IP_ADDRESS);
   try {
     const response = await fetch(
-      `http://${IP_ADDRESS}:3000/driver/send-email`,
+      `https://flexiride.onrender.com/driver/send-email`,
 
       {
         method: "POST",
@@ -23,7 +23,7 @@ const sendEmail = async (name, email, otpCode) => {
     } else {
       Alert.alert("Lỗi", result.message || "Không thể gửi email.");
     }
-  } catch (error) {}
+  } catch (error) { }
 };
 
 export default sendEmail;

@@ -55,7 +55,7 @@ const Login = ({ navigation }) => {
       console.log("🚀 ~ handleSubmit ~ loginData: ", loginData);
       try {
         const response = await axios.post(
-          `http://${IP_ADDRESS}:3000/auth/login`,
+          `https://flexiride.onrender.com/auth/login`,
           loginData
         );
         if (response.data.token) {
