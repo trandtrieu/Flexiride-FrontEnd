@@ -24,7 +24,6 @@ export default function Register({ navigation }) {
   const [showRePassword, setShowRePassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Hàm tạo mã 6 chữ số ngẫu nhiên
   const generateVerificationCode = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
   };
@@ -33,22 +32,22 @@ export default function Register({ navigation }) {
     const newErrors = {};
 
     if (!/^\d{10}$/.test(phoneNumber)) {
-      newErrors.phoneNumber = "Phone number must be exactly 10 digits.";
+      newErrors.phoneNumber = "Số điện thoại phải đúng 10 chữ số.";
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      newErrors.email = "Enter a valid email address.";
+      newErrors.email = "Vui lòng nhập email hợp lệ.";
     }
 
     if (!password) {
-      newErrors.password = "Password is required.";
+      newErrors.password = "Mật khẩu không được để trống.";
     }
 
     if (!rePassword) {
-      newErrors.rePassword = "Please confirm your password.";
+      newErrors.rePassword = "Vui lòng xác nhận mật khẩu.";
     } else if (password.trim() !== rePassword.trim()) {
-      newErrors.rePassword = "Passwords do not match.";
+      newErrors.rePassword = "Mật khẩu không khớp.";
     }
 
     setErrors(newErrors);
@@ -61,19 +60,18 @@ export default function Register({ navigation }) {
     if (validateForm()) {
       setIsLoading(true);
 
-      // Tạo đối tượng account với mã xác minh
       const account = {
         phone: phoneNumber,
         email: email,
         password: password,
-        code: generateVerificationCode(), // Tạo mã 6 số ngẫu nhiên
+        code: generateVerificationCode(),
       };
 
       try {
         setIsLoading(false);
         navigation.navigate("VerificationScreen", { account });
       } catch (error) {
-        console.error("Error during API call:", error);
+        console.error("Lỗi trong quá trình gọi API:", error);
       } finally {
         setIsLoading(false);
       }
@@ -89,22 +87,15 @@ export default function Register({ navigation }) {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.navigate("Authenticate")}
-        >
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-
-        <Text style={styles.headerText}>Bắt đầu </Text>
+        <Text style={styles.headerText}>Đăng ký tài khoản</Text>
         <Text style={styles.subText}>
-          With a valid number, you can access rides, deliveries, and our other
-          services.
+          Với số điện thoại hợp lệ, bạn có thể sử dụng dịch vụ đặt xe, thuê tài
+          xế, xe ghép và các dịch vụ khác của chúng tôi.
         </Text>
 
         <TextInput
           style={styles.input}
-          placeholder="Phone Number"
+          placeholder="Số điện thoại"
           value={phoneNumber}
           onChangeText={setPhoneNumber}
           keyboardType="phone-pad"
@@ -129,7 +120,7 @@ export default function Register({ navigation }) {
         <View style={styles.passwordContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Password"
+            placeholder="Mật khẩu"
             value={password}
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
@@ -153,7 +144,7 @@ export default function Register({ navigation }) {
         <View style={styles.passwordContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Re-Password"
+            placeholder="Xác nhận mật khẩu"
             value={rePassword}
             onChangeText={setRePassword}
             secureTextEntry={!showRePassword}
@@ -182,7 +173,7 @@ export default function Register({ navigation }) {
           {isLoading ? (
             <ActivityIndicator size="small" color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>Next</Text>
+            <Text style={styles.buttonText}>Tiếp tục</Text>
           )}
         </TouchableOpacity>
       </ScrollView>

@@ -24,14 +24,26 @@ import MapScreen from "./screens/bookingTraditional/MapScreen";
 import RideTrackingScreen from "./screens/bookingTraditional/RideTrackingScreen";
 import LocationPicker from "./screens/bookingTraditional/LocationPicker";
 import ActivityScreen from "./screens/ActivityScreen";
+import PaymentScreen from "./screens/bookingTraditional/PaymentScreen";
+import CancelScreen from "./screens/bookingTraditional/CancelPaymentScreen";
+import ReturnScreen from "./screens/bookingTraditional/ReturnPaymentScreen";
 
 export default function App() {
   const Stack = createNativeStackNavigator();
+  const linking = {
+    prefixes: ["flexiride://"], // Đảm bảo trùng với scheme trong `app.json`
+    config: {
+      screens: {
+        PaymentScreen: "ReturnScreen", // Callback thành công
+        Home: "CancelScreen", // Callback hủy
+      },
+    },
+  };
   return (
     <SocketProvider>
       <LocationProvider>
         <AuthProvider>
-          <NavigationContainer>
+          <NavigationContainer linking={linking}>
             <Stack.Navigator initialRouteName="Splash">
               <Stack.Screen
                 name="Splash"
@@ -61,7 +73,7 @@ export default function App() {
               <Stack.Screen
                 name="Register"
                 component={Register}
-                options={{ headerShown: false }}
+                options={{ title: "Đăng ký" }}
               />
               <Stack.Screen
                 name="VerificationScreen"
@@ -117,6 +129,21 @@ export default function App() {
                 name="ChatScreenCustomer"
                 component={ChatScreenCustomer}
                 options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="PaymentScreen"
+                component={PaymentScreen}
+                options={{ title: "Thanh toán" }}
+              />
+              <Stack.Screen
+                name="ReturnScreen"
+                component={ReturnScreen}
+                options={{ title: "Thanh toán thành công" }}
+              />
+              <Stack.Screen
+                name="CancelScreen"
+                component={CancelScreen}
+                options={{ title: "Thanh toán bị hủy" }}
               />
             </Stack.Navigator>
           </NavigationContainer>

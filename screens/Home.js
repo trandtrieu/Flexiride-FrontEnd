@@ -64,7 +64,6 @@ const Home = ({ navigation }) => {
             `http://${IP_ADDRESS}:3000/booking-traditional/location/driver/${activeRide.driverId}`
           );
           if (response.data && response.data.location) {
-            console.log("Driver Location Data:", response.data);
             setDriverDetails(response.data.driverDetails);
           }
         } catch (error) {
@@ -90,16 +89,13 @@ const Home = ({ navigation }) => {
       {/* Nội dung chính */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.qrButton}>
-            <Ionicons name="qr-code-outline" size={24} color="black" />
-          </TouchableOpacity>
           <TextInput
             style={styles.searchBar}
             placeholder="Tìm kiếm"
             placeholderTextColor="#888"
           />
           <TouchableOpacity style={styles.heartButton}>
-            <Ionicons name="heart-outline" size={24} color="black" />
+            <Ionicons name="notifications-outline" size={24} color="black" />
           </TouchableOpacity>
         </View>
 

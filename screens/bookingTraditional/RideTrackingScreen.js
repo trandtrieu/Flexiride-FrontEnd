@@ -27,6 +27,7 @@ const fetchRequestDetails = async (requestId) => {
       `http://${IP_ADDRESS}:3000/booking-traditional/request/${requestId}`
     );
     if (response.data) {
+      // setDriverStatus(response.data.status);
       return {
         pickup: {
           latitude: response.data.latitude_from,
@@ -81,8 +82,8 @@ const calculateRoute = async (driverLocation, pickupLocation, setRouteData) => {
 
       setRouteData({
         coordinates,
-        estimatedDistance: distance / 1000, // Convert meters to kilometers
-        estimatedTime: Math.ceil(time / 1000 / 60), // Convert milliseconds to minutes
+        estimatedDistance: distance / 1000,
+        estimatedTime: Math.ceil(time / 1000 / 60),
       });
     } else {
       throw new Error("No route data available .");
@@ -103,6 +104,7 @@ const RideTrackingScreen = ({ route, navigation }) => {
   const [driverLocation, setDriverLocation] = useState(null);
   const [driverDetails, setDriverDetails] = useState({});
   const [driverStatus, setDriverStatus] = useState("offline");
+
   const [routeData, setRouteData] = useState({
     coordinates: [],
     estimatedDistance: "",
@@ -112,7 +114,35 @@ const RideTrackingScreen = ({ route, navigation }) => {
   const mapRef = useRef(null);
   const socket = useRef(null);
   const { authState } = useAuth();
-  const [isModalVisible, setIsModalVisible] = useState(false); // State kiểm soát modal
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const fetchRequestStatus = async () => {
+    try {
+      const response = await axios.get(
+        `http://${IP_ADDRESS}:3000/booking-traditional/request/${requestId}`
+      );
+      if (response.data) {
+        return response.data.status;
+      } else {
+        console.warn("No request data found.");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching request status:", error);
+      return null;
+    }
+  };
+  useEffect(() => {
+    const intervalId = setInterval(async () => {
+      const currentStatus = await fetchRequestStatus();
+
+      if (currentStatus === "dropped off") {
+        navigation.navigate("PaymentScreen", { requestId });
+        clearInterval(intervalId); // Dừng kiểm tra sau khi điều hướng
+      }
+    }, 5000); // Kiểm tra mỗi 5 giây
+
+    return () => clearInterval(intervalId); // Dọn dẹp khi unmount
+  }, [requestId, navigation]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -126,6 +156,38 @@ const RideTrackingScreen = ({ route, navigation }) => {
       };
     }, [navigation])
   );
+
+  useEffect(() => {
+    if (!socket.current) {
+      socket.current = io(`http://${IP_ADDRESS}:3000`, {
+        transports: ["websocket"],
+        query: { customerId: authState.userId },
+      });
+
+      socket.current.on("updateStatus", (data) => {
+        const { requestId: updatedRequestId, newStatus } = data;
+        if (updatedRequestId === requestId) {
+          setDriverStatus(newStatus);
+
+          if (newStatus === "dropped off") {
+            navigation.navigate("PaymentScreen", {
+              requestId,
+            });
+          }
+        }
+      });
+    }
+
+    // Cleanup khi unmount
+    return () => {
+      if (socket.current) {
+        socket.current.off("updateStatus");
+        socket.current.disconnect();
+        socket.current = null;
+      }
+    };
+  }, [requestId, authState.userId]);
+
   const toggleModal = () => setIsModalVisible(!isModalVisible);
   useEffect(() => {
     const initializeData = async () => {
@@ -258,7 +320,13 @@ const RideTrackingScreen = ({ route, navigation }) => {
 
       <View style={styles.infoContainer}>
         <Text style={styles.infoText}>
-          Khoảng:{" "}
+          Trạng thái hiện tại:{" "}
+          <Text style={{ fontWeight: "bold", color: "blue" }}>
+            {driverStatus || "Đang tải..."}
+          </Text>
+        </Text>
+        <Text style={styles.infoText}>
+          Khoảng cách:{" "}
           {routeData.estimatedDistance < 1
             ? `${(routeData.estimatedDistance * 1000).toFixed(0)} m`
             : `${routeData.estimatedDistance.toFixed(1)} km`}
@@ -293,8 +361,8 @@ const RideTrackingScreen = ({ route, navigation }) => {
           <Ionicons name="chatbubble-outline" size={24} color="black" />
           <Text style={styles.chatText}>Liên hệ với tài xế</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.chatButton} onPress={handleCancelRide}>
-          <Ionicons name="chatbubble-outline" size={24} color="black" />
+        <TouchableOpacity style={styles.cancel1Button} onPress={toggleModal}>
+          <Ionicons name="close-circle" size={24} color="black" />
           <Text style={styles.chatText}>Hủy chuyến</Text>
         </TouchableOpacity>
 
@@ -377,6 +445,14 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   chatButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 15,
+    backgroundColor: "#E0F7FA",
+    padding: 10,
+    borderRadius: 10,
+  },
+  cancel1Button: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 15,

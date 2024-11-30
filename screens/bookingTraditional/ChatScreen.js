@@ -124,7 +124,12 @@ const ChatScreenCustomer = ({ route, navigation }) => {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
-        <Image source={{ uri: driverDetails.avatar }} style={styles.avatar} />
+        <Image
+          source={{
+            uri: "https://ninhbinhtouristcenter.com/wp-content/uploads/2019/08/car-with-driver-in-Ninh-Binh-North-Vietnam.webp",
+          }}
+          style={styles.avatar}
+        />
         <View style={styles.userInfo}>
           <Text style={styles.otherUserName}>{driverDetails.name}</Text>
           <Text style={styles.otherUserVehicle}>

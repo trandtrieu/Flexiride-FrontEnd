@@ -15,15 +15,9 @@ const ServiceIcons = () => {
           source={require("../../assets/bike-icon.png")}
           style={styles.serviceIcon}
         />
-        <Text style={styles.serviceText}>Xe máy</Text>
+        <Text style={styles.serviceText}>Đặt xe</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.serviceItem}>
-        <Image
-          source={require("../../assets/car-icon.png")}
-          style={styles.serviceIcon}
-        />
-        <Text style={styles.serviceText}>Ô tô</Text>
-      </TouchableOpacity>
+
       <TouchableOpacity style={styles.serviceItem}>
         <Image
           source={require("../../assets/hire-driver-icon.png")}
