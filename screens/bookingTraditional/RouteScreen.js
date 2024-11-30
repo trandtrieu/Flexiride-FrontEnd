@@ -56,8 +56,11 @@ const RouteScreen = ({ route, navigation }) => {
   };
 
   useEffect(() => {
+    console.log("destinationLocation: ", destinationLocation);
+
     console.log("IP_ADDRESS" + IP_ADDRESS);
-    socket.current = io(`https://flexiride-backend.onrender.com`, {
+    // socket.current = io(`https://flexiride-backend.onrender.com`, {
+    socket.current = io(`http://${IP_ADDRESS}:3000`, {
       transports: ["websocket"],
       query: { customerId: authState.userId },
     });
@@ -284,7 +287,6 @@ const RouteScreen = ({ route, navigation }) => {
           >
             <Callout>
               <Text>{pickupLocation.name || "Pickup Location"}</Text>
-              <Text>{pickupLocation.address || "Địa điểm đón"}</Text>
             </Callout>
           </Marker>
 

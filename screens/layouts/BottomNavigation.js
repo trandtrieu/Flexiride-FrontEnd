@@ -19,20 +19,7 @@ const BottomNavigation = ({ navigation }) => {
         <Ionicons name="document-text-outline" size={24} color="black" />
         <Text style={styles.navText}>Hoạt động</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.navItem}
-        onPress={() => navigation.navigate("Payment")}
-      >
-        <Ionicons name="card-outline" size={24} color="black" />
-        <Text style={styles.navText}>Thanh toán</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.navItem}
-        onPress={() => navigation.navigate("Messages")}
-      >
-        <Ionicons name="notifications-outline" size={24} color="black" />
-        <Text style={styles.navText}>Tin nhắn</Text>
-      </TouchableOpacity>
+
       <TouchableOpacity
         style={styles.navItem}
         onPress={() => navigation.navigate("CustomerProfile")}
@@ -56,6 +43,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: "100%",
     height: 60,
+    paddingBottom: 20,
   },
   navItem: {
     alignItems: "center",

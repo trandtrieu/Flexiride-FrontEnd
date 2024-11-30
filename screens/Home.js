@@ -49,7 +49,6 @@ const Home = ({ navigation }) => {
   const fetchNotifications = async () => {
     try {
       const response = await getPersonalNotification(authState.token);
-      console.log("Fetching notifications: ", response.data);
 
       // Kiểm tra xem response.data.notifications có tồn tại không
       if (response.data && Array.isArray(response.data.notifications)) {
@@ -58,7 +57,6 @@ const Home = ({ navigation }) => {
         );
         setNotifications(response.data.notifications);
         setUnreadCount(unreadNotifications.length);
-        console.log("==============HOME==============");
       } else {
         console.error("Không có thông báo hoặc dữ liệu không hợp lệ.");
       }
@@ -128,14 +126,18 @@ const Home = ({ navigation }) => {
       {/* Nội dung chính */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.qrButton} onPress={testTermsScreen}>
+          {/* <TouchableOpacity style={styles.qrButton} onPress={testTermsScreen}>
             <Ionicons name="qr-code-outline" size={24} color="black" />
-          </TouchableOpacity>
-          <TextInput
-            style={styles.searchBar}
-            placeholder="Tìm kiếm"
-            placeholderTextColor="#888"
-          />
+          </TouchableOpacity> */}
+          <View style={styles.locationContainer}>
+            <Text style={styles.text}>Đón bạn tại</Text>
+            <TouchableOpacity>
+              <Text style={styles.locationText}>
+                Tạp Hóa Tứ Vang{" "}
+                <Ionicons name="chevron-down-outline" size={15} color="black" />
+              </Text>
+            </TouchableOpacity>
+          </View>
           <TouchableOpacity
             style={styles.notificationButton}
             onPress={navigateToManageNotifications}
@@ -151,7 +153,7 @@ const Home = ({ navigation }) => {
 
         <ServiceIcons />
 
-        <View style={styles.cardsContainer}>
+        {/* <View style={styles.cardsContainer}>
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Activate</Text>
             <Text style={styles.cardSubTitle}>FRidePay</Text>
@@ -162,7 +164,7 @@ const Home = ({ navigation }) => {
             <Text style={styles.cardSubTitle}>758</Text>
             <Ionicons name="wallet-outline" size={24} color="blue" />
           </View>
-        </View>
+        </View> */}
 
         <View style={styles.bookNowContainer}>
           <Text style={styles.bookNowTitle}>ĐẶT XE NGAY</Text>
@@ -253,6 +255,22 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
+  locationContainer: {
+    flexDirection: "column",
+    justifyContent: "space-between",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 35,
+    marginHorizontal: 10,
+  },
+  text: {
+    fontSize: 13,
+  },
+  locationText: {
+    fontWeight: "bold",
+    fontSize: 15,
+  },
   scrollContent: {
     paddingBottom: 80, // Tránh bị chồng lấp bởi BottomNavigation
   },
@@ -269,7 +287,6 @@ const styles = StyleSheet.create({
   searchBar: {
     flex: 1,
     marginHorizontal: 10,
-    paddingVertical: 8,
     paddingHorizontal: 15,
     borderRadius: 10,
     backgroundColor: "#fff",
