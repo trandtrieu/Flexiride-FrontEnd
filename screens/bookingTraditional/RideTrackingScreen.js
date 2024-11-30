@@ -8,6 +8,7 @@ import {
   Alert,
   ActivityIndicator,
   Modal,
+  BackHandler,
 } from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,15 +17,17 @@ import io from "socket.io-client";
 import { IP_ADDRESS, VIETMAP_API_KEY } from "@env";
 import polyline from "@mapbox/polyline";
 import { useAuth } from "../../provider/AuthProvider";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 
 // Utility Functions
 const fetchRequestDetails = async (requestId) => {
   try {
     const response = await axios.get(
-      `http://${IP_ADDRESS}:3000/booking-traditional/request/${requestId}`
+      `https://flexiride-backend.onrender.com/booking-traditional/request/${requestId}`
     );
     if (response.data) {
-      console.log("🚀 ~ fetchRequestDetails ~ response.data :", response.data);
+      // setDriverStatus(response.data.status);
       return {
         pickup: {
           latitude: response.data.latitude_from,
@@ -45,7 +48,7 @@ const fetchRequestDetails = async (requestId) => {
 const fetchDriverDetails = async (driverId) => {
   try {
     const response = await axios.get(
-      `http://${IP_ADDRESS}:3000/booking-traditional/location/driver/${driverId}`
+      `https://flexiride-backend.onrender.com/booking-traditional/location/driver/${driverId}`
     );
     if (response.data && response.data.location) {
       return {
@@ -79,11 +82,11 @@ const calculateRoute = async (driverLocation, pickupLocation, setRouteData) => {
 
       setRouteData({
         coordinates,
-        estimatedDistance: distance / 1000, // Convert meters to kilometers
-        estimatedTime: Math.ceil(time / 1000 / 60), // Convert milliseconds to minutes
+        estimatedDistance: distance / 1000,
+        estimatedTime: Math.ceil(time / 1000 / 60),
       });
     } else {
-      throw new Error("No route data available.");
+      throw new Error("No route data available .");
     }
   } catch (error) {
     console.error("Error calculating route: ", error);
@@ -101,6 +104,7 @@ const RideTrackingScreen = ({ route, navigation }) => {
   const [driverLocation, setDriverLocation] = useState(null);
   const [driverDetails, setDriverDetails] = useState({});
   const [driverStatus, setDriverStatus] = useState("offline");
+
   const [routeData, setRouteData] = useState({
     coordinates: [],
     estimatedDistance: "",
@@ -110,7 +114,102 @@ const RideTrackingScreen = ({ route, navigation }) => {
   const mapRef = useRef(null);
   const socket = useRef(null);
   const { authState } = useAuth();
-  const [isModalVisible, setIsModalVisible] = useState(false); // State kiểm soát modal
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const fetchRequestStatus = async () => {
+    try {
+      const response = await axios.get(
+        `https://flexiride-backend.onrender.com/booking-traditional/request/${requestId}`
+      );
+      if (response.data) {
+        return response.data.status;
+      } else {
+        console.warn("No request data found.");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching request status:", error);
+      return null;
+    }
+  };
+  useEffect(() => {
+    const intervalId = setInterval(async () => {
+      const currentStatus = await fetchRequestStatus();
+
+      if (currentStatus === "dropped off") {
+        navigation.navigate("PaymentScreen", { requestId });
+        clearInterval(intervalId); // Dừng kiểm tra sau khi điều hướng
+      }
+    }, 5000); // Kiểm tra mỗi 5 giây
+
+    return () => clearInterval(intervalId); // Dọn dẹp khi unmount
+  }, [requestId, navigation]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.replace("Home");
+        return true;
+      };
+      BackHandler.addEventListener("hardwareBackPress", onBackPress);
+      return () => {
+        BackHandler.removeEventListener("hardwareBackPress", onBackPress);
+      };
+    }, [navigation])
+  );
+  useEffect(() => {
+    const updateRoute = async () => {
+      try {
+        if (driverStatus === "on trip" || driverStatus === "picked up") {
+          // Vẽ tuyến đường từ điểm đón đến điểm đến
+          await calculateRoute(pickupLocation, destination, setRouteData);
+        } else if (
+          driverStatus === "on the way" ||
+          driverStatus === "confirmed"
+        ) {
+          // Vẽ tuyến đường từ tài xế đến điểm đón
+          await calculateRoute(driverLocation, pickupLocation, setRouteData);
+        }
+      } catch (error) {
+        console.error("Error updating route:", error);
+      }
+    };
+
+    // Gọi hàm khi trạng thái hoặc vị trí thay đổi
+    if (pickupLocation && destination && driverLocation) {
+      updateRoute();
+    }
+  }, [driverStatus, pickupLocation, destination, driverLocation]);
+
+  useEffect(() => {
+    if (!socket.current) {
+      socket.current = io(`https://flexiride-backend.onrender.com`, {
+        transports: ["websocket"],
+        query: { customerId: authState.userId },
+      });
+
+      socket.current.on("updateStatus", (data) => {
+        const { requestId: updatedRequestId, newStatus } = data;
+        if (updatedRequestId === requestId) {
+          setDriverStatus(newStatus);
+
+          if (newStatus === "dropped off") {
+            navigation.navigate("PaymentScreen", {
+              requestId,
+            });
+          }
+        }
+      });
+    }
+
+    // Cleanup khi unmount
+    return () => {
+      if (socket.current) {
+        socket.current.off("updateStatus");
+        socket.current.disconnect();
+        socket.current = null;
+      }
+    };
+  }, [requestId, authState.userId]);
 
   const toggleModal = () => setIsModalVisible(!isModalVisible);
   useEffect(() => {
@@ -136,7 +235,7 @@ const RideTrackingScreen = ({ route, navigation }) => {
 
     initializeData();
 
-    socket.current = io(`http://${IP_ADDRESS}:3000`, {
+    socket.current = io(`https://flexiride-backend.onrender.com`, {
       transports: ["websocket"],
       query: { driverId },
     });
@@ -176,27 +275,32 @@ const RideTrackingScreen = ({ route, navigation }) => {
           text: "Hủy chuyến",
           style: "destructive",
           onPress: () => {
-            // Thực hiện API call để hủy chuyến đi
-            axios
-              .post(`http://${IP_ADDRESS}:3000/booking-traditional/cancel`, {
+            if (socket.current) {
+              // Gửi sự kiện hủy chuyến qua socket
+              socket.current.emit("cancelRide", {
                 requestId,
-              })
-              .then(() => {
-                Alert.alert("Thành công", "Bạn đã hủy chuyến đi.");
-                navigation.goBack();
-              })
-              .catch((error) => {
-                Alert.alert(
-                  "Lỗi",
-                  "Không thể hủy chuyến đi. Vui lòng thử lại."
-                );
+                customerId: authState.userId,
               });
+
+              // Lắng nghe phản hồi từ server
+              socket.current.on("rideCanceledSuccess", (data) => {
+                AsyncStorage.removeItem("activeRide");
+                navigation.replace("Home");
+              });
+
+              socket.current.on("cancelError", (error) => {
+                Alert.alert("Lỗi", error.message);
+              });
+            } else {
+              Alert.alert("Lỗi", "Kết nối socket không khả dụng.");
+            }
           },
         },
       ],
       { cancelable: true }
     );
   };
+
   return (
     <View style={styles.container}>
       <MapView
@@ -239,7 +343,13 @@ const RideTrackingScreen = ({ route, navigation }) => {
 
       <View style={styles.infoContainer}>
         <Text style={styles.infoText}>
-          Khoảng:{" "}
+          Trạng thái hiện tại:{" "}
+          <Text style={{ fontWeight: "bold", color: "blue" }}>
+            {driverStatus || "Đang tải..."}
+          </Text>
+        </Text>
+        <Text style={styles.infoText}>
+          Khoảng cách:{" "}
           {routeData.estimatedDistance < 1
             ? `${(routeData.estimatedDistance * 1000).toFixed(0)} m`
             : `${routeData.estimatedDistance.toFixed(1)} km`}
@@ -273,6 +383,10 @@ const RideTrackingScreen = ({ route, navigation }) => {
         <TouchableOpacity style={styles.chatButton} onPress={handleChat}>
           <Ionicons name="chatbubble-outline" size={24} color="black" />
           <Text style={styles.chatText}>Liên hệ với tài xế</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.cancel1Button} onPress={toggleModal}>
+          <Ionicons name="close-circle" size={24} color="black" />
+          <Text style={styles.chatText}>Hủy chuyến</Text>
         </TouchableOpacity>
 
         <Modal
@@ -354,6 +468,14 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   chatButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 15,
+    backgroundColor: "#E0F7FA",
+    padding: 10,
+    borderRadius: 10,
+  },
+  cancel1Button: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 15,

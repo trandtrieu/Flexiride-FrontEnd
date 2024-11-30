@@ -48,6 +48,7 @@
     "react-native-stack": "^1.0.0-alpha11",
     "react-native-vector-icons": "^10.2.0",
     "react-native-web": "^0.19.12",
+    "react-native-webview": "^13.12.4",
     "socket.io-client": "^4.8.1",
     "expo-image-picker": "~16.0.3",
     "expo-image-manipulator": "~13.0.5"

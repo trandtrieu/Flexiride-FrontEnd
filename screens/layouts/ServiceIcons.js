@@ -28,8 +28,10 @@ const ServiceIcons = () => {
         />
         <Text style={styles.serviceText}>Thuê Tài Xế</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.serviceItem}
-        onPress={() => navigation.navigate("ServiceSelection")}>
+      <TouchableOpacity
+        style={styles.serviceItem}
+        onPress={() => navigation.navigate("ServiceSelection")}
+      >
         <Image
           source={require("../../assets/car-pool-icon.png")}
           style={styles.serviceIcon}

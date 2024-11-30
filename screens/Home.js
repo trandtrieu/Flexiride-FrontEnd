@@ -19,7 +19,6 @@ import axios from "axios";
 import { getPersonalNotification } from "../service/CommonServiceApi";
 import { useFocusEffect } from "@react-navigation/native"; // Import useFocusEffect
 
-
 const Home = ({ navigation }) => {
   const { authState } = useAuth();
   const [activeRide, setActiveRide] = useState(null);
@@ -29,7 +28,7 @@ const Home = ({ navigation }) => {
 
   // Load thông tin chuyến đi từ AsyncStorage
   useEffect(() => {
-    console.log("🚀 ~ IP_ADDRESS:", IP_ADDRESS);
+    console.log("🚀 ~ IP_ADDRESS: ", IP_ADDRESS);
 
     const loadActiveRide = async () => {
       try {
@@ -54,8 +53,8 @@ const Home = ({ navigation }) => {
 
       // Kiểm tra xem response.data.notifications có tồn tại không
       if (response.data && Array.isArray(response.data.notifications)) {
-        const unreadNotifications = response.data.notifications.filter(notification =>
-          !notification.readBy.includes(response.data.userId)
+        const unreadNotifications = response.data.notifications.filter(
+          (notification) => !notification.readBy.includes(response.data.userId)
         );
         setNotifications(response.data.notifications);
         setUnreadCount(unreadNotifications.length);
@@ -73,7 +72,6 @@ const Home = ({ navigation }) => {
       fetchNotifications(); // Gọi lại hàm lấy thông báo mỗi khi màn hình có focus
     }, [])
   );
-
 
   const navigateToManageNotifications = () => {
     navigation.navigate("ManageNotifications", { notifications });
@@ -99,10 +97,9 @@ const Home = ({ navigation }) => {
       if (activeRide?.driverId) {
         try {
           const response = await axios.get(
-            `http://${IP_ADDRESS}:3000/booking-traditional/location/driver/${activeRide.driverId}`
+            `https://flexiride-backend.onrender.com/booking-traditional/location/driver/${activeRide.driverId}`
           );
           if (response.data && response.data.location) {
-            console.log("Driver Location Data:", response.data);
             setDriverDetails(response.data.driverDetails);
           }
         } catch (error) {
@@ -124,16 +121,14 @@ const Home = ({ navigation }) => {
   };
 
   const testTermsScreen = () => {
-    navigation.navigate("TermsScreen")
-  }
+    navigation.navigate("TermsScreen");
+  };
   return (
     <View style={styles.container}>
       {/* Nội dung chính */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.qrButton}
-            onPress={testTermsScreen}
-          >
+          <TouchableOpacity style={styles.qrButton} onPress={testTermsScreen}>
             <Ionicons name="qr-code-outline" size={24} color="black" />
           </TouchableOpacity>
           <TextInput
@@ -141,7 +136,10 @@ const Home = ({ navigation }) => {
             placeholder="Tìm kiếm"
             placeholderTextColor="#888"
           />
-          <TouchableOpacity style={styles.notificationButton} onPress={navigateToManageNotifications}>
+          <TouchableOpacity
+            style={styles.notificationButton}
+            onPress={navigateToManageNotifications}
+          >
             <Ionicons name="notifications-outline" size={30} color="black" />
             {unreadCount > 0 && (
               <View style={styles.unreadBadge}>
@@ -149,7 +147,6 @@ const Home = ({ navigation }) => {
               </View>
             )}
           </TouchableOpacity>
-
         </View>
 
         <ServiceIcons />
@@ -233,24 +230,24 @@ const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   notificationButton: {
-    position: 'relative',
+    position: "relative",
     padding: 10,
   },
   unreadBadge: {
-    position: 'absolute',
+    position: "absolute",
     top: -5,
     right: -5,
-    backgroundColor: 'red',
+    backgroundColor: "red",
     borderRadius: 10,
     width: 20,
     height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   unreadBadgeText: {
     fontSize: 12,
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
   },
   container: {
     flex: 1,

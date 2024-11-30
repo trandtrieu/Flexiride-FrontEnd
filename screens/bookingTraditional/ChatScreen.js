@@ -32,7 +32,7 @@ const ChatScreenCustomer = ({ route, navigation }) => {
   ];
 
   useEffect(() => {
-    socket.current = io(`http://${IP_ADDRESS}:3000`, {
+    socket.current = io(`https://flexiride-backend.onrender.com`, {
       transports: ["websocket"],
       query: { userId },
     });
@@ -53,7 +53,7 @@ const ChatScreenCustomer = ({ route, navigation }) => {
     const fetchMessages = async () => {
       try {
         const response = await axios.get(
-          `http://${IP_ADDRESS}:3000/booking-traditional/messages/${roomId}`
+          `https://flexiride-backend.onrender.com/booking-traditional/messages/${roomId}`
         );
         setMessages(response.data);
       } catch (error) {
@@ -105,14 +105,14 @@ const ChatScreenCustomer = ({ route, navigation }) => {
     const fetchDriverLocation = async () => {
       try {
         const response = await axios.get(
-          `http://${IP_ADDRESS}:3000/booking-traditional/location/driver/${driverId}`
+          `https://flexiride-backend.onrender.com/booking-traditional/location/driver/${driverId}`
         );
         if (response.data && response.data.location) {
           console.log("Driver Location Data:", response.data);
           setDriverDetails(response.data.driverDetails);
         }
       } catch (error) {
-        console.error("Error fetching driver location:", error);
+        console.error("Error fetching driver location: ", error);
       }
     };
     fetchDriverLocation();
@@ -124,7 +124,12 @@ const ChatScreenCustomer = ({ route, navigation }) => {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
-        <Image source={{ uri: driverDetails.avatar }} style={styles.avatar} />
+        <Image
+          source={{
+            uri: "https://ninhbinhtouristcenter.com/wp-content/uploads/2019/08/car-with-driver-in-Ninh-Binh-North-Vietnam.webp",
+          }}
+          style={styles.avatar}
+        />
         <View style={styles.userInfo}>
           <Text style={styles.otherUserName}>{driverDetails.name}</Text>
           <Text style={styles.otherUserVehicle}>

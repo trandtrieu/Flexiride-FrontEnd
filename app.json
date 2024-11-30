@@ -24,10 +24,11 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "scheme": "flexiride",
+    "platforms": ["ios", "android", "web"],
     "extra": {
-      "eas": {
-        "projectId": "7e66f206-a270-4180-ada2-9f56ffe66cdf"
-      }
+      "payosReturnUrl": "flexiride://ReturnScreen",
+      "payosCancelUrl": "flexiride://CancelScreen"
     },
     "owner": "trandtrieu",
     "newArchEnabled": true
