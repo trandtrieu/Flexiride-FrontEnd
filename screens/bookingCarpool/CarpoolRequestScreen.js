@@ -5,6 +5,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { createCarpoolRequest } from '../../service/BookingCarpoolApi';
 import _ from 'lodash';
 import { VIETMAP_API_KEY } from '@env';
+import { useAuth } from "../../provider/AuthProvider";
 
 export const CarpoolRequestScreen = ({ navigation, route }) => {
   const { serviceId } = route.params; 
@@ -19,6 +20,7 @@ export const CarpoolRequestScreen = ({ navigation, route }) => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [price, setPrice] = useState('');
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const { authState } = useAuth();
 
   const centralProvinces = [
     { label: 'Hà Tĩnh', value: 'Hà Tĩnh', lat: 18.3389, lng: 105.9110 },
@@ -206,7 +208,7 @@ export const CarpoolRequestScreen = ({ navigation, route }) => {
             Alert.alert('Lỗi', 'Ngày và giờ đi phải cách thời gian hiện tại ít nhất 4 giờ.');
             return;
           }
-          const response = await createCarpoolRequest(requestData);
+          const response = await createCarpoolRequest(requestData, authState.token);
           if (response.data.allowCreateNew) {
             navigation.navigate('Sucessfull');
           }

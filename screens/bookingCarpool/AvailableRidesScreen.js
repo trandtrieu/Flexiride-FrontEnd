@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, FlatList, Text, TouchableOpacity, ActivityIndicator, Alert, StyleSheet } from 'react-native';
 import { getAvailableRides, joinCarpoolRequest } from '../../service/BookingCarpoolApi';
+import { useAuth } from "../../provider/AuthProvider";
 
 export const AvailableRidesScreen = ({ route, navigation }) => {
   const [rides, setRides] = useState([]);
   const [loading, setLoading] = useState(true);
   const { searchParams } = route.params || {};
+  const { authState } = useAuth();
 
   useEffect(() => {
     const fetchRides = async () => {
@@ -44,7 +46,7 @@ export const AvailableRidesScreen = ({ route, navigation }) => {
       console.log('Location:', location, 'Longitude:', longitude, 'Latitude:', latitude);
 
       // Gọi API joinCarpoolRequest với các tham số cần thiết
-      await joinCarpoolRequest(requestId, { location, longitude, latitude });
+      await joinCarpoolRequest(requestId, { location, longitude, latitude }, authState.token);
 
       Alert.alert('Thành công', 'Bạn đã tham gia vào chuyến đi thành công.');
       navigation.navigate('ManageBooking');

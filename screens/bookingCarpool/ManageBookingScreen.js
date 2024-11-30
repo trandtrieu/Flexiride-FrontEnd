@@ -11,7 +11,7 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/FontAwesome'
-
+import { useAuth } from "../../provider/AuthProvider";
 import { useFocusEffect } from '@react-navigation/native';
 import { getCustomerRides, cancelCarpoolRequest } from '../../service/BookingCarpoolApi';
 
@@ -21,6 +21,7 @@ export const ManageBookingScreen = ({ navigation }) => {
   const [dateFilter, setDateFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const { authState } = useAuth();
 
   // Gọi API để tải danh sách chuyến đi mỗi khi màn hình được focus
   useFocusEffect(
@@ -32,7 +33,7 @@ export const ManageBookingScreen = ({ navigation }) => {
   // Gọi API để tải danh sách chuyến đi
   const fetchCustomerRides = async () => {
     try {
-      const response = await getCustomerRides();
+      const response = await getCustomerRides(authState.token);
       const sortedRides = response.data.sort(
         (a, b) => new Date(a.date) - new Date(b.date)
       );
@@ -67,7 +68,7 @@ export const ManageBookingScreen = ({ navigation }) => {
   // Hủy chuyến đi
   const handleCancelRequest = async (requestId) => {
     try {
-      await cancelCarpoolRequest(requestId);
+      await cancelCarpoolRequest(requestId, authState.token);
       Alert.alert('Success', 'Ride request canceled successfully.');
       fetchCustomerRides();
     } catch (error) {

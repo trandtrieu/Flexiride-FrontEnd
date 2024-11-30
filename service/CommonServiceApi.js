@@ -1,19 +1,39 @@
 import axios from 'axios';
+import { IP_ADDRESS } from "@env"; // Assuming IP_ADDRESS is managed via environment variables
 
-const domain = 'http://192.168.111.52:3000/notification'; // Add /notification to the base URL
+// Configure the base domain
+const DOMAIN = `http://${IP_ADDRESS}:3000/notification`; // Use the IP from the environment variable
 
-// Tokens for customer 
-const CUSTOMER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3M2RkNGRkZjJmNWQyM2M1Yzg3YzY0NSIsImVtYWlsIjoidHRoaW5oMjQwMjIwMDJAZ21haWwuY29tIiwiaWF0IjoxNzMyNzI1ODI3LCJleHAiOjE3MzI3Mjk0Mjd9.vHcCWoz-zdvIJtLUxXhXemuvD0RFO7xqaTPFb7j4VRg';
-
-// Configure axios instances with tokens for customer 
-const customerApi = axios.create({
-  baseURL: domain,
-  headers: {
-    Authorization: `Bearer ${CUSTOMER_TOKEN}`,
-  },
-});
+// Function to create Axios instance with token passed as argument
+const createApiInstance = (token) => {
+  return axios.create({
+    baseURL: DOMAIN,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+};
 
 // API for customers
-export const getPersonalNotification = () => customerApi.get('/your-notification');
-export const markAsRead = (requestId) => customerApi.post(`/mark-as-read/${requestId}`);
+export const getPersonalNotification = async (customerToken) => {
+  const customerApi = createApiInstance(customerToken);
+  try {
+    const response = await customerApi.get('/your-notification');
+    return response;
+  } catch (error) {
+    console.error('Error fetching personal notifications:', error.message);
+    throw error;
+  }
+};
 
+export const markAsRead = async (requestId, customerToken) => {
+  const customerApi = createApiInstance(customerToken);
+  try {
+    const response = await customerApi.post(`/mark-as-read/${requestId}`);
+    return response;
+  } catch (error) {
+    console.error('Error marking as read:', error.message);
+    throw error;
+  }
+};
