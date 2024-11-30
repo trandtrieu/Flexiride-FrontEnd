@@ -1,24 +1,28 @@
-// screens/ServiceSelectionScreen.js
 import React from 'react';
-import { View, Button, Text, StyleSheet } from 'react-native';
+import { View, Button, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';  // For adding icons
 
 export const ServiceSelectionScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
-      <View style={styles.section}>
+      <View style={styles.card}>
         <Text style={styles.sectionTitle}>Customer</Text>
-        <Button
-          title="Đặt xe ghép"
+
+        <TouchableOpacity
+          style={styles.button}
           onPress={() => navigation.navigate('TypeService')}
-        />
-        <Button
-          title="Quản lý chuyến xe"
+        >
+          <FontAwesome name="car" size={24} color="white" style={styles.icon} />
+          <Text style={styles.buttonText}>Đặt xe ghép</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.button}
           onPress={() => navigation.navigate('ManageBooking')}
-        />
-        {/* <Button
-          title="Quản lý chuyến xe"
-          onPress={() => navigation.navigate('ManageNotification')}
-        /> */}
+        >
+          <FontAwesome name="list-alt" size={24} color="white" style={styles.icon} />
+          <Text style={styles.buttonText}>Quản lý chuyến xe</Text>
+        </TouchableOpacity>
       </View>      
     </View>
   );
@@ -30,24 +34,44 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#f8f8f8', 
+    backgroundColor: '#FFF9C4',  // Light yellow background
   },
-  section: {
+  card: {
     width: '100%',
-    marginBottom: 20,
+    padding: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 6,
     alignItems: 'center',
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333',
+    marginBottom: 20,
+    color: '#FBC02D',  // Light yellow accent color
   },
-  divider: {
-    height: 1,
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FBC02D',  // Light yellow buttons
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginBottom: 15,
     width: '80%',
-    backgroundColor: '#ccc',
-    marginVertical: 20,
+    justifyContent: 'center',
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '500',
+    marginLeft: 10,
+  },
+  icon: {
+    marginRight: 10,
   },
 });
-
