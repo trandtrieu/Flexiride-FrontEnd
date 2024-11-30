@@ -15,16 +15,7 @@ const ServiceIcons = () => {
           source={require("../../assets/bike-icon.png")}
           style={styles.serviceIcon}
         />
-        <Text style={styles.serviceText}>Xe máy</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.serviceItem}>
-        <Image
-          source={require("../../assets/car-icon.png")}
-          style={styles.serviceIcon}
-        />
-        <Text style={styles.serviceText}>Ô tô</Text>
+        <Text style={styles.serviceText}>Đặt Xe</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -35,7 +26,7 @@ const ServiceIcons = () => {
           source={require("../../assets/hire-driver-icon.png")}
           style={styles.serviceIcon}
         />
-        <Text style={styles.serviceText}>Thuê tài xế</Text>
+        <Text style={styles.serviceText}>Thuê Tài Xế</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.serviceItem}
         onPress={() => navigation.navigate("ServiceSelection")}>
@@ -43,7 +34,7 @@ const ServiceIcons = () => {
           source={require("../../assets/car-pool-icon.png")}
           style={styles.serviceIcon}
         />
-        <Text style={styles.serviceText}>Xe ghép</Text>
+        <Text style={styles.serviceText}>Xe Ghép</Text>
       </TouchableOpacity>
     </View>
   );
