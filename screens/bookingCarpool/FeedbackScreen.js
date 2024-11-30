@@ -9,11 +9,13 @@ import {
 } from 'react-native';
 import { Rating } from 'react-native-ratings';
 import { submitFeedback } from '../../service/BookingCarpoolApi';
+import { useAuth } from "../../provider/AuthProvider";
 
 export const FeedbackScreen = ({ route, navigation }) => {
   const { ride } = route.params; // Dữ liệu chuyến đi được truyền từ route
   const [rating, setRating] = useState(0); // Giá trị mặc định của rating là 0
   const [comment, setComment] = useState('');
+  const { authState } = useAuth();
 
   useEffect(() => {
     console.log('Ride Details:', ride);
@@ -35,7 +37,7 @@ export const FeedbackScreen = ({ route, navigation }) => {
         comment,
         rideId: ride._id, // Gửi rideId vào API
       };
-      await submitFeedback(ride.driver.driverId, feedbackData);
+      await submitFeedback(ride.driver.driverId, feedbackData,  authState.token);
       Alert.alert('Thành công', 'Phản hồi đã được gửi!');
       navigation.navigate('ManageBooking');
     } catch (error) {

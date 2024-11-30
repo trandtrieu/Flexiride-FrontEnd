@@ -3,10 +3,12 @@ import { View, Text, TouchableOpacity, StyleSheet, FlatList } from "react-native
 import { Ionicons } from "@expo/vector-icons"; // Sử dụng icon
 import { getPersonalNotification } from "../service/CommonServiceApi";
 import { useFocusEffect } from "@react-navigation/native"; // Import useFocusEffect
+import { useAuth } from "../provider/AuthProvider";
 
 const ManageNotifications = ({ route, navigation }) => {
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    const { authState } = useAuth();
 
     // Hàm điều hướng đến màn hình chi tiết thông báo
     const navigateToNotificationDetail = (notification) => {
@@ -16,7 +18,7 @@ const ManageNotifications = ({ route, navigation }) => {
     // Hàm lấy dữ liệu thông báo
     const fetchNotifications = async () => {
         try {
-            const response = await getPersonalNotification();
+            const response = await getPersonalNotification(authState.token);
             console.log("Fetching notifications: ", response.data);
 
             // Kiểm tra xem response.data.notifications có tồn tại không
