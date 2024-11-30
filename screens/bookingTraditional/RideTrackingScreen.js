@@ -156,6 +156,29 @@ const RideTrackingScreen = ({ route, navigation }) => {
       };
     }, [navigation])
   );
+  useEffect(() => {
+    const updateRoute = async () => {
+      try {
+        if (driverStatus === "on trip" || driverStatus === "picked up") {
+          // Vẽ tuyến đường từ điểm đón đến điểm đến
+          await calculateRoute(pickupLocation, destination, setRouteData);
+        } else if (
+          driverStatus === "on the way" ||
+          driverStatus === "confirmed"
+        ) {
+          // Vẽ tuyến đường từ tài xế đến điểm đón
+          await calculateRoute(driverLocation, pickupLocation, setRouteData);
+        }
+      } catch (error) {
+        console.error("Error updating route:", error);
+      }
+    };
+
+    // Gọi hàm khi trạng thái hoặc vị trí thay đổi
+    if (pickupLocation && destination && driverLocation) {
+      updateRoute();
+    }
+  }, [driverStatus, pickupLocation, destination, driverLocation]);
 
   useEffect(() => {
     if (!socket.current) {
