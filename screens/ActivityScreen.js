@@ -26,7 +26,7 @@ const ActivityScreen = ({ navigation }) => {
       if (selectedTab === "Đặt xe") {
         // Fetch completed and canceled bookings
         const response = await axios.get(
-          `http://${IP_ADDRESS}:3000/activity-history/${authState.userId}`
+          `https://flexiride-backend.onrender.com/activity-history/${authState.userId}`
         );
         history = response.data.history || [];
       } else {
@@ -48,7 +48,7 @@ const ActivityScreen = ({ navigation }) => {
         }))
       );
     } catch (error) {
-      console.error("Error fetching activities:  ", error);
+      console.error("Error fetching activities:   ", error);
     } finally {
       setLoading(false);
     }

@@ -16,15 +16,19 @@ import { useAuth } from "../provider/AuthProvider";
 import { IP_ADDRESS } from "@env";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { getPersonalNotification } from "../service/CommonServiceApi";
+import { useFocusEffect } from "@react-navigation/native"; // Import useFocusEffect
 
 const Home = ({ navigation }) => {
   const { authState } = useAuth();
   const [activeRide, setActiveRide] = useState(null);
   const [driverDetails, setDriverDetails] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // Load thông tin chuyến đi từ AsyncStorage
   useEffect(() => {
-    console.log("🚀 ~ IP_ADDRESS:", IP_ADDRESS);
+    console.log("🚀 ~ IP_ADDRESS: ", IP_ADDRESS);
 
     const loadActiveRide = async () => {
       try {
@@ -41,6 +45,38 @@ const Home = ({ navigation }) => {
 
     loadActiveRide();
   }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await getPersonalNotification();
+      console.log("Fetching notifications: ", response.data);
+
+      // Kiểm tra xem response.data.notifications có tồn tại không
+      if (response.data && Array.isArray(response.data.notifications)) {
+        const unreadNotifications = response.data.notifications.filter(
+          (notification) => !notification.readBy.includes(response.data.userId)
+        );
+        setNotifications(response.data.notifications);
+        setUnreadCount(unreadNotifications.length);
+        console.log("==============HOME==============");
+      } else {
+        console.error("Không có thông báo hoặc dữ liệu không hợp lệ.");
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchNotifications(); // Gọi lại hàm lấy thông báo mỗi khi màn hình có focus
+    }, [])
+  );
+
+  const navigateToManageNotifications = () => {
+    navigation.navigate("ManageNotifications", { notifications });
+  };
+
   // useEffect(() => {
   //   const clearActiveBooking = async () => {
   //     try {
@@ -61,7 +97,7 @@ const Home = ({ navigation }) => {
       if (activeRide?.driverId) {
         try {
           const response = await axios.get(
-            `http://${IP_ADDRESS}:3000/booking-traditional/location/driver/${activeRide.driverId}`
+            `https://flexiride-backend.onrender.com/booking-traditional/location/driver/${activeRide.driverId}`
           );
           if (response.data && response.data.location) {
             setDriverDetails(response.data.driverDetails);
@@ -84,18 +120,32 @@ const Home = ({ navigation }) => {
     }
   };
 
+  const testTermsScreen = () => {
+    navigation.navigate("TermsScreen");
+  };
   return (
     <View style={styles.container}>
       {/* Nội dung chính */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
+          <TouchableOpacity style={styles.qrButton} onPress={testTermsScreen}>
+            <Ionicons name="qr-code-outline" size={24} color="black" />
+          </TouchableOpacity>
           <TextInput
             style={styles.searchBar}
             placeholder="Tìm kiếm"
             placeholderTextColor="#888"
           />
-          <TouchableOpacity style={styles.heartButton}>
-            <Ionicons name="notifications-outline" size={24} color="black" />
+          <TouchableOpacity
+            style={styles.notificationButton}
+            onPress={navigateToManageNotifications}
+          >
+            <Ionicons name="notifications-outline" size={30} color="black" />
+            {unreadCount > 0 && (
+              <View style={styles.unreadBadge}>
+                <Text style={styles.unreadBadgeText}>{unreadCount}</Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -179,6 +229,26 @@ const Home = ({ navigation }) => {
 const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
+  notificationButton: {
+    position: "relative",
+    padding: 10,
+  },
+  unreadBadge: {
+    position: "absolute",
+    top: -5,
+    right: -5,
+    backgroundColor: "red",
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  unreadBadgeText: {
+    fontSize: 12,
+    color: "white",
+    fontWeight: "bold",
+  },
   container: {
     flex: 1,
     backgroundColor: "#fff",

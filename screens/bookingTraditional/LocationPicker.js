@@ -179,9 +179,9 @@ const LocationPicker = ({ navigation, route }) => {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(toRad(lat1)) *
-        Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c;
@@ -385,11 +385,11 @@ const LocationPicker = ({ navigation, route }) => {
       const { latitude, longitude } = location.coords;
       const distance = previousLocation
         ? calculateDistance(
-            previousLocation.latitude,
-            previousLocation.longitude,
-            latitude,
-            longitude
-          )
+          previousLocation.latitude,
+          previousLocation.longitude,
+          latitude,
+          longitude
+        )
         : null;
 
       if (!previousLocation || distance > 0.5) {
@@ -442,7 +442,7 @@ const LocationPicker = ({ navigation, route }) => {
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
-                placeholder="Đón tại"
+                placeholder="Đón tôi tại"
                 value={pickup ? pickup.name : ""}
                 onChangeText={handlePickupChange}
                 onFocus={() => setIsPickupFocused(true)}

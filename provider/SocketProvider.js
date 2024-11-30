@@ -16,7 +16,7 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     // Kết nối socket khi component khởi tạo
-    socket.current = io("http://192.168.88.142:3000", {
+    socket.current = io("http://192.168.0.96:3000", {
       transports: ["websocket"],
     });
 

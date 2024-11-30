@@ -15,22 +15,28 @@ const ServiceIcons = () => {
           source={require("../../assets/bike-icon.png")}
           style={styles.serviceIcon}
         />
-        <Text style={styles.serviceText}>Đặt xe</Text>
+        <Text style={styles.serviceText}>Đặt Xe</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.serviceItem}>
+      <TouchableOpacity
+        style={styles.serviceItem}
+        onPress={() => navigation.navigate("HireDriverScreen")}
+      >
         <Image
           source={require("../../assets/hire-driver-icon.png")}
           style={styles.serviceIcon}
         />
-        <Text style={styles.serviceText}>Thuê tài xế</Text>
+        <Text style={styles.serviceText}>Thuê Tài Xế</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.serviceItem}>
+      <TouchableOpacity
+        style={styles.serviceItem}
+        onPress={() => navigation.navigate("ServiceSelection")}
+      >
         <Image
           source={require("../../assets/car-pool-icon.png")}
           style={styles.serviceIcon}
         />
-        <Text style={styles.serviceText}>Xe ghép</Text>
+        <Text style={styles.serviceText}>Xe Ghép</Text>
       </TouchableOpacity>
     </View>
   );

@@ -38,9 +38,9 @@ const RouteScreen = ({ route, navigation }) => {
   const [estimatedTime, setEstimatedTime] = useState("");
   const [selectedServiceId, setSelectedServiceId] = useState(null);
   const [selectedServicePrice, setSelectedServicePrice] = useState(null);
-  const [isBooking, setIsBooking] = useState(false);
+  const [isHire, setIsHire] = useState(false);
   const socket = useRef(null);
-  const bookingTimeout = useRef(null);
+  const hireTimeout = useRef(null);
   const [selectedMethod, setSelectedMethod] = useState(
     route.params?.selectedMethod || "cash"
   );
@@ -49,7 +49,7 @@ const RouteScreen = ({ route, navigation }) => {
   const [note, setNote] = useState(""); // State for storing note
   const [noteModalVisible, setNoteModalVisible] = useState(false);
   const openNoteModal = () => setNoteModalVisible(true);
-
+  const [isTermsAccepted, setIsTermsAccepted] = useState(false);
   const images = {
     "bike-icon.png": require("../../assets/bike-icon.png"),
     "car-icon.png": require("../../assets/car-icon.png"),
@@ -63,7 +63,7 @@ const RouteScreen = ({ route, navigation }) => {
     });
 
     socket.current.on("connect", () => {
-      console.log("Customer connected: ", socket.current.id);
+      console.log("Customer connected:", socket.current.id);
     });
 
     const handleRideAccepted = (data) => {
@@ -88,12 +88,12 @@ const RouteScreen = ({ route, navigation }) => {
         requestId: data.requestDetailId,
         driverId: data.driverId,
       });
-      clearTimeout(bookingTimeout.current);
+      clearTimeout(hireTimeout.current);
       Alert.alert(
         "Yêu cầu được chấp nhận",
         `Tài xế ${data.driverId} đã nhận chuyến!`
       );
-      setIsBooking(false);
+      setIsHire(false);
     };
     socket.current.on("rideAccepted", handleRideAccepted);
 
@@ -106,8 +106,8 @@ const RouteScreen = ({ route, navigation }) => {
   useEffect(() => {
     // Kết nối socket và lắng nghe sự kiện
     socket.current.on("requestExpired", () => {
-      clearTimeout(bookingTimeout.current);
-      setIsBooking(false);
+      clearTimeout(hireTimeout.current);
+      setIsHire(false);
     });
 
     return () => {
@@ -147,12 +147,12 @@ const RouteScreen = ({ route, navigation }) => {
   const fetchServicesAndPrices = async () => {
     try {
       const response = await axios.get(
-        `https://flexiride-backend.onrender.com/booking-traditional/service-with-prices`,
+        `https://flexiride-backend.onrender.com/hire-driver/services-with-prices`,
         {
           params: {
             pickupLocation: `${pickupLocation.latitude},${pickupLocation.longitude}`,
             destinationLocation: `${destinationLocation.latitude},${destinationLocation.longitude}`,
-            isAdvanceBooking: false, // Hoặc điều chỉnh dựa trên yêu cầu thực tế
+            isAdvanceHire: false, // Hoặc điều chỉnh dựa trên yêu cầu thực tế
             isBadWeather: false, // Hoặc điều chỉnh dựa trên điều kiện thời tiết
           },
         }
@@ -208,16 +208,34 @@ const RouteScreen = ({ route, navigation }) => {
     return (Value * Math.PI) / 180;
   };
 
-  const handleBookingRequest = () => {
+  const handleHireRequest = () => {
     if (!selectedServiceId) {
-      alert("Vui lòng chọn một dịch vụ trước khi đặt xe");
+      Alert.alert(
+        "Thông Báo!!",
+        'Vui lòng chọn một dịch vụ trước khi nhấn "Thuê Tài Xế"'
+      );
+      return;
+    }
+
+    if (!isTermsAccepted) {
+      Alert.alert(
+        "Điều khoản dịch vụ",
+        "Bạn cần phải đồng ý với điều khoản trước khi thuê tài xế.",
+        [
+          {
+            text: "Xem điều khoản",
+            onPress: () => navigation.navigate("TermsScreen", { onAccept }),
+          },
+        ]
+      );
       return;
     }
     console.log(
-      "🚀 ~ handleBookingRequest ~ selectedServiceId:",
+      "🚀 ~ handleHireRequest ~ selectedServiceId:",
       selectedServiceId
     );
-    setIsBooking(true);
+
+    setIsHire(true);
     socket.current.emit("customerRequest", {
       customerId: authState.userId,
       pickupLocation,
@@ -229,13 +247,17 @@ const RouteScreen = ({ route, navigation }) => {
     });
 
     // Đặt khoảng thời gian chờ phản hồi từ tài xế
-    bookingTimeout.current = setTimeout(() => {
-      setIsBooking(false);
+    hireTimeout.current = setTimeout(() => {
+      setIsHire(false);
       Alert.alert(
         "Không có tài xế khả dụng",
         "Hiện không có tài xế nào chấp nhận yêu cầu của bạn."
       );
     }, 15000);
+  };
+  const onAccept = () => {
+    setIsTermsAccepted(true); // Đánh dấu khách hàng đã chấp nhận
+    navigation.goBack(); // Quay lại màn hình chính
   };
   const handlePaymentMethodPress = () => {
     navigation.navigate("PaymentMethod", {
@@ -388,7 +410,7 @@ const RouteScreen = ({ route, navigation }) => {
               </TouchableOpacity>
             </View>
           </View>
-          {/* Payment and Booking */}
+          {/* Payment and Hire */}
           <View style={styles.paymentOptions}>
             <TouchableOpacity
               style={styles.addNoteButton}
@@ -398,14 +420,14 @@ const RouteScreen = ({ route, navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.bookButton}
-              onPress={handleBookingRequest}
-              disabled={isBooking} // Vô hiệu hóa nút khi đang đặt xe
+              onPress={handleHireRequest}
+              disabled={isHire} // Vô hiệu hóa nút khi đang Thuê Tài Xế
             >
-              {isBooking ? (
+              {isHire ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
                 <>
-                  <Text style={styles.bookButtonText}>Đặt Xe</Text>
+                  <Text style={styles.bookButtonText}>Thuê Tài Xế</Text>
                 </>
               )}
             </TouchableOpacity>

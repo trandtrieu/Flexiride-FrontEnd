@@ -35,7 +35,7 @@ const BottomNavigation = ({ navigation }) => {
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.navItem}
-        onPress={() => navigation.navigate("Account")}
+        onPress={() => navigation.navigate("CustomerProfile")}
       >
         <Ionicons name="person-outline" size={24} color="black" />
         <Text style={styles.navText}>Tài khoản</Text>

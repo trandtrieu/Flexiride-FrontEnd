@@ -13,36 +13,54 @@ export const AvailableRidesScreen = ({ route, navigation }) => {
         setLoading(true);
         console.log('Search Params:', searchParams);
 
+        // Gọi API để lấy danh sách các chuyến đi
         const response = searchParams
           ? await getAvailableRides(searchParams)
           : await getAvailableRides();
 
         console.log('API Response:', response.data);
         setRides(response.data);
-        Alert.alert('Call OK', 'Dữ liệu đã được tải thành công');
       } catch (error) {
         console.error('Error fetching rides:', error.response?.data || error);
-        Alert.alert('Lỗi rồi', 'Không thể tải dữ liệu');
+        Alert.alert('Lỗi', 'Không thể tải dữ liệu.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchRides();
-  }, []);
+  }, [searchParams]);
 
-  const handleJoinRequest = async (requestId) => {
+  const handleJoinRequest = async (requestId, searchParams) => {
     try {
-      await joinCarpoolRequest(requestId);
+      const { location, longitude, latitude } = searchParams || {};
+      console.log("join ne")
+      // if (!location || !longitude || !latitude) {
+      //   Alert.alert('Lỗi', 'Thông tin vị trí không đầy đủ để tham gia chuyến đi.');
+      //   return;
+      // }
+
+      console.log('Request ID:', requestId);
+      console.log('Location:', location, 'Longitude:', longitude, 'Latitude:', latitude);
+
+      // Gọi API joinCarpoolRequest với các tham số cần thiết
+      await joinCarpoolRequest(requestId, { location, longitude, latitude });
+
+      Alert.alert('Thành công', 'Bạn đã tham gia vào chuyến đi thành công.');
       navigation.navigate('ManageBooking');
     } catch (error) {
-      console.error('Error joining request:', error);
-      Alert.alert('Lỗi', error.response.data.message);
+      console.error('Error joining request:', error.response?.data || error);
+      Alert.alert('Lỗi', error.response?.data?.message || 'Có lỗi xảy ra.');
     }
   };
 
   const formatCurrency = (value) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
   };
 
   if (loading) {
@@ -60,17 +78,19 @@ export const AvailableRidesScreen = ({ route, navigation }) => {
             <Text style={styles.location}>{`Từ: ${item.start_location}`}</Text>
             <Text style={styles.location}>{`Đến: ${item.end_location}`}</Text>
             <Text style={styles.time}>{`Giờ khởi hành: ${item.time_start}`}</Text>
-            <Text style={styles.time}>{`Số lượng khách: ${item.account_id.length}/4`}</Text>
             <Text style={styles.time}>
-              {`Tài xế: ${item.driver_id ? "đã nhận" : "chưa nhận"}`}
+              {`Số lượng khách: ${Array.isArray(item.pickup_location) ? item.pickup_location.length : 0}/4`}
+            </Text>
+            <Text style={styles.time}>
+              {`Tài xế: ${item.driver_id ? 'đã nhận' : 'chưa nhận'}`}
             </Text>
             <Text style={styles.price}>
-              {`Giá mỗi khách: ${formatCurrency(item.price / item.account_id.length)}`}
+              {`Giá mỗi khách: ${formatCurrency(item.price / (item.pickup_location?.length || 1))}`}
             </Text>
 
             <TouchableOpacity
               style={styles.joinButton}
-              onPress={() => handleJoinRequest(item._id)}
+              onPress={() => handleJoinRequest(item._id, searchParams)}
             >
               <Text style={styles.joinButtonText}>Tham gia</Text>
             </TouchableOpacity>

@@ -18,7 +18,7 @@ export default function WelcomeScreen({ navigation }) {
 
       <TouchableOpacity
         style={styles.loginButton}
-        onPress={() => navigation.navigate("LoginOptions")}
+        onPress={() => navigation.navigate("Login")}
       >
         <Text style={styles.loginButtonText}>Đăng nhập</Text>
       </TouchableOpacity>
