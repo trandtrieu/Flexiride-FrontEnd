@@ -26,7 +26,7 @@ const ActivityScreen = ({ navigation }) => {
       if (selectedTab === "Đặt xe") {
         // Fetch completed and canceled bookings
         const response = await axios.get(
-          `https://flexiride-backend.onrender.com/activity-history/${authState.userId}`
+          `http://${IP_ADDRESS}:3000/activity-history/${authState.userId}`
         );
         history = response.data.history || [];
       } else {

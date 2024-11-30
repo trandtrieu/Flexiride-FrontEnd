@@ -32,7 +32,7 @@ const ChatScreenCustomer = ({ route, navigation }) => {
   ];
 
   useEffect(() => {
-    socket.current = io(`https://flexiride-backend.onrender.com`, {
+    socket.current = io(`http://${IP_ADDRESS}:3000`, {
       transports: ["websocket"],
       query: { userId },
     });
@@ -53,7 +53,7 @@ const ChatScreenCustomer = ({ route, navigation }) => {
     const fetchMessages = async () => {
       try {
         const response = await axios.get(
-          `https://flexiride-backend.onrender.com/booking-traditional/messages/${roomId}`
+          `http://${IP_ADDRESS}:3000/booking-traditional/messages/${roomId}`
         );
         setMessages(response.data);
       } catch (error) {
@@ -105,7 +105,7 @@ const ChatScreenCustomer = ({ route, navigation }) => {
     const fetchDriverLocation = async () => {
       try {
         const response = await axios.get(
-          `https://flexiride-backend.onrender.com/booking-traditional/location/driver/${driverId}`
+          `http://${IP_ADDRESS}:3000/booking-traditional/location/driver/${driverId}`
         );
         if (response.data && response.data.location) {
           console.log("Driver Location Data:", response.data);

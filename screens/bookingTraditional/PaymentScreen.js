@@ -25,7 +25,7 @@ const PaymentScreen = ({ route, navigation }) => {
     const fetchDetails = async () => {
       try {
         const bookingResponse = await axios.get(
-          `https://flexiride-backend.onrender.com/booking-traditional/request/${requestId}`
+          `http://${IP_ADDRESS}:3000/booking-traditional/request/${requestId}`
         );
 
         if (bookingResponse.data) {
@@ -50,7 +50,7 @@ const PaymentScreen = ({ route, navigation }) => {
       setIsLoading(true);
 
       const response = await axios.post(
-        `https://flexiride-backend.onrender.com/payment-history/create-payos`,
+        `http://${IP_ADDRESS}:3000/payment-history/create-payos`,
         {
           userId: bookingDetails.account_id, // ID khách hàng
           amount: bookingDetails.price, // Tổng tiền
@@ -84,13 +84,10 @@ const PaymentScreen = ({ route, navigation }) => {
           { text: "OK", onPress: () => navigation.navigate("Home") },
         ]);
         // Ví dụ: cập nhật trạng thái đặt xe
-        axios.post(
-          `https://flexiride-backend.onrender.com/booking-traditional/confirm`,
-          {
-            requestId,
-            status: "PAID",
-          }
-        );
+        axios.post(`http://${IP_ADDRESS}:3000/booking-traditional/confirm`, {
+          requestId,
+          status: "PAID",
+        });
       } else if (url.includes("status=CANCELLED")) {
         Alert.alert("Hủy bỏ", "Giao dịch đã bị hủy.", [
           { text: "OK", onPress: () => navigation.navigate("Home") },
