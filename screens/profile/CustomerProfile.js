@@ -162,7 +162,7 @@ const CustomerProfile = ({ route }) => {
       >
         <View style={styles.header}>
           <Icon
-            onPress={() => navigation.navigate("DriverScreen")}
+            onPress={() => navigation.navigate("Home")}
             name="arrow-left"
             size={24}
             color="#000"
