@@ -109,11 +109,16 @@ export default function VerifyWithSelfie({ navigation, route }) {
         const response = await registerCustomer(customerData);
         console.log("Customer registered successfully:", response);
 
-        // Navigate to Login screen after successful registration
-        navigation.navigate("Login");
+        // Show alert for successful registration
+        Alert.alert(
+          "Đăng ký thành công",
+          "Tài khoản của bạn đã được đăng ký thành công. Bạn có thể đăng nhập ngay bây giờ.",
+          [{ text: "OK", onPress: () => navigation.navigate("Login") }]
+        );
       } catch (error) {
         console.error("Registration failed:", error);
       } finally {
+        // navigation.navigate("Login");
         // Hide loading spinner once the process is complete
         setLoading(false);
       }
