@@ -14,7 +14,7 @@ const BottomNavigation = ({ navigation }) => {
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.navItem}
-        onPress={() => navigation.navigate("Activity")}
+        onPress={() => navigation.navigate("ActivityScreen")}
       >
         <Ionicons name="document-text-outline" size={24} color="black" />
         <Text style={styles.navText}>Hoạt động</Text>
@@ -35,7 +35,7 @@ const BottomNavigation = ({ navigation }) => {
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.navItem}
-        onPress={() => navigation.navigate("Account")}
+        onPress={() => navigation.navigate("CustomerProfile")}
       >
         <Ionicons name="person-outline" size={24} color="black" />
         <Text style={styles.navText}>Tài khoản</Text>

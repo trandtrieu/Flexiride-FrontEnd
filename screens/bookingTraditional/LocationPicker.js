@@ -13,8 +13,10 @@ import {
 import { Button, Icon } from "react-native-elements";
 import { TouchableWithoutFeedback } from "react-native";
 import * as Location from "expo-location";
-import { VIETMAP_API_KEY } from "@env";
+import { IP_ADDRESS, VIETMAP_API_KEY } from "@env";
 import _ from "lodash";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Ionicons } from "@expo/vector-icons";
 
 const LocationPicker = ({ navigation, route }) => {
   const [selectedTab, setSelectedTab] = useState("recent");
@@ -27,13 +29,28 @@ const LocationPicker = ({ navigation, route }) => {
   const [nearbyPlaces, setNearbyPlaces] = useState([]);
   const predictionCache = {};
   const nearbyPlacesCache = {};
+  const [activeRide, setActiveRide] = useState(null);
 
   let previousLocation = null;
 
   useEffect(() => {
+    console.log("IP_ADDRESS: " + IP_ADDRESS);
     getCurrentLocation();
   }, []);
+  useEffect(() => {
+    const loadActiveRide = async () => {
+      try {
+        const ride = await AsyncStorage.getItem("activeRide");
+        if (ride) {
+          setActiveRide(JSON.parse(ride));
+        }
+      } catch (error) {
+        console.error("Error loading active ride:", error);
+      }
+    };
 
+    loadActiveRide();
+  }, []);
   useEffect(() => {
     // Lắng nghe sự kiện khi màn hình này được focus để cập nhật pickup
     const unsubscribe = navigation.addListener("focus", () => {
@@ -546,6 +563,22 @@ const LocationPicker = ({ navigation, route }) => {
                 Đã lưu
               </Text>
             </TouchableOpacity>
+            {activeRide && (
+              <TouchableOpacity
+                style={styles.activeRideButton}
+                onPress={() => {
+                  navigation.navigate("RideTrackingScreen", {
+                    requestId: activeRide.requestId,
+                    driverId: activeRide.driverId,
+                  });
+                }}
+              >
+                <Ionicons name="navigate-circle" size={24} color="blue" />
+                <Text style={styles.activeRideText}>
+                  Truy cập chuyến đi hiện tại
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
 

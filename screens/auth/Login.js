@@ -14,7 +14,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { useAuth } from "../../provider/AuthProvider";
-import { IP_ADDRESS } from "@env";
+import { IP_ADDRESS, VIETMAP_API_KEY } from "@env";
 
 const Login = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -63,8 +63,8 @@ const Login = ({ navigation }) => {
             token: response.data.token,
             user: response.data.user,
           });
-          // navigation.navigate("Home");
-          navigation.navigate("CustomerProfile");
+          navigation.navigate("Home");
+          // navigation.navigate("CustomerProfile");
         }
       } catch (error) {
         console.error("Error during login:", error);

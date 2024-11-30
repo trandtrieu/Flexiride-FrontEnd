@@ -26,7 +26,7 @@ export default function PaymentMethodsScreen({ route, navigation }) {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text style={styles.title}>Phương thức thanh toán</Text>
+        <Text style={styles.title}>Phương thức thanh toán </Text>
       </View>
       <Text style={styles.subtitle}>Các phương thức được liên kết</Text>
 
