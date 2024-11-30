@@ -3,11 +3,11 @@ import {
   View,
   Text,
   Image,
-  TextInput,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
   Dimensions,
+  RefreshControl, // Import RefreshControl
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import BottomNavigation from "./layouts/BottomNavigation";
@@ -17,7 +17,7 @@ import { IP_ADDRESS } from "@env";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { getPersonalNotification } from "../service/CommonServiceApi";
-import { useFocusEffect } from "@react-navigation/native"; // Import useFocusEffect
+import { useFocusEffect } from "@react-navigation/native";
 
 const Home = ({ navigation }) => {
   const { authState } = useAuth();
@@ -25,32 +25,27 @@ const Home = ({ navigation }) => {
   const [driverDetails, setDriverDetails] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [refreshing, setRefreshing] = useState(false); // State cho refresh
+  const [request, setRequest] = useState(null);
 
   // Load thông tin chuyến đi từ AsyncStorage
-  useEffect(() => {
-    console.log("🚀 ~ IP_ADDRESS: ", IP_ADDRESS);
-
-    const loadActiveRide = async () => {
-      try {
-        const ride = await AsyncStorage.getItem("activeRide");
-        if (ride) {
-          const parsedRide = JSON.parse(ride);
-          setActiveRide(parsedRide);
-          console.log("Active Ride:", parsedRide);
-        }
-      } catch (error) {
-        console.error("Error loading active ride:", error);
+  const loadActiveRide = async () => {
+    try {
+      const ride = await AsyncStorage.getItem("activeRide");
+      if (ride) {
+        const parsedRide = JSON.parse(ride);
+        setActiveRide(parsedRide);
+        console.log("Active Ride:", parsedRide);
       }
-    };
-
-    loadActiveRide();
-  }, []);
+    } catch (error) {
+      console.error("Error loading active ride:", error);
+    }
+  };
 
   const fetchNotifications = async () => {
     try {
       const response = await getPersonalNotification(authState.token);
 
-      // Kiểm tra xem response.data.notifications có tồn tại không
       if (response.data && Array.isArray(response.data.notifications)) {
         const unreadNotifications = response.data.notifications.filter(
           (notification) => !notification.readBy.includes(response.data.userId)
@@ -61,41 +56,56 @@ const Home = ({ navigation }) => {
         console.error("Không có thông báo hoặc dữ liệu không hợp lệ.");
       }
     } catch (error) {
-      console.error("Error fetching notifications:", error);
+      // console.error("Error fetching notifications:", error);
     }
   };
 
-  useFocusEffect(
-    React.useCallback(() => {
-      fetchNotifications(); // Gọi lại hàm lấy thông báo mỗi khi màn hình có focus
-    }, [])
-  );
+  useEffect(() => {
+    console.log("🚀 ~ IP_ADDRESS: ", IP_ADDRESS);
+    loadActiveRide();
+    fetchNotifications();
+  }, []);
+  useEffect(() => {
+    if (!activeRide?.requestId || request?.requestId === activeRide.requestId) {
+      return; // Không gọi API nếu không có thay đổi
+    }
 
-  const navigateToManageNotifications = () => {
-    navigation.navigate("ManageNotifications", { notifications });
-  };
+    const fetchRequestDetail = async (requestId) => {
+      try {
+        const response = await axios.get(
+          `https://flexiride.onrender.com/booking-traditional/request/${requestId}`
+        );
 
-  // useEffect(() => {
-  //   const clearActiveBooking = async () => {
-  //     try {
-  //       await AsyncStorage.removeItem("activeRide");
-  //       console.log("Active booking cleared successfully!");
-  //     } catch (error) {
-  //       console.error("Failed to clear active booking:", error);
-  //     }
-  //   };
+        if (response.data) {
+          setRequest(response.data);
 
-  //   // Gọi hàm để xóa
-  //   clearActiveBooking();
-  // }, []);
+          if (response.data.status === "completed") {
+            await AsyncStorage.removeItem("activeRide");
+            setActiveRide(null);
+          } else if (response.data.status === "canceled") {
+            setActiveRide(null);
+            await AsyncStorage.removeItem("activeRide");
+          }
+        } else {
+          Alert.alert(
+            "Lỗi",
+            "Không tìm thấy yêu cầu nào khớp với thời gian đã chọn."
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching request details:", error);
+        Alert.alert("Lỗi", "Không thể lấy thông tin yêu cầu");
+      }
+    };
 
-  // Fetch thông tin vị trí tài xế
+    fetchRequestDetail(activeRide.requestId);
+  }, [activeRide, request]);
   useEffect(() => {
     const fetchDriverLocation = async () => {
       if (activeRide?.driverId) {
         try {
           const response = await axios.get(
-            `http://${IP_ADDRESS}:3000/booking-traditional/location/driver/${activeRide.driverId}`
+            `https://flexiride.onrender.com/booking-traditional/location/driver/${activeRide.driverId}`
           );
           if (response.data && response.data.location) {
             setDriverDetails(response.data.driverDetails);
@@ -109,6 +119,17 @@ const Home = ({ navigation }) => {
     fetchDriverLocation();
   }, [activeRide]);
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadActiveRide();
+    await fetchNotifications();
+    setRefreshing(false);
+  };
+
+  const navigateToManageNotifications = () => {
+    navigation.navigate("ManageNotifications", { notifications });
+  };
+
   const navigateToRide = () => {
     if (activeRide) {
       navigation.navigate("RideTrackingScreen", {
@@ -118,17 +139,15 @@ const Home = ({ navigation }) => {
     }
   };
 
-  const testTermsScreen = () => {
-    navigation.navigate("TermsScreen");
-  };
   return (
     <View style={styles.container}>
-      {/* Nội dung chính */}
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <View style={styles.header}>
-          {/* <TouchableOpacity style={styles.qrButton} onPress={testTermsScreen}>
-            <Ionicons name="qr-code-outline" size={24} color="black" />
-          </TouchableOpacity> */}
           <View style={styles.locationContainer}>
             <Text style={styles.text}>Đón bạn tại</Text>
             <TouchableOpacity>
@@ -152,19 +171,6 @@ const Home = ({ navigation }) => {
         </View>
 
         <ServiceIcons />
-
-        {/* <View style={styles.cardsContainer}>
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Activate</Text>
-            <Text style={styles.cardSubTitle}>FRidePay</Text>
-            <Ionicons name="wallet-outline" size={24} color="green" />
-          </View>
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Use Points</Text>
-            <Text style={styles.cardSubTitle}>758</Text>
-            <Ionicons name="wallet-outline" size={24} color="blue" />
-          </View>
-        </View> */}
 
         <View style={styles.bookNowContainer}>
           <Text style={styles.bookNowTitle}>ĐẶT XE NGAY</Text>
@@ -194,7 +200,6 @@ const Home = ({ navigation }) => {
         </View>
       </ScrollView>
 
-      {/* Thông tin chuyến đi */}
       {activeRide && (
         <TouchableOpacity
           style={styles.activeRideContainer}
@@ -222,7 +227,6 @@ const Home = ({ navigation }) => {
         </TouchableOpacity>
       )}
 
-      {/* Thanh điều hướng dưới cùng */}
       <BottomNavigation navigation={navigation} />
     </View>
   );

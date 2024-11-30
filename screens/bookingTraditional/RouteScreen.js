@@ -59,7 +59,7 @@ const RouteScreen = ({ route, navigation }) => {
     console.log("destinationLocation: ", destinationLocation);
 
     console.log("IP_ADDRESS" + IP_ADDRESS);
-    socket.current = io(`http://${IP_ADDRESS}:3000`, {
+    socket.current = io(`https://flexiride.onrender.com`, {
       transports: ["websocket"],
       query: { customerId: authState.userId },
     });
@@ -149,7 +149,7 @@ const RouteScreen = ({ route, navigation }) => {
   const fetchServicesAndPrices = async () => {
     try {
       const response = await axios.get(
-        `http://${IP_ADDRESS}:3000/booking-traditional/service-with-prices`,
+        `https://flexiride.onrender.com/booking-traditional/service-with-prices`,
         {
           params: {
             pickupLocation: `${pickupLocation.latitude},${pickupLocation.longitude}`,

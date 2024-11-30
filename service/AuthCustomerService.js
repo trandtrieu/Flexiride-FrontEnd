@@ -1,8 +1,8 @@
 import axios from "axios";
 import { IP_ADDRESS } from "@env";
 
-const CUSTOMER_API_URL = `http://${IP_ADDRESS}:3000/customer/`;
-const AUTH_API_URL = `http://${IP_ADDRESS}:3000/auth/`;
+const CUSTOMER_API_URL = `https://flexiride.onrender.com/customer/`;
+const AUTH_API_URL = `https://flexiride.onrender.com/auth/`;
 
 const registerCustomer = async (customerData) => {
   try {

@@ -26,7 +26,7 @@ const ActivityScreen = ({ navigation }) => {
       if (selectedTab === "Đặt xe") {
         // Fetch completed and canceled bookings
         const response = await axios.get(
-          `http://${IP_ADDRESS}:3000/activity-history/${authState.userId}`
+          `https://flexiride.onrender.com/activity-history/${authState.userId}`
         );
         history = response.data.history || [];
       } else {
@@ -41,7 +41,7 @@ const ActivityScreen = ({ navigation }) => {
           to: item.destination,
           date: item.time,
           price: item.price ? `${item.price.toLocaleString("vi-VN")}₫` : null,
-          status: item.status === "completed" ? "Hoàn thành" : "Đã hủy",
+          status: item.status === "Hoàn thành" ? "Hoàn thành" : "Đã hủy",
           vehicle: "bike", // Adjust based on API data
           pickupCoordinates: item.pickupCoordinates, // Thêm tọa độ điểm đón
           destinationCoordinates: item.destinationCoordinates, // Thêm tọa độ điểm đến

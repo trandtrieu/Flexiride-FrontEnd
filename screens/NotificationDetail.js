@@ -12,7 +12,7 @@ const NotificationDetail = ({ route, navigation }) => {
   useEffect(() => {
     const markAsReadNotification = async () => {
       try {
-        await markAsRead(notification._id, authState.token); 
+        await markAsRead(notification._id, authState.token);
       } catch (error) {
         // console.error("Error marking notification as read", error);
       }
@@ -39,7 +39,9 @@ const NotificationDetail = ({ route, navigation }) => {
         <Text style={styles.notificationDate}>
           {new Date(notification.date).toLocaleString()}
         </Text>
-        <Text style={styles.notificationDescription}>{notification.description}</Text>
+        <Text style={styles.notificationDescription}>
+          {notification.description}
+        </Text>
       </View>
 
       <View style={styles.footer}>
