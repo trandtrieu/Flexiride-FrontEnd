@@ -2,15 +2,17 @@ import React, { useEffect, useState } from "react";
 import { View, Text, Button, StyleSheet, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // Sử dụng icon
 import { markAsRead } from "../service/CommonServiceApi";
+import { useAuth } from "../provider/AuthProvider";
 
 const NotificationDetail = ({ route, navigation }) => {
   const { notification } = route.params;
+  const { authState } = useAuth();
 
   // Hàm đánh dấu thông báo đã đọc
   useEffect(() => {
     const markAsReadNotification = async () => {
       try {
-        await markAsRead(notification._id); 
+        await markAsRead(notification._id, authState.token); 
       } catch (error) {
         // console.error("Error marking notification as read", error);
       }

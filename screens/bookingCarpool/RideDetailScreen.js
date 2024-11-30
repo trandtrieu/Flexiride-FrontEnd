@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Alert, TouchableOpacity, ScrollView } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getDriverLocation, getCustomerLocation } from '../../service/BookingCarpoolApi';
+import { useAuth } from "../../provider/AuthProvider";
 
 const RideDetailScreen = ({ route, navigation }) => {
   const { ride } = route.params;
   const [location, setLocation] = useState(null);
   const [customerLocation, setCustomerLocation] = useState(null);
+  const { authState } = useAuth();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -19,7 +21,7 @@ const RideDetailScreen = ({ route, navigation }) => {
 
   const fetchDriverLocation = async (driverId) => {
     try {
-      const response = await getDriverLocation(driverId);
+      const response = await getDriverLocation(driverId, authState.token);
       setLocation(response.data);
     } catch (error) {
       console.error('Error fetching driver location:', error);
@@ -29,7 +31,7 @@ const RideDetailScreen = ({ route, navigation }) => {
 
   const fetchCustomerLocation = async () => {
     try {
-      const response = await getCustomerLocation(ride._id);
+      const response = await getCustomerLocation(ride._id,  authState.token);
       setCustomerLocation(response.data[0]);
     } catch (error) {
       console.error('Error fetching customer location:', error);

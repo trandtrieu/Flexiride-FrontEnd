@@ -48,7 +48,7 @@ const Home = ({ navigation }) => {
 
   const fetchNotifications = async () => {
     try {
-      const response = await getPersonalNotification();
+      const response = await getPersonalNotification(authState.token);
       console.log("Fetching notifications: ", response.data);
 
       // Kiểm tra xem response.data.notifications có tồn tại không
