@@ -53,8 +53,8 @@ import ManageNotifications from "./screens/ManageNotificationScreen";
 import NotificationDetail from "./screens/NotificationDetail";
 
 // HireDriver
-import ElectronicContractScreen from "./screens/hireDriver/ElectronicContractScreen";
-import RouteHireScreen from "./screens/RouteHireScreen";
+import TermsScreen from "./screens/hireDriver/TermsScreen";
+
 import HireDriverServiceOption from "./screens/hireDriver/HireDriverServiceOptionScreen"
 import HireDriverRequestScreen from "./screens/hireDriver/HireDriverRequestScreen"
 import HireRouteScreen from "./screens/hireDriver/HireRouteScreen"
@@ -267,8 +267,8 @@ export default function App() {
               />
               {/* Screens for hire driver */}
               <Stack.Screen name="HireDriverScreen" component={HireDriverScreen} options={{ headerShown: false }} />
-              <Stack.Screen name="ElectronicContract" component={ElectronicContractScreen} options={{ headerShown: false }} />
-              <Stack.Screen name="RouteHireScreen" component={RouteHireScreen} options={{ headerShown: false }} />
+              <Stack.Screen name="TermsScreen" component={TermsScreen} options={{ headerShown: false }} />
+
               <Stack.Screen name="HireDriverServiceOption" component={HireDriverServiceOption} options={{ headerShown: false }} />
               <Stack.Screen name="HireDriverRequestScreen" component={HireDriverRequestScreen} options={{ headerShown: false }} />
               <Stack.Screen name="HireRouteScreen" component={HireRouteScreen} options={{ headerShown: false }} />
