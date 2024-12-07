@@ -18,6 +18,14 @@ export const ServiceSelectionScreen = ({ navigation }) => {
 
         <TouchableOpacity
           style={styles.button}
+          onPress={() => navigation.navigate('ViewAllAvailableRideScreen')}
+        >
+          <FontAwesome name="car" size={24} color="white" style={styles.icon} />
+          <Text style={styles.buttonText}>Danh sách yêu cầu</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.button}
           onPress={() => navigation.navigate('ManageBooking')}
         >
           <FontAwesome name="list-alt" size={24} color="white" style={styles.icon} />

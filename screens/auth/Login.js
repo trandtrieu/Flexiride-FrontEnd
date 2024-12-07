@@ -17,8 +17,8 @@ import { useAuth } from "../../provider/AuthProvider";
 import { IP_ADDRESS, VIETMAP_API_KEY } from "@env";
 
 const Login = ({ navigation }) => {
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [password, setPassword] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("0123456789");
+  const [password, setPassword] = useState("24022002");
   const [errors, setErrors] = useState({});
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
