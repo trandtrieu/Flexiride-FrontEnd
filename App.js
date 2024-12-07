@@ -37,6 +37,8 @@ import { SucessfullScreen } from "./screens/bookingCarpool/SuccessfullSceen";
 import { FeedbackScreen } from "./screens/bookingCarpool/FeedbackScreen";
 import { TypeService } from "./screens/bookingCarpool/TypeService";
 import RideDetailScreen from "./screens/bookingCarpool/RideDetailScreen";
+import { ViewAllAvailableRideScreen } from "./screens/bookingCarpool/ViewAllAvailableRideScreen";
+import { JoinRequestScreen } from "./screens/bookingCarpool/JoinRequestScreen";
 
 import { DriverAvailableRidesScreen } from "./screens/bookingCarpoolDriver/DriverAvailableRidesScreen";
 import { ManageDriverRidesScreen } from "./screens/bookingCarpoolDriver/ManageDriverRidesScreen";
@@ -202,6 +204,8 @@ export default function App() {
               <Stack.Screen name="FeedbackScreen" component={FeedbackScreen} />
               <Stack.Screen name="TypeService" component={TypeService} />
               <Stack.Screen name="RideDetailScreen" component={RideDetailScreen} />
+              <Stack.Screen name="ViewAllAvailableRideScreen" component={ViewAllAvailableRideScreen} />
+              <Stack.Screen name="JoinRequestScreen" component={JoinRequestScreen} />
 
               {/* Screens for booking carpool driver */}
               <Stack.Screen
