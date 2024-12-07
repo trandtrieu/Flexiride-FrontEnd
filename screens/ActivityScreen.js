@@ -20,20 +20,26 @@ const ActivityScreen = ({ navigation }) => {
   const { authState } = useAuth();
 
   const fetchActivities = async () => {
+    console.log("User ID:", authState.userId);
+
     setLoading(true);
     try {
-      let history = [];
+      let response;
       if (selectedTab === "Đặt xe") {
-        // Fetch completed and canceled bookings
-        const response = await axios.get(
-          `https://flexiride.onrender.com/activity-history/${authState.userId}`
+        response = await axios.get(
+          `https://flexiride.onrender.com/activity-history/booking/${authState.userId}`
         );
-        history = response.data.history || [];
-      } else {
-        history = []; // Placeholder for other tabs
+      } else if (selectedTab === "Thuê tài xế") {
+        response = await axios.get(
+          `https://flexiride.onrender.com/activity-history/hire/${authState.userId}`
+        );
+      } else if (selectedTab === "Xe ghép") {
+        response = await axios.get(
+          `https://flexiride.onrender.com/activity-history/carpool/${authState.userId}`
+        );
       }
 
-      // Map data into display format
+      const history = response?.data?.history || [];
       setActivities(
         history.map((item, index) => ({
           id: `${index}`,
@@ -42,13 +48,13 @@ const ActivityScreen = ({ navigation }) => {
           date: item.time,
           price: item.price ? `${item.price.toLocaleString("vi-VN")}₫` : null,
           status: item.status === "Hoàn thành" ? "Hoàn thành" : "Đã hủy",
-          vehicle: "bike", // Adjust based on API data
-          pickupCoordinates: item.pickupCoordinates, // Thêm tọa độ điểm đón
-          destinationCoordinates: item.destinationCoordinates, // Thêm tọa độ điểm đến
+          vehicle: "bike", // Có thể sửa thành logic từ API
+          pickupCoordinates: item.pickupCoordinates,
+          destinationCoordinates: item.destinationCoordinates,
         }))
       );
     } catch (error) {
-      console.error("Error fetching activities: ssss ", error);
+      console.error("Error fetching activities: ", error);
     } finally {
       setLoading(false);
     }
@@ -57,6 +63,7 @@ const ActivityScreen = ({ navigation }) => {
   useEffect(() => {
     fetchActivities();
   }, [selectedTab]);
+
 
   const renderItem = ({ item }) => (
     <View style={styles.card}>
@@ -86,24 +93,40 @@ const ActivityScreen = ({ navigation }) => {
           {item.price && <Text style={styles.price}>{item.price}</Text>}
           <TouchableOpacity
             style={styles.reorderButton}
-            onPress={() =>
-              navigation.navigate("RouteScreen", {
-                pickupLocation: {
-                  latitude: item.pickupCoordinates.latitude,
-                  longitude: item.pickupCoordinates.longitude,
-                  name: item.from,
-                },
-                destinationLocation: {
-                  latitude: item.destinationCoordinates.latitude,
-                  longitude: item.destinationCoordinates.longitude,
-                  name: item.to,
-                },
-              })
-            }
+            onPress={() => {
+              if (selectedTab === "Đặt xe") {
+                navigation.navigate("RouteScreen", {
+                  pickupLocation: {
+                    latitude: item.pickupCoordinates.latitude,
+                    longitude: item.pickupCoordinates.longitude,
+                    name: item.from,
+                  },
+                  destinationLocation: {
+                    latitude: item.destinationCoordinates.latitude,
+                    longitude: item.destinationCoordinates.longitude,
+                    name: item.to,
+                  },
+                });
+              } else if (selectedTab === "Thuê tài xế") {
+                navigation.navigate("HireRouteScreen", {
+                  pickupLocation: {
+                    latitude: item.pickupCoordinates.latitude,
+                    longitude: item.pickupCoordinates.longitude,
+                    name: item.from,
+                  },
+                  destinationLocation: {
+                    latitude: item.destinationCoordinates.latitude,
+                    longitude: item.destinationCoordinates.longitude,
+                    name: item.to,
+                  },
+                });
+              }
+            }}
           >
             <Text style={styles.reorderText}>Đặt lại</Text>
             <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
           </TouchableOpacity>
+
         </View>
       </View>
     </View>
@@ -131,7 +154,11 @@ const ActivityScreen = ({ navigation }) => {
               styles.tabButton,
               selectedTab === tab && styles.activeTabButton,
             ]}
-            onPress={() => setSelectedTab(tab)}
+            onPress={() => {
+              if (selectedTab !== tab) {
+                setSelectedTab(tab); // Cập nhật tab đã chọn
+              }
+            }}
           >
             <Text
               style={[
