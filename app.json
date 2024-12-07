@@ -19,16 +19,27 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
+      "package": "com.trandtrieu.flex"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "scheme": "flexiride",
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "extra": {
       "payosReturnUrl": "flexiride://ReturnScreen",
-      "payosCancelUrl": "flexiride://CancelScreen"
+      "payosCancelUrl": "flexiride://CancelScreen",
+      "eas": {
+        "projectId": "e2c864e7-964b-4029-b07b-e9922be95c31"
+      }
     },
     "owner": "trandtrieu",
     "newArchEnabled": true

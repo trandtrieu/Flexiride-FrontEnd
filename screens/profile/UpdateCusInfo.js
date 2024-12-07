@@ -34,7 +34,7 @@ const UpdateCusInfo = ({ navigation, route }) => {
         setSelectedGender(customerData.gender || "");
       } catch (error) {
         Alert.alert("Error", "Failed to load customer information.");
-        console.error("Error fetching customer details:", error.message);
+        console.error("Error fetching customer details: ", error.message);
       }
     };
 

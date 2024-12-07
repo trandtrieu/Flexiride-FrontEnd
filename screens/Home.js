@@ -25,8 +25,8 @@ const Home = ({ navigation }) => {
   const [driverDetails, setDriverDetails] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [refreshing, setRefreshing] = useState(false); // State cho refresh
   const [request, setRequest] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Load thông tin chuyến đi từ AsyncStorage
   const loadActiveRide = async () => {
@@ -38,7 +38,7 @@ const Home = ({ navigation }) => {
         console.log("Active Ride:", parsedRide);
       }
     } catch (error) {
-      console.error("Error loading active ride:", error);
+      console.error("Error loading active ride: ", error);
     }
   };
 
@@ -60,11 +60,13 @@ const Home = ({ navigation }) => {
     }
   };
 
-  useEffect(() => {
-    console.log("🚀 ~ IP_ADDRESS: ", IP_ADDRESS);
-    loadActiveRide();
-    fetchNotifications();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      loadActiveRide();
+      fetchNotifications();
+    }, [])
+  );
+
   useEffect(() => {
     if (!activeRide?.requestId || request?.requestId === activeRide.requestId) {
       return; // Không gọi API nếu không có thay đổi
@@ -119,11 +121,15 @@ const Home = ({ navigation }) => {
     fetchDriverLocation();
   }, [activeRide]);
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await loadActiveRide();
-    await fetchNotifications();
-    setRefreshing(false);
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([loadActiveRide()]);
+    } catch (error) {
+      console.error("Error during refresh:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const navigateToManageNotifications = () => {
@@ -144,7 +150,7 @@ const Home = ({ navigation }) => {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
         }
       >
         <View style={styles.header}>
@@ -169,6 +175,12 @@ const Home = ({ navigation }) => {
             )}
           </TouchableOpacity>
         </View>
+        {isRefreshing && (
+          <View style={{ alignItems: "center", marginVertical: 10 }}>
+            <Ionicons name="reload-outline" size={24} color="blue" />
+            <Text>Đang làm mới...</Text>
+          </View>
+        )}
 
         <ServiceIcons />
 
@@ -237,7 +249,6 @@ const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
   notificationButton: {
     position: "relative",
-    padding: 10,
   },
   unreadBadge: {
     position: "absolute",
@@ -280,10 +291,11 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    padding: 10,
+    justifyContent: "space-between",
     backgroundColor: "#FFD700",
+    padding: 10,
+    elevation: 2,
   },
   qrButton: {
     padding: 10,
@@ -291,9 +303,10 @@ const styles = StyleSheet.create({
   searchBar: {
     flex: 1,
     marginHorizontal: 10,
+    backgroundColor: "#f1f1f1",
+    borderRadius: 20,
     paddingHorizontal: 15,
-    borderRadius: 10,
-    backgroundColor: "#fff",
+    height: 40,
   },
   heartButton: {
     padding: 10,

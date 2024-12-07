@@ -39,7 +39,7 @@ const CustomerProfile = ({ route }) => {
       // Update state with the customer data
       setPersonalInfo(customerData);
     } catch (error) {
-      console.error("Error fetching customer data:", error);
+      console.error("Error fetching customer data: ", error);
       // Handle error appropriately (e.g., show an alert or set an error state)
     }
   };

@@ -103,7 +103,7 @@ const RideTrackingScreen = ({ route, navigation }) => {
 
   const [driverLocation, setDriverLocation] = useState(null);
   const [driverDetails, setDriverDetails] = useState({});
-  const [driverStatus, setDriverStatus] = useState("offline");
+  const [driverStatus, setDriverStatus] = useState("Đang đến");
 
   const [routeData, setRouteData] = useState({
     coordinates: [],
@@ -127,7 +127,7 @@ const RideTrackingScreen = ({ route, navigation }) => {
         return null;
       }
     } catch (error) {
-      console.error("Error fetching request status:", error);
+      console.error("Error fetching request status: ", error);
       return null;
     }
   };
@@ -223,7 +223,7 @@ const RideTrackingScreen = ({ route, navigation }) => {
         const driver = await fetchDriverDetails(driverId);
         setDriverLocation(driver.location);
         setDriverDetails(driver.details);
-        setDriverStatus(driver.status);
+        // setDriverStatus(driver.status);
 
         await calculateRoute(driver.location, pickup, setRouteData);
       } catch (error) {
