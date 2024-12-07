@@ -22,7 +22,7 @@ export const createCarpoolRequest = async (data, customerToken) => {
     const response = await customerApi.post('/create-request', data);
     return response;
   } catch (error) {
-    console.error('Error creating carpool request:', error.message);
+    // console.error('Error creating carpool request:', error.message);
     throw error;
   }
 };
@@ -30,10 +30,12 @@ export const createCarpoolRequest = async (data, customerToken) => {
 export const getAvailableRides = async (params, customerToken) => {
   const customerApi = createApiInstance(customerToken);
   try {
+    console.log("check", customerToken)
     const response = await customerApi.get('/available-rides', { params });
     return response;
   } catch (error) {
-    console.error('Error fetching available rides:', error.message);
+    
+    // console.error('Error fetching available rides:', error.message);
     throw error;
   }
 };
@@ -44,7 +46,7 @@ export const joinCarpoolRequest = async (requestId, location, customerToken) => 
     const response = await customerApi.post(`/join-request/${requestId}`, location);
     return response;
   } catch (error) {
-    console.error('Error joining carpool request:', error.message);
+    // console.error('Error joining carpool request:', error.message);
     throw error;
   }
 };
@@ -55,7 +57,7 @@ export const cancelCarpoolRequest = async (requestId, customerToken) => {
     const response = await customerApi.post(`/unjoin-request/${requestId}`);
     return response;
   } catch (error) {
-    console.error('Error canceling carpool request:', error.message);
+    // console.error('Error canceling carpool request:', error.message);
     throw error;
   }
 };
@@ -66,7 +68,7 @@ export const getCustomerRides = async (customerToken) => {
     const response = await customerApi.get('/my-rides');
     return response;
   } catch (error) {
-    console.error('Error fetching customer rides:', error.message);
+    // console.error('Error fetching customer rides:', error.message);
     throw error;
   }
 };
@@ -77,7 +79,7 @@ export const getCustomerNotifications = async (customerToken) => {
     const response = await customerApi.get('/notification/');
     return response;
   } catch (error) {
-    console.error('Error fetching customer notifications:', error.message);
+    // console.error('Error fetching customer notifications:', error.message);
     throw error;
   }
 };
@@ -88,7 +90,7 @@ export const submitFeedback = async (driverId, feedbackData, customerToken) => {
     const response = await customerApi.post(`/feedback/${driverId}`, feedbackData);
     return response;
   } catch (error) {
-    console.error('Error submitting feedback:', error.message);
+    // console.error('Error submitting feedback:', error.message);
     throw error;
   }
 };
@@ -99,7 +101,7 @@ export const getDriverLocation = async (driverId, customerToken) => {
     const response = await customerApi.get(`/driver-location/${driverId}`);
     return response;
   } catch (error) {
-    console.error('Error fetching driver location:', error.message);
+    // console.error('Error fetching driver location:', error.message);
     throw error;
   }
 };
@@ -110,7 +112,7 @@ export const getCustomerLocation = async (requestId, customerToken) => {
     const response = await customerApi.get(`/get-location/${requestId}`);
     return response;
   } catch (error) {
-    console.error('Error fetching customer location:', error.message);
+    // console.error('Error fetching customer location:', error.message);
     throw error;
   }
 };
@@ -121,7 +123,7 @@ export const getPersonalNotification = async (customerToken) => {
     const response = await customerApi.get(`/your-notification`);
     return response;
   } catch (error) {
-    console.error('Error fetching personal notifications:', error.message);
+    // console.error('Error fetching personal notifications:', error.message);
     throw error;
   }
 };
@@ -133,7 +135,7 @@ export const getDriverAvailableRides = async (driverToken) => {
     const response = await driverApi.get('/driver-rides/get-request');
     return response;
   } catch (error) {
-    console.error('Error fetching available rides for driver:', error.message);
+    // console.error('Error fetching available rides for driver:', error.message);
     throw error;
   }
 };
@@ -144,7 +146,7 @@ export const acceptCarpoolRequest = async (requestId, driverToken) => {
     const response = await driverApi.post(`/accept-request/${requestId}`);
     return response;
   } catch (error) {
-    console.error('Error accepting carpool request:', error.message);
+    // console.error('Error accepting carpool request:', error.message);
     throw error;
   }
 };
@@ -155,7 +157,7 @@ export const getDriverRides = async (driverToken) => {
     const response = await driverApi.get('/driver-rides');
     return response;
   } catch (error) {
-    console.error('Error fetching driver rides:', error.message);
+    // console.error('Error fetching driver rides:', error.message);
     throw error;
   }
 };
@@ -166,7 +168,7 @@ export const updatePickupProgress = async (rideId, customerId, driverToken) => {
     const response = await driverApi.put(`/driver-rides/${rideId}/pickup/${customerId}`);
     return response;
   } catch (error) {
-    console.error('Error updating pickup progress:', error.message);
+    // console.error('Error updating pickup progress:', error.message);
     throw error;
   }
 };
@@ -177,7 +179,7 @@ export const getCustomerStatusPickup = async (rideId, driverToken) => {
     const response = await driverApi.get(`/driver-rides/${rideId}`);
     return response;
   } catch (error) {
-    console.error('Error fetching customer status:', error.message);
+    // console.error('Error fetching customer status:', error.message);
     throw error;
   }
 };
@@ -188,7 +190,7 @@ export const updateStartStatusRequest = async (rideId, driverToken) => {
     const response = await driverApi.put(`/driver-rides/${rideId}/start`);
     return response;
   } catch (error) {
-    console.error('Error updating start status:', error.message);
+    // console.error('Error updating start status:', error.message);
     throw error;
   }
 };
@@ -199,7 +201,7 @@ export const updateCompleteStatusRequest = async (rideId, driverToken) => {
     const response = await driverApi.put(`/driver-rides/${rideId}/complete`);
     return response;
   } catch (error) {
-    console.error('Error updating complete status:', error.message);
+    // console.error('Error updating complete status:', error.message);
     throw error;
   }
 };

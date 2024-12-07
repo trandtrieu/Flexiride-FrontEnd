@@ -8,7 +8,7 @@ import { VIETMAP_API_KEY } from '@env';
 import { useAuth } from "../../provider/AuthProvider";
 
 export const CarpoolRequestScreen = ({ navigation, route }) => {
-  const { serviceId } = route.params; 
+  const { serviceId } = route.params;
   const [locationDetail, setLocationDetail] = useState('');
   const [predictions, setPredictions] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -35,7 +35,7 @@ export const CarpoolRequestScreen = ({ navigation, route }) => {
     { label: 'Khánh Hòa', value: 'Khánh Hòa', lat: 12.2523, lng: 109.1967 },
     { label: 'Ninh Thuận', value: 'Ninh Thuận', lat: 11.6000, lng: 108.9333 },
     { label: 'Bình Thuận', value: 'Bình Thuận', lat: 10.9281, lng: 108.0965 }
-  ];  
+  ];
 
   // Tính khoảng cách giữa 2 thành phố
   const haversineDistance = (coords1, coords2) => {
@@ -70,8 +70,8 @@ export const CarpoolRequestScreen = ({ navigation, route }) => {
       default:
         pricePerKm = 10000; // Giá mặc định nếu không khớp với bất kỳ serviceId nào
     }
-    console .log("pricePerKm: ",pricePerKm)
-    console .log("serviceId: ",serviceId)
+    console.log("pricePerKm: ", pricePerKm)
+    console.log("serviceId: ", serviceId)
     // Tính giá dựa trên khoảng cách và giá per km
     return Math.round(distance * pricePerKm); // Làm tròn đến hàng đơn vị
   };
@@ -216,6 +216,7 @@ export const CarpoolRequestScreen = ({ navigation, route }) => {
       } catch (error) {
         if (error.response.data.message == "You are already part of another ride on this date that is ongoing or pending.") {
           Alert.alert('Lỗi', 'Bạn có 1 chuyến khác chưa hoàn thành. Vui lòng kiểm tra lại');
+          return;
         }
         if (error.response.data.message == "You already have a similar pending request for this ride within ±1 hours.") {
           const searchParams = {
@@ -231,7 +232,10 @@ export const CarpoolRequestScreen = ({ navigation, route }) => {
 
           Alert.alert('Thông báo', 'Có 1 chuyến tương tự đã được tạo, hãy tham gia nó nhé');
           navigation.navigate('AvailableRides', { searchParams });
+          return;
         }
+        Alert.alert("Lỗi", "Lỗi không thể tạo.");
+
       }
     } else {
       Alert.alert('Lỗi', 'Không tìm thấy vị trí cụ thể. Vui lòng chọn lại.');
