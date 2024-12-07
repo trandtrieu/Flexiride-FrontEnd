@@ -48,7 +48,7 @@ const ActivityScreen = ({ navigation }) => {
         }))
       );
     } catch (error) {
-      console.error("Error fetching activities:   ", error);
+      console.error("Error fetching activities: ssss ", error);
     } finally {
       setLoading(false);
     }

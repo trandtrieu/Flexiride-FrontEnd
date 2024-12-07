@@ -8,6 +8,8 @@ const BottomNavigation = ({ navigation }) => {
       <TouchableOpacity
         style={styles.navItem}
         onPress={() => navigation.navigate("Home")}
+        accessible={true}
+        accessibilityLabel="Go to Home"
       >
         <Ionicons name="home-outline" size={24} color="#FFD700" />
         <Text style={styles.navText}>Trang chủ</Text>
@@ -35,16 +37,15 @@ const styles = StyleSheet.create({
   bottomNavigation: {
     flexDirection: "row",
     justifyContent: "space-around",
+    alignItems: "center",
     backgroundColor: "#fff",
     paddingVertical: 10,
     borderTopColor: "#DDD",
     borderTopWidth: 1,
-    position: "absolute",
-    bottom: 0,
     width: "100%",
     height: 60,
-    paddingBottom: 20,
   },
+
   navItem: {
     alignItems: "center",
   },
