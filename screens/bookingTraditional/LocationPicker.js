@@ -37,20 +37,7 @@ const LocationPicker = ({ navigation, route }) => {
     console.log("IP_ADDRESS: " + IP_ADDRESS);
     getCurrentLocation();
   }, []);
-  useEffect(() => {
-    const loadActiveRide = async () => {
-      try {
-        const ride = await AsyncStorage.getItem("activeRide");
-        if (ride) {
-          setActiveRide(JSON.parse(ride));
-        }
-      } catch (error) {
-        console.error("Error loading active ride:", error);
-      }
-    };
 
-    loadActiveRide();
-  }, []);
   useEffect(() => {
     // Lắng nghe sự kiện khi màn hình này được focus để cập nhật pickup
     const unsubscribe = navigation.addListener("focus", () => {
@@ -134,7 +121,7 @@ const LocationPicker = ({ navigation, route }) => {
       } finally {
         setLoading(false);
       }
-    }, 3000), // Sử dụng debounce với thời gian chờ là 3 giây
+    }, 2000), // Sử dụng debounce với thời gian chờ là 2 giây
     [currentLocation]
   );
 
@@ -179,9 +166,9 @@ const LocationPicker = ({ navigation, route }) => {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c;
@@ -375,7 +362,11 @@ const LocationPicker = ({ navigation, route }) => {
       if (status !== "granted") {
         Alert.alert(
           "Quyền truy cập vị trí bị từ chối",
-          "Ứng dụng cần quyền truy cập vị trí để lấy điểm đón hiện tại."
+          "Ứng dụng cần quyền truy cập vị trí. Vui lòng kiểm tra cài đặt và cấp quyền.",
+          [
+            { text: "Hủy" },
+            { text: "Mở cài đặt", onPress: () => Linking.openSettings() },
+          ]
         );
         setLoading(false);
         return;
@@ -385,11 +376,11 @@ const LocationPicker = ({ navigation, route }) => {
       const { latitude, longitude } = location.coords;
       const distance = previousLocation
         ? calculateDistance(
-          previousLocation.latitude,
-          previousLocation.longitude,
-          latitude,
-          longitude
-        )
+            previousLocation.latitude,
+            previousLocation.longitude,
+            latitude,
+            longitude
+          )
         : null;
 
       if (!previousLocation || distance > 0.5) {
@@ -399,6 +390,11 @@ const LocationPicker = ({ navigation, route }) => {
       }
     } catch (error) {
       console.error("Error getting location", error);
+      Alert.alert(
+        "Không thể lấy vị trí hiện tại",
+        "Vui lòng kiểm tra cài đặt GPS hoặc nhập điểm đón thủ công.",
+        [{ text: "OK" }]
+      );
     } finally {
       setLoading(false);
     }
@@ -563,22 +559,6 @@ const LocationPicker = ({ navigation, route }) => {
                 Đã lưu
               </Text>
             </TouchableOpacity>
-            {activeRide && (
-              <TouchableOpacity
-                style={styles.activeRideButton}
-                onPress={() => {
-                  navigation.navigate("RideTrackingScreen", {
-                    requestId: activeRide.requestId,
-                    driverId: activeRide.driverId,
-                  });
-                }}
-              >
-                <Ionicons name="navigate-circle" size={24} color="blue" />
-                <Text style={styles.activeRideText}>
-                  Truy cập chuyến đi hiện tại
-                </Text>
-              </TouchableOpacity>
-            )}
           </View>
         )}
 
@@ -631,13 +611,13 @@ const LocationPicker = ({ navigation, route }) => {
             </>
           )}
 
-        <View style={styles.footer}>
+        {/* <View style={styles.footer}>
           <Button
             title="Chọn từ bản đồ"
             onPress={handleSelectFromMap}
             buttonStyle={styles.btnMap}
           />
-        </View>
+        </View> */}
       </View>
     </TouchableWithoutFeedback>
   );

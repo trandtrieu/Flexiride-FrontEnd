@@ -127,7 +127,7 @@ const RideTrackingScreen = ({ route, navigation }) => {
         return null;
       }
     } catch (error) {
-      console.error("Error fetching request status: ", error);
+      console.error("Error fetching request status:  ", error);
       return null;
     }
   };
@@ -170,7 +170,7 @@ const RideTrackingScreen = ({ route, navigation }) => {
           await calculateRoute(driverLocation, pickupLocation, setRouteData);
         }
       } catch (error) {
-        console.error("Error updating route:", error);
+        console.error("Error updating route: ", error);
       }
     };
 
@@ -223,7 +223,6 @@ const RideTrackingScreen = ({ route, navigation }) => {
         const driver = await fetchDriverDetails(driverId);
         setDriverLocation(driver.location);
         setDriverDetails(driver.details);
-        // setDriverStatus(driver.status);
 
         await calculateRoute(driver.location, pickup, setRouteData);
       } catch (error) {
@@ -265,40 +264,90 @@ const RideTrackingScreen = ({ route, navigation }) => {
     );
   }
 
-  const handleCancelRide = () => {
-    Alert.alert(
-      "Xác nhận",
-      "Bạn có chắc muốn hủy chuyến đi?",
-      [
-        { text: "Không", style: "cancel" },
-        {
-          text: "Hủy chuyến",
-          style: "destructive",
-          onPress: () => {
-            if (socket.current) {
-              // Gửi sự kiện hủy chuyến qua socket
-              socket.current.emit("cancelRide", {
-                requestId,
-                customerId: authState.userId,
-              });
+  // const handleCancelRide = () => {
+  //   Alert.alert(
+  //     "Xác nhận",
+  //     "Bạn có chắc muốn hủy chuyến đi?",
+  //     [
+  //       { text: "Không", style: "cancel" },
+  //       {
+  //         text: "Hủy chuyến",
+  //         style: "destructive",
+  //         onPress: () => {
+  //           if (socket.current) {
+  //             // Gửi sự kiện hủy chuyến qua socket
+  //             socket.current.emit("cancelRide", {
+  //               requestId,
+  //               customerId: authState.userId,
+  //             });
 
-              // Lắng nghe phản hồi từ server
-              socket.current.on("rideCanceledSuccess", (data) => {
-                AsyncStorage.removeItem("activeRide");
-                navigation.replace("Home");
-              });
+  //             // Lắng nghe phản hồi từ server
+  //             socket.current.on("rideCanceledSuccess", (data) => {
+  //               AsyncStorage.removeItem("activeRide");
+  //               navigation.replace("Home");
+  //             });
 
-              socket.current.on("cancelError", (error) => {
-                Alert.alert("Lỗi", error.message);
-              });
-            } else {
-              Alert.alert("Lỗi", "Kết nối socket không khả dụng.");
-            }
-          },
-        },
-      ],
-      { cancelable: true }
-    );
+  //             socket.current.on("cancelError", (error) => {
+  //               Alert.alert("Lỗi", error.message);
+  //             });
+  //           } else {
+  //             Alert.alert("Lỗi", "Kết nối socket không khả dụng.");
+  //           }
+  //         },
+  //       },
+  //     ],
+  //     { cancelable: true }
+  //   );
+  // };
+  const handleCancelRide = async () => {
+    try {
+      // Kiểm tra trạng thái chuyến đi
+
+      // Chỉ cho phép hủy nếu trạng thái chưa đến điểm đón
+      if (driverStatus === "confirmed" || driverStatus === "on the way") {
+        Alert.alert(
+          "Xác nhận",
+          "Bạn có chắc muốn hủy chuyến đi?",
+          [
+            { text: "Không", style: "cancel" },
+            {
+              text: "Hủy chuyến",
+              style: "destructive",
+              onPress: () => {
+                if (socket.current) {
+                  // Gửi sự kiện hủy chuyến qua socket
+                  socket.current.emit("cancelRide", {
+                    requestId,
+                    customerId: authState.userId,
+                  });
+
+                  // Lắng nghe phản hồi từ server
+                  socket.current.on("rideCanceledSuccess", () => {
+                    AsyncStorage.removeItem("activeRide");
+                    navigation.replace("Home");
+                  });
+
+                  socket.current.on("cancelError", (error) => {
+                    Alert.alert("Lỗi", error.message);
+                  });
+                } else {
+                  Alert.alert("Lỗi", "Kết nối socket không khả dụng.");
+                }
+              },
+            },
+          ],
+          { cancelable: true }
+        );
+      } else {
+        Alert.alert(
+          "Không thể hủy",
+          "Tài xế đã đến điểm đón hoặc đã bắt đầu chuyến đi."
+        );
+      }
+    } catch (error) {
+      console.error("Error canceling ride: ", error);
+      Alert.alert("Lỗi", "Không thể kiểm tra trạng thái chuyến đi.");
+    }
   };
 
   return (

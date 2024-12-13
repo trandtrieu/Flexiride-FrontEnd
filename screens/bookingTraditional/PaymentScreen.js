@@ -63,7 +63,7 @@ const PaymentScreen = ({ route, navigation }) => {
       if (paymentUrl) {
         setPaymentUrl(paymentUrl); // Hiển thị WebView
       } else {
-        Alert.alert("Error", "Failed to create payment link.");
+        Alert.alert("Error", "Failed to create payment link. ");
       }
     } catch (error) {
       console.error("Error creating payment link:", error);
@@ -120,13 +120,6 @@ const PaymentScreen = ({ route, navigation }) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.paymentContainer}>
-        <View style={styles.sectionContainer}>
-          <Text style={styles.label}>Dịch vụ:</Text>
-          <Text style={styles.value}>
-            {bookingDetails.service_option_id || "N/A"}
-          </Text>
-        </View>
-
         <View style={styles.sectionContainer}>
           <Text style={styles.label}>Điểm đón:</Text>
           <Text style={styles.value}>{bookingDetails.pickup}</Text>
@@ -232,7 +225,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 15,
-    backgroundColor: "#2196F3",
+    backgroundColor: "#FFD700",
     borderRadius: 50,
   },
   backButtonText: {

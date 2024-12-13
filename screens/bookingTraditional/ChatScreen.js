@@ -131,7 +131,7 @@ const ChatScreenCustomer = ({ route, navigation }) => {
           style={styles.avatar}
         />
         <View style={styles.userInfo}>
-          <Text style={styles.otherUserName}>{driverDetails.name}</Text>
+          <Text style={styles.otherUserName}>Tài xế: {driverDetails.name}</Text>
           <Text style={styles.otherUserVehicle}>
             {driverDetails.vehiclePlate}
           </Text>

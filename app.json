@@ -21,6 +21,8 @@
       },
       "permissions": [
         "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION"
       ],
       "package": "com.trandtrieu.flex"
@@ -42,6 +44,12 @@
       }
     },
     "owner": "trandtrieu",
-    "newArchEnabled": true
+    "newArchEnabled": true,
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/e2c864e7-964b-4029-b07b-e9922be95c31"
+    }
   }
 }

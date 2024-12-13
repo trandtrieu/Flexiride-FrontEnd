@@ -54,7 +54,7 @@ const ActivityScreen = ({ navigation }) => {
         }))
       );
     } catch (error) {
-      console.error("Error fetching activities: ", error);
+      console.error("Error fetching activities : ", error);
     } finally {
       setLoading(false);
     }
@@ -63,7 +63,6 @@ const ActivityScreen = ({ navigation }) => {
   useEffect(() => {
     fetchActivities();
   }, [selectedTab]);
-
 
   const renderItem = ({ item }) => (
     <View style={styles.card}>
@@ -126,7 +125,6 @@ const ActivityScreen = ({ navigation }) => {
             <Text style={styles.reorderText}>Đặt lại</Text>
             <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
           </TouchableOpacity>
-
         </View>
       </View>
     </View>

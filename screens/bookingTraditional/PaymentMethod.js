@@ -11,7 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 export default function PaymentMethodsScreen({ route, navigation }) {
   const [selectedMethod, setSelectedMethod] = useState(
-    route.params?.selectedMethod || "momo"
+    route.params?.selectedMethod || "online"
   );
 
   const handleSelectMethod = (method) => {
@@ -28,18 +28,17 @@ export default function PaymentMethodsScreen({ route, navigation }) {
         </TouchableOpacity>
         <Text style={styles.title}>Phương thức thanh toán </Text>
       </View>
-      <Text style={styles.subtitle}>Các phương thức được liên kết</Text>
 
       <View style={styles.option}>
         <TouchableOpacity
-          onPress={() => handleSelectMethod("momo")}
+          onPress={() => handleSelectMethod("online")}
           style={styles.methodRow}
         >
-          <Ionicons name="logo-usd" size={24} color="#A626D3" />
-          <Text style={styles.methodText}>MoMo</Text>
+          <Ionicons name="qr-code-outline" size={24} color="#A626D3" />
+          <Text style={styles.methodText}>Thanh toán online</Text>
           <RadioButton
-            value="momo"
-            status={selectedMethod === "momo" ? "checked" : "unchecked"}
+            value="online"
+            status={selectedMethod === "online" ? "checked" : "unchecked"}
           />
         </TouchableOpacity>
       </View>
@@ -70,7 +69,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   header: {
-    marginTop: 25,
+    marginTop: 15,
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 16,

@@ -30,14 +30,13 @@ export const createCarpoolRequest = async (data, customerToken) => {
 export const getAvailableRides = async (params, customerToken) => {
   const customerApi = createApiInstance(customerToken);
   try {
-    console.log("check", customerToken)
-    console.log("params", params)
+    console.log("check", customerToken);
+    console.log("params", params);
     const response = await customerApi.get("/available-rides", { params });
-    console.log("Pass call check", customerToken)
+    console.log("Pass call check", customerToken);
 
     return response;
   } catch (error) {
-    
     // console.error('Error fetching available rides:', error.message);
     throw error;
   }

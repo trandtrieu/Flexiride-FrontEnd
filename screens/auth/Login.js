@@ -67,7 +67,7 @@ const Login = ({ navigation }) => {
           // navigation.navigate("CustomerProfile");
         }
       } catch (error) {
-        console.error("Error during login: ", error);
+        console.error("Error during login:  ", error);
         setErrors({ general: "Số điện thoại hoặc mật khẩu không đúng" });
       } finally {
         setIsLoading(false);

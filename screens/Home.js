@@ -38,10 +38,22 @@ const Home = ({ navigation }) => {
         console.log("Active Ride:", parsedRide);
       }
     } catch (error) {
-      console.error("Error loading active ride: ", error);
+      console.error("Error loading active ride:  ", error);
     }
   };
+  // useEffect(() => {
+  //   const clearActiveBooking = async () => {
+  //     try {
+  //       await AsyncStorage.removeItem("activeRide");
+  //       console.log("Active booking cleared successfully!");
+  //     } catch (error) {
+  //       console.error("Failed to clear active booking:", error);
+  //     }
+  //   };
 
+  //   // Gọi hàm để xóa
+  //   clearActiveBooking();
+  // }, []);
   const fetchNotifications = async () => {
     try {
       const response = await getPersonalNotification(authState.token);
@@ -211,7 +223,6 @@ const Home = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-
       {activeRide && (
         <TouchableOpacity
           style={styles.activeRideContainer}
@@ -238,7 +249,6 @@ const Home = ({ navigation }) => {
           <Ionicons name="chevron-forward-outline" size={24} color="black" />
         </TouchableOpacity>
       )}
-
       <BottomNavigation navigation={navigation} />
     </View>
   );
@@ -249,6 +259,7 @@ const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
   notificationButton: {
     position: "relative",
+    marginLeft: 10,
   },
   unreadBadge: {
     position: "absolute",
@@ -293,9 +304,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    padding: 15,
     backgroundColor: "#FFD700",
-    padding: 10,
-    elevation: 2,
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
+    elevation: 3,
   },
   qrButton: {
     padding: 10,
