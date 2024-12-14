@@ -172,7 +172,7 @@ const RouteScreen = ({ route, navigation }) => {
       );
       setServices(response.data);
     } catch (error) {
-      alert("Hệ thống đang gặp vấn đề. Vui lòng thử lại!!");
+      alert("Hệ thống đang gặp vấn đề. Vui lòng thử lại!! ");
 
       console.error("Error fetching services and prices:", error);
     }

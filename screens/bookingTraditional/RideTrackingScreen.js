@@ -40,7 +40,7 @@ const fetchRequestDetails = async (requestId) => {
       };
     }
   } catch (error) {
-    console.error("Error fetching request details:", error);
+    console.error("Error fetching request detailss: ", error);
     throw new Error("Unable to fetch request details.");
   }
 };
@@ -156,25 +156,36 @@ const RideTrackingScreen = ({ route, navigation }) => {
       };
     }, [navigation])
   );
+  // useEffect(() => {
+  //   const intervalId = setInterval(async () => {
+  //     try {
+  //       const response = await fetchDriverDetails(driverId);
+  //       setDriverLocation(response.location);
+  //       console.log("driver location use effect", driverLocation);
+  //     } catch (error) {
+  //       console.error("Error fetching fallback driver location:", error);
+  //     }
+  //   }, 5000); // Kiểm tra mỗi 5 giây
+
+  //   return () => clearInterval(intervalId);
+  // }, [driverId]);
+
   useEffect(() => {
     const updateRoute = async () => {
       try {
         if (driverStatus === "on trip" || driverStatus === "picked up") {
-          // Vẽ tuyến đường từ điểm đón đến điểm đến
           await calculateRoute(pickupLocation, destination, setRouteData);
         } else if (
           driverStatus === "on the way" ||
           driverStatus === "confirmed"
         ) {
-          // Vẽ tuyến đường từ tài xế đến điểm đón
           await calculateRoute(driverLocation, pickupLocation, setRouteData);
         }
       } catch (error) {
-        console.error("Error updating route: ", error);
+        console.error("Error updating route:", error);
       }
     };
 
-    // Gọi hàm khi trạng thái hoặc vị trí thay đổi
     if (pickupLocation && destination && driverLocation) {
       updateRoute();
     }
@@ -187,29 +198,52 @@ const RideTrackingScreen = ({ route, navigation }) => {
         query: { customerId: authState.userId },
       });
 
+      socket.current.on("driverLocationUpdate", (data) => {
+        if (data.driverId === driverId) {
+          setDriverLocation({
+            latitude: data.location.coordinates[1],
+            longitude: data.location.coordinates[0],
+          });
+        } else {
+          console.warn(
+            "Location update ignored for other driver:",
+            data.driverId
+          );
+        }
+      });
+
       socket.current.on("updateStatus", (data) => {
         const { requestId: updatedRequestId, newStatus } = data;
         if (updatedRequestId === requestId) {
           setDriverStatus(newStatus);
-
-          if (newStatus === "dropped off") {
-            navigation.navigate("PaymentScreen", {
-              requestId,
-            });
-          }
         }
       });
     }
 
-    // Cleanup khi unmount
     return () => {
       if (socket.current) {
-        socket.current.off("updateStatus");
         socket.current.disconnect();
-        socket.current = null;
       }
     };
-  }, [requestId, authState.userId]);
+  }, [driverId, requestId]);
+  useEffect(() => {
+    if (driverLocation && pickupLocation) {
+      calculateRoute(driverLocation, pickupLocation, setRouteData);
+    }
+  }, [driverLocation, pickupLocation]);
+  useEffect(() => {
+    if (driverLocation && pickupLocation && routeData.coordinates.length > 0) {
+      calculateRoute(driverLocation, pickupLocation, setRouteData);
+    }
+  }, [driverLocation]);
+  useEffect(() => {
+    if (routeData.coordinates.length > 0) {
+      mapRef.current?.fitToCoordinates(routeData.coordinates, {
+        edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+        animated: true,
+      });
+    }
+  }, [routeData.coordinates]);
 
   const toggleModal = () => setIsModalVisible(!isModalVisible);
   useEffect(() => {
@@ -368,12 +402,13 @@ const RideTrackingScreen = ({ route, navigation }) => {
             style={{ width: 40, height: 40 }}
           />
         </Marker>
-        <Marker coordinate={driverLocation} title="Tài xế">
+        <Marker coordinate={driverLocation}>
           <Image
             source={require("../../assets/bike-icon.png")}
             style={{ width: 40, height: 40 }}
           />
         </Marker>
+
         <Marker coordinate={destination} title="Điểm đến">
           <Image
             source={require("../../assets/destination-icon.png")} // Replace with your destination icon path

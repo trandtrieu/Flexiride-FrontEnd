@@ -25,17 +25,16 @@
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION"
       ],
+      "googleMaps": {
+        "apiKey": "AIzaSyAmS7EXqYwISQIOzoZF6YUVUx6ZAFiW754"
+      },
       "package": "com.trandtrieu.flex"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "scheme": "flexiride",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "platforms": ["ios", "android", "web"],
     "extra": {
       "payosReturnUrl": "flexiride://ReturnScreen",
       "payosCancelUrl": "flexiride://CancelScreen",

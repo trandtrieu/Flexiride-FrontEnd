@@ -159,7 +159,7 @@ const PaymentScreen = ({ route, navigation }) => {
         style={styles.backButton}
         onPress={() => navigation.navigate("Home")}
       >
-        <Text style={styles.backButtonText}>Trở về trang chủ</Text>
+        <Text style={styles.backButtonText}>Đánh giá </Text>
       </TouchableOpacity>
     </ScrollView>
   );
