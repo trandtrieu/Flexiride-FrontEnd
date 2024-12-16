@@ -56,6 +56,7 @@ import UpdateCusInfo from "./screens/profile/UpdateCusInfo";
 import ChangePassword from "./screens/auth/ChangePassword";
 import ManageNotifications from "./screens/ManageNotificationScreen";
 import NotificationDetail from "./screens/NotificationDetail";
+import { FeedbackCustomerScreen } from "./screens/hireDriver/FeedbackCustomerScreen";
 
 // HireDriver
 import TermsScreen from "./screens/hireDriver/TermsScreen";
@@ -351,6 +352,12 @@ export default function App() {
               <Stack.Screen
                 name="VoucherListScreen"
                 component={VoucherListScreen}
+              />
+
+
+              <Stack.Screen
+                name="FeedbackCustomerScreen"
+                component={FeedbackCustomerScreen}
               />
             </Stack.Navigator>
           </NavigationContainer>

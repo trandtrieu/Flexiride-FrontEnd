@@ -150,7 +150,7 @@ const RouteScreen = ({ route, navigation }) => {
         animated: true,
       });
     } catch (error) {
-      navigation.replace("LocationPicker");
+      // navigation.replace("LocationPicker");
 
       console.error("Error calculating route:  ", error);
     }
@@ -385,8 +385,8 @@ const RouteScreen = ({ route, navigation }) => {
                   </View>
                   <Text style={styles.priceContainer}>
                     {service._id === selectedServiceId &&
-                    originalPrice &&
-                    originalPrice > selectedServicePrice ? ( // Chỉ áp dụng nếu service được chọn
+                      originalPrice &&
+                      originalPrice > selectedServicePrice ? ( // Chỉ áp dụng nếu service được chọn
                       <View>
                         <Text style={styles.discountedPrice}>
                           {formatCurrency(selectedServicePrice)}{" "}

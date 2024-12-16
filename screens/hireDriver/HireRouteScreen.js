@@ -38,6 +38,8 @@ const RouteScreen = ({ route, navigation }) => {
   const [estimatedTime, setEstimatedTime] = useState("");
   const [selectedServiceId, setSelectedServiceId] = useState(null);
   const [selectedServicePrice, setSelectedServicePrice] = useState(null);
+  const [originalPrice, setOriginalPrice] = useState(null); // Lưu giá cũ
+
   const [isHire, setIsHire] = useState(false);
   const socket = useRef(null);
   const hireTimeout = useRef(null);
@@ -269,6 +271,26 @@ const RouteScreen = ({ route, navigation }) => {
     Keyboard.dismiss();
     setNoteModalVisible(false);
   };
+  // Func Ưuu đãi
+  const navigateToVoucherScreen = () => {
+    if (!selectedServiceId) {
+      Alert.alert(
+        "Thông báo",
+        "Vui lòng chọn một dịch vụ trước khi áp dụng ưu đãi!"
+      );
+      return;
+    }
+
+    navigation.navigate("VoucherListScreen", {
+      serviceId: selectedServiceId,
+      price: selectedServicePrice,
+      updatePrice: (newPrice) => {
+        setOriginalPrice(selectedServicePrice); // Lưu giá cũ
+        setSelectedServicePrice(newPrice); // Cập nhật giá mới
+      },
+    });
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
@@ -377,10 +399,25 @@ const RouteScreen = ({ route, navigation }) => {
                     />
                     <Text style={styles.optionSeats}>{service.seat}</Text>
                   </View>
-                  <Text style={styles.actualPrice}>
-                    {service.calculatedFare
-                      ? formatCurrency(service.calculatedFare)
-                      : "Không có giá"}
+                  <Text style={styles.priceContainer}>
+                    {service._id === selectedServiceId &&
+                      originalPrice &&
+                      originalPrice > selectedServicePrice ? ( // Chỉ áp dụng nếu service được chọn
+                      <View>
+                        <Text style={styles.discountedPrice}>
+                          {formatCurrency(selectedServicePrice)}{" "}
+                          {/* Giá sau giảm */}
+                        </Text>
+                        <Text style={styles.originalPrice}>
+                          {formatCurrency(originalPrice)} {/* Giá gốc */}
+                        </Text>
+                      </View>
+                    ) : (
+                      <Text style={styles.actualPrice}>
+                        {formatCurrency(service.calculatedFare)}{" "}
+                        {/* Giá gốc nếu không chọn */}
+                      </Text>
+                    )}
                   </Text>
                 </TouchableOpacity>
               ))
@@ -394,16 +431,18 @@ const RouteScreen = ({ route, navigation }) => {
                   onPress={handlePaymentMethodPress}
                 >
                   <Text style={styles.methodText}>
-                    {selectedMethod === "momo" ? "MoMo" : "Tiền mặt"}
+                    {selectedMethod === "online"
+                      ? "Thanh toán online"
+                      : "Tiền mặt"}
                   </Text>
                 </TouchableOpacity>
               </View>
-              <View style={styles.detailsContainer}>
-                <View style={styles.codeRow}>
-                  <Ionicons name="checkmark-circle" size={16} color="green" />
-                  <Text style={styles.codeText}>CLMGBDNALFR17HJDSJ</Text>
-                </View>
-              </View>
+              <TouchableOpacity
+                style={styles.methodRow}
+                onPress={navigateToVoucherScreen}
+              >
+                <Text style={styles.methodText}>Ưu đãi</Text>
+              </TouchableOpacity>
 
               <TouchableOpacity style={styles.moreOptions}>
                 <Ionicons name="ellipsis-horizontal" size={24} color="black" />
@@ -672,6 +711,22 @@ const styles = StyleSheet.create({
   addNoteButtonText: {
     color: "#00796B",
     fontSize: 16,
+    fontWeight: "bold",
+  },
+  originalPrice: {
+    fontSize: 14,
+    color: "#888",
+    textDecorationLine: "line-through", // Gạch ngang giá cũ
+    marginBottom: 2,
+  },
+  discountedPrice: {
+    fontSize: 16,
+    color: "#ff5722", // Màu nổi bật cho giá đã giảm
+    fontWeight: "bold",
+  },
+  actualPrice: {
+    fontSize: 16,
+    color: "#333",
     fontWeight: "bold",
   },
 });

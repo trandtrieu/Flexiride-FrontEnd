@@ -157,7 +157,9 @@ const PaymentScreen = ({ route, navigation }) => {
       )}
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => navigation.navigate("Home")}
+        // onPress={() => navigation.navigate("Home")}
+        onPress={() => navigation.navigate("FeedbackCustomerScreen")}
+
       >
         <Text style={styles.backButtonText}>Đánh giá </Text>
       </TouchableOpacity>
