@@ -8,6 +8,8 @@ const BottomNavigation = ({ navigation }) => {
       <TouchableOpacity
         style={styles.navItem}
         onPress={() => navigation.navigate("Home")}
+        accessible={true}
+        accessibilityLabel="Go to Home"
       >
         <Ionicons name="home-outline" size={24} color="#FFD700" />
         <Text style={styles.navText}>Trang chủ</Text>
@@ -19,20 +21,7 @@ const BottomNavigation = ({ navigation }) => {
         <Ionicons name="document-text-outline" size={24} color="black" />
         <Text style={styles.navText}>Hoạt động</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.navItem}
-        onPress={() => navigation.navigate("Payment")}
-      >
-        <Ionicons name="card-outline" size={24} color="black" />
-        <Text style={styles.navText}>Thanh toán</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.navItem}
-        onPress={() => navigation.navigate("Messages")}
-      >
-        <Ionicons name="notifications-outline" size={24} color="black" />
-        <Text style={styles.navText}>Tin nhắn</Text>
-      </TouchableOpacity>
+
       <TouchableOpacity
         style={styles.navItem}
         onPress={() => navigation.navigate("CustomerProfile")}
@@ -48,15 +37,15 @@ const styles = StyleSheet.create({
   bottomNavigation: {
     flexDirection: "row",
     justifyContent: "space-around",
+    alignItems: "center",
     backgroundColor: "#fff",
     paddingVertical: 10,
     borderTopColor: "#DDD",
     borderTopWidth: 1,
-    position: "absolute",
-    bottom: 0,
     width: "100%",
     height: 60,
   },
+
   navItem: {
     alignItems: "center",
   },

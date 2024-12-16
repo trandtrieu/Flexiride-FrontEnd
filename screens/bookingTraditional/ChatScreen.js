@@ -32,7 +32,7 @@ const ChatScreenCustomer = ({ route, navigation }) => {
   ];
 
   useEffect(() => {
-    socket.current = io(`https://flexiride-backend.onrender.com`, {
+    socket.current = io(`https://flexiride.onrender.com`, {
       transports: ["websocket"],
       query: { userId },
     });
@@ -53,7 +53,7 @@ const ChatScreenCustomer = ({ route, navigation }) => {
     const fetchMessages = async () => {
       try {
         const response = await axios.get(
-          `https://flexiride-backend.onrender.com/booking-traditional/messages/${roomId}`
+          `https://flexiride.onrender.com/booking-traditional/messages/${roomId}`
         );
         setMessages(response.data);
       } catch (error) {
@@ -105,7 +105,7 @@ const ChatScreenCustomer = ({ route, navigation }) => {
     const fetchDriverLocation = async () => {
       try {
         const response = await axios.get(
-          `https://flexiride-backend.onrender.com/booking-traditional/location/driver/${driverId}`
+          `https://flexiride.onrender.com/booking-traditional/location/driver/${driverId}`
         );
         if (response.data && response.data.location) {
           console.log("Driver Location Data:", response.data);
@@ -131,7 +131,7 @@ const ChatScreenCustomer = ({ route, navigation }) => {
           style={styles.avatar}
         />
         <View style={styles.userInfo}>
-          <Text style={styles.otherUserName}>{driverDetails.name}</Text>
+          <Text style={styles.otherUserName}>Tài xế: {driverDetails.name}</Text>
           <Text style={styles.otherUserVehicle}>
             {driverDetails.vehiclePlate}
           </Text>

@@ -24,11 +24,6 @@ const locations = [
     address: "180 Xô Viết Nghệ Tĩnh",
     subAddress: "180 Xô Viết Nghệ Tĩnh, P. Hòa Cường...",
   },
-  {
-    id: "3",
-    address: "143 Trần Bạch Đằng",
-    subAddress: "143 Tran Bach Dang St., P. Mỹ An, Q. ...",
-  },
 ];
 
 // Static content component

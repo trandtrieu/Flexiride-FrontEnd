@@ -3,11 +3,11 @@ import {
   View,
   Text,
   Image,
-  TextInput,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
   Dimensions,
+  RefreshControl, // Import RefreshControl
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import BottomNavigation from "./layouts/BottomNavigation";
@@ -17,7 +17,7 @@ import { IP_ADDRESS } from "@env";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { getPersonalNotification } from "../service/CommonServiceApi";
-import { useFocusEffect } from "@react-navigation/native"; // Import useFocusEffect
+import { useFocusEffect } from "@react-navigation/native";
 
 const Home = ({ navigation }) => {
   const { authState } = useAuth();
@@ -25,58 +25,22 @@ const Home = ({ navigation }) => {
   const [driverDetails, setDriverDetails] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [request, setRequest] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Load thông tin chuyến đi từ AsyncStorage
-  useEffect(() => {
-    console.log("🚀 ~ IP_ADDRESS: ", IP_ADDRESS);
-
-    const loadActiveRide = async () => {
-      try {
-        const ride = await AsyncStorage.getItem("activeRide");
-        if (ride) {
-          const parsedRide = JSON.parse(ride);
-          setActiveRide(parsedRide);
-          console.log("Active Ride:", parsedRide);
-        }
-      } catch (error) {
-        console.error("Error loading active ride:", error);
-      }
-    };
-
-    loadActiveRide();
-  }, []);
-
-  const fetchNotifications = async () => {
+  const loadActiveRide = async () => {
     try {
-      const response = await getPersonalNotification(authState.token);
-      console.log("Fetching notifications: ", response.data);
-
-      // Kiểm tra xem response.data.notifications có tồn tại không
-      if (response.data && Array.isArray(response.data.notifications)) {
-        const unreadNotifications = response.data.notifications.filter(
-          (notification) => !notification.readBy.includes(response.data.userId)
-        );
-        setNotifications(response.data.notifications);
-        setUnreadCount(unreadNotifications.length);
-        console.log("==============HOME==============");
-      } else {
-        console.error("Không có thông báo hoặc dữ liệu không hợp lệ.");
+      const ride = await AsyncStorage.getItem("activeRide");
+      if (ride) {
+        const parsedRide = JSON.parse(ride);
+        setActiveRide(parsedRide);
+        console.log("Active Ride:", parsedRide);
       }
     } catch (error) {
-      console.error("Error fetching notifications:", error);
+      console.error("Error loading active ride:  ", error);
     }
   };
-
-  useFocusEffect(
-    React.useCallback(() => {
-      fetchNotifications(); // Gọi lại hàm lấy thông báo mỗi khi màn hình có focus
-    }, [])
-  );
-
-  const navigateToManageNotifications = () => {
-    navigation.navigate("ManageNotifications", { notifications });
-  };
-
   // useEffect(() => {
   //   const clearActiveBooking = async () => {
   //     try {
@@ -90,14 +54,72 @@ const Home = ({ navigation }) => {
   //   // Gọi hàm để xóa
   //   clearActiveBooking();
   // }, []);
+  const fetchNotifications = async () => {
+    try {
+      const response = await getPersonalNotification(authState.token);
 
-  // Fetch thông tin vị trí tài xế
+      if (response.data && Array.isArray(response.data.notifications)) {
+        const unreadNotifications = response.data.notifications.filter(
+          (notification) => !notification.readBy.includes(response.data.userId)
+        );
+        setNotifications(response.data.notifications);
+        setUnreadCount(unreadNotifications.length);
+      } else {
+        console.error("Không có thông báo hoặc dữ liệu không hợp lệ.");
+      }
+    } catch (error) {
+      // console.error("Error fetching notifications:", error);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadActiveRide();
+      fetchNotifications();
+    }, [])
+  );
+
+  useEffect(() => {
+    if (!activeRide?.requestId || request?.requestId === activeRide.requestId) {
+      return; // Không gọi API nếu không có thay đổi
+    }
+
+    const fetchRequestDetail = async (requestId) => {
+      try {
+        const response = await axios.get(
+          `https://flexiride.onrender.com/booking-traditional/request/${requestId}`
+        );
+
+        if (response.data) {
+          setRequest(response.data);
+
+          if (response.data.status === "completed") {
+            await AsyncStorage.removeItem("activeRide");
+            setActiveRide(null);
+          } else if (response.data.status === "canceled") {
+            setActiveRide(null);
+            await AsyncStorage.removeItem("activeRide");
+          }
+        } else {
+          Alert.alert(
+            "Lỗi",
+            "Không tìm thấy yêu cầu nào khớp với thời gian đã chọn."
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching request details:", error);
+        Alert.alert("Lỗi", "Không thể lấy thông tin yêu cầu");
+      }
+    };
+
+    fetchRequestDetail(activeRide.requestId);
+  }, [activeRide, request]);
   useEffect(() => {
     const fetchDriverLocation = async () => {
       if (activeRide?.driverId) {
         try {
           const response = await axios.get(
-            `https://flexiride-backend.onrender.com/booking-traditional/location/driver/${activeRide.driverId}`
+            `https://flexiride.onrender.com/booking-traditional/location/driver/${activeRide.driverId}`
           );
           if (response.data && response.data.location) {
             setDriverDetails(response.data.driverDetails);
@@ -111,6 +133,21 @@ const Home = ({ navigation }) => {
     fetchDriverLocation();
   }, [activeRide]);
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([loadActiveRide()]);
+    } catch (error) {
+      console.error("Error during refresh:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const navigateToManageNotifications = () => {
+    navigation.navigate("ManageNotifications", { notifications });
+  };
+
   const navigateToRide = () => {
     if (activeRide) {
       navigation.navigate("RideTrackingScreen", {
@@ -120,22 +157,24 @@ const Home = ({ navigation }) => {
     }
   };
 
-  const testTermsScreen = () => {
-    navigation.navigate("TermsScreen");
-  };
   return (
     <View style={styles.container}>
-      {/* Nội dung chính */}
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
+        }
+      >
         <View style={styles.header}>
-          <TouchableOpacity style={styles.qrButton} onPress={testTermsScreen}>
-            <Ionicons name="qr-code-outline" size={24} color="black" />
-          </TouchableOpacity>
-          <TextInput
-            style={styles.searchBar}
-            placeholder="Tìm kiếm"
-            placeholderTextColor="#888"
-          />
+          <View style={styles.locationContainer}>
+            <Text style={styles.text}>Đón bạn tại</Text>
+            <TouchableOpacity>
+              <Text style={styles.locationText}>
+                Tạp Hóa Tứ Vang{" "}
+                <Ionicons name="chevron-down-outline" size={15} color="black" />
+              </Text>
+            </TouchableOpacity>
+          </View>
           <TouchableOpacity
             style={styles.notificationButton}
             onPress={navigateToManageNotifications}
@@ -148,21 +187,14 @@ const Home = ({ navigation }) => {
             )}
           </TouchableOpacity>
         </View>
+        {isRefreshing && (
+          <View style={{ alignItems: "center", marginVertical: 10 }}>
+            <Ionicons name="reload-outline" size={24} color="blue" />
+            <Text>Đang làm mới...</Text>
+          </View>
+        )}
 
         <ServiceIcons />
-
-        <View style={styles.cardsContainer}>
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Activate</Text>
-            <Text style={styles.cardSubTitle}>FRidePay</Text>
-            <Ionicons name="wallet-outline" size={24} color="green" />
-          </View>
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Use Points</Text>
-            <Text style={styles.cardSubTitle}>758</Text>
-            <Ionicons name="wallet-outline" size={24} color="blue" />
-          </View>
-        </View>
 
         <View style={styles.bookNowContainer}>
           <Text style={styles.bookNowTitle}>ĐẶT XE NGAY</Text>
@@ -191,8 +223,6 @@ const Home = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-
-      {/* Thông tin chuyến đi */}
       {activeRide && (
         <TouchableOpacity
           style={styles.activeRideContainer}
@@ -219,8 +249,6 @@ const Home = ({ navigation }) => {
           <Ionicons name="chevron-forward-outline" size={24} color="black" />
         </TouchableOpacity>
       )}
-
-      {/* Thanh điều hướng dưới cùng */}
       <BottomNavigation navigation={navigation} />
     </View>
   );
@@ -231,7 +259,7 @@ const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
   notificationButton: {
     position: "relative",
-    padding: 10,
+    marginLeft: 10,
   },
   unreadBadge: {
     position: "absolute",
@@ -253,15 +281,34 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
+  locationContainer: {
+    flexDirection: "column",
+    justifyContent: "space-between",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 35,
+    marginHorizontal: 10,
+  },
+  text: {
+    fontSize: 13,
+  },
+  locationText: {
+    fontWeight: "bold",
+    fontSize: 15,
+  },
   scrollContent: {
     paddingBottom: 80, // Tránh bị chồng lấp bởi BottomNavigation
   },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    padding: 10,
+    justifyContent: "space-between",
+    padding: 15,
     backgroundColor: "#FFD700",
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
+    elevation: 3,
   },
   qrButton: {
     padding: 10,
@@ -269,10 +316,10 @@ const styles = StyleSheet.create({
   searchBar: {
     flex: 1,
     marginHorizontal: 10,
-    paddingVertical: 8,
+    backgroundColor: "#f1f1f1",
+    borderRadius: 20,
     paddingHorizontal: 15,
-    borderRadius: 10,
-    backgroundColor: "#fff",
+    height: 40,
   },
   heartButton: {
     padding: 10,

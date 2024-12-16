@@ -25,16 +25,16 @@ const PaymentScreen = ({ route, navigation }) => {
     const fetchDetails = async () => {
       try {
         const bookingResponse = await axios.get(
-          `https://flexiride-backend.onrender.com/booking-traditional/request/${requestId}`
+          `https://flexiride.onrender.com/booking-traditional/request/${requestId}`
         );
 
         if (bookingResponse.data) {
           setBookingDetails(bookingResponse.data);
         } else {
-          Alert.alert("Error", "Unable to fetch booking details.");
+          Alert.alert("Error", "Unable to fetch booking details. ");
         }
       } catch (error) {
-        console.error("Error fetching details:", error);
+        console.error("Error fetching details: ", error);
         Alert.alert("Error", "Unable to fetch details.");
       } finally {
         setIsLoading(false);
@@ -50,7 +50,7 @@ const PaymentScreen = ({ route, navigation }) => {
       setIsLoading(true);
 
       const response = await axios.post(
-        `https://flexiride-backend.onrender.com/payment-history/create-payos`,
+        `https://flexiride.onrender.com/payment-history/create-payos`,
         {
           userId: bookingDetails.account_id, // ID khách hàng
           amount: bookingDetails.price, // Tổng tiền
@@ -63,7 +63,7 @@ const PaymentScreen = ({ route, navigation }) => {
       if (paymentUrl) {
         setPaymentUrl(paymentUrl); // Hiển thị WebView
       } else {
-        Alert.alert("Error", "Failed to create payment link.");
+        Alert.alert("Error", "Failed to create payment link. ");
       }
     } catch (error) {
       console.error("Error creating payment link:", error);
@@ -72,40 +72,7 @@ const PaymentScreen = ({ route, navigation }) => {
       setIsLoading(false);
     }
   };
-  useEffect(() => {
-    const handleDeeplink = (event) => {
-      const { url } = event;
-      console.log("Received Deeplink URL:", url);
 
-      if (url.includes("status=PAID")) {
-        // Thực hiện logic của bạn tại đây khi thanh toán thành công
-        console.log("Payment was successful!");
-        Alert.alert("Thành công", "Thanh toán hoàn tất!", [
-          { text: "OK", onPress: () => navigation.navigate("Home") },
-        ]);
-        // Ví dụ: cập nhật trạng thái đặt xe
-        axios.post(
-          `https://flexiride-backend.onrender.com/booking-traditional/confirm`,
-          {
-            requestId,
-            status: "PAID",
-          }
-        );
-      } else if (url.includes("status=CANCELLED")) {
-        Alert.alert("Hủy bỏ", "Giao dịch đã bị hủy.", [
-          { text: "OK", onPress: () => navigation.navigate("Home") },
-        ]);
-      } else {
-        console.log("Unknown URL:", url);
-      }
-    };
-
-    const subscription = Linking.addEventListener("url", handleDeeplink);
-
-    return () => {
-      subscription.remove();
-    };
-  }, [navigation, requestId]);
   // Hiển thị trạng thái loading
   if (isLoading) {
     return (
@@ -154,24 +121,17 @@ const PaymentScreen = ({ route, navigation }) => {
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.paymentContainer}>
         <View style={styles.sectionContainer}>
-          <Text style={styles.label}>Serviceeee:</Text>
-          <Text style={styles.value}>
-            {bookingDetails.service_option_id || "N/A"}
-          </Text>
-        </View>
-
-        <View style={styles.sectionContainer}>
-          <Text style={styles.label}>Pickup Location:</Text>
+          <Text style={styles.label}>Điểm đón:</Text>
           <Text style={styles.value}>{bookingDetails.pickup}</Text>
         </View>
 
         <View style={styles.sectionContainer}>
-          <Text style={styles.label}>Destination:</Text>
+          <Text style={styles.label}>Điểm đến:</Text>
           <Text style={styles.value}>{bookingDetails.destination}</Text>
         </View>
 
         <View style={styles.sectionContainer}>
-          <Text style={styles.label}>Total Amount:</Text>
+          <Text style={styles.label}>Tổng chi phí:</Text>
           <Text style={styles.value}>
             {bookingDetails.price.toLocaleString("en-US", {
               style: "currency",
@@ -181,7 +141,7 @@ const PaymentScreen = ({ route, navigation }) => {
         </View>
 
         <View style={styles.sectionContainer}>
-          <Text style={styles.label}>Payment Method:</Text>
+          <Text style={styles.label}>Phương thức thanh toán:</Text>
           <Text style={styles.value}>
             {bookingDetails.payment_method === "cash"
               ? "Tiền mặt"
@@ -195,6 +155,12 @@ const PaymentScreen = ({ route, navigation }) => {
           <Text style={styles.payButtonText}>Pay Now</Text>
         </TouchableOpacity>
       )}
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.navigate("Home")}
+      >
+        <Text style={styles.backButtonText}>Đánh giá </Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -249,6 +215,20 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   payButtonText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginLeft: 10,
+  },
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 15,
+    backgroundColor: "#FFD700",
+    borderRadius: 50,
+  },
+  backButtonText: {
     color: "white",
     fontSize: 18,
     fontWeight: "bold",

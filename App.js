@@ -40,6 +40,8 @@ import { SucessfullScreen } from "./screens/bookingCarpool/SuccessfullSceen";
 import { FeedbackScreen } from "./screens/bookingCarpool/FeedbackScreen";
 import { TypeService } from "./screens/bookingCarpool/TypeService";
 import RideDetailScreen from "./screens/bookingCarpool/RideDetailScreen";
+import { ViewAllAvailableRideScreen } from "./screens/bookingCarpool/ViewAllAvailableRideScreen";
+import { JoinRequestScreen } from "./screens/bookingCarpool/JoinRequestScreen";
 
 import { DriverAvailableRidesScreen } from "./screens/bookingCarpoolDriver/DriverAvailableRidesScreen";
 import { ManageDriverRidesScreen } from "./screens/bookingCarpoolDriver/ManageDriverRidesScreen";
@@ -58,13 +60,14 @@ import NotificationDetail from "./screens/NotificationDetail";
 // HireDriver
 import TermsScreen from "./screens/hireDriver/TermsScreen";
 
-import HireDriverServiceOption from "./screens/hireDriver/HireDriverServiceOptionScreen"
-import HireDriverRequestScreen from "./screens/hireDriver/HireDriverRequestScreen"
-import HireRouteScreen from "./screens/hireDriver/HireRouteScreen"
-import HireMapScreen from "./screens/hireDriver/HireMapScreen"
-import HireLocationPicker from "./screens/hireDriver/HireLocationPicker"
+import HireDriverServiceOption from "./screens/hireDriver/HireDriverServiceOptionScreen";
+import HireDriverRequestScreen from "./screens/hireDriver/HireDriverRequestScreen";
+import HireRouteScreen from "./screens/hireDriver/HireRouteScreen";
+import HireMapScreen from "./screens/hireDriver/HireMapScreen";
+import HireLocationPicker from "./screens/hireDriver/HireLocationPicker";
 import HireDriverScreen from "./screens/hireDriver/HireDriverScreen";
-import SingleRouteScreen from "./screens/bookingCarpool/SingleRouteScreen"
+import SingleRouteScreen from "./screens/bookingCarpool/SingleRouteScreen";
+import VoucherListScreen from "./screens/bookingTraditional/VoucherListScreen";
 
 export default function App() {
   const Stack = createNativeStackNavigator();
@@ -227,7 +230,18 @@ export default function App() {
               />
               <Stack.Screen name="FeedbackScreen" component={FeedbackScreen} />
               <Stack.Screen name="TypeService" component={TypeService} />
-              <Stack.Screen name="RideDetailScreen" component={RideDetailScreen} />
+              <Stack.Screen
+                name="RideDetailScreen"
+                component={RideDetailScreen}
+              />
+              <Stack.Screen
+                name="ViewAllAvailableRideScreen"
+                component={ViewAllAvailableRideScreen}
+              />
+              <Stack.Screen
+                name="JoinRequestScreen"
+                component={JoinRequestScreen}
+              />
 
               {/* Screens for booking carpool driver */}
               <Stack.Screen
@@ -287,19 +301,44 @@ export default function App() {
                 options={{ headerShown: false }}
               />
               {/* end profile customer */}
-              <Stack.Screen
-                name="SingleRoute"
-                component={SingleRouteScreen}
-              />
+              <Stack.Screen name="SingleRoute" component={SingleRouteScreen} />
               {/* Screens for hire driver */}
-              <Stack.Screen name="HireDriverScreen" component={HireDriverScreen} options={{ headerShown: false }} />
-              <Stack.Screen name="TermsScreen" component={TermsScreen} options={{ headerShown: false }} />
+              <Stack.Screen
+                name="HireDriverScreen"
+                component={HireDriverScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="TermsScreen"
+                component={TermsScreen}
+                options={{ headerShown: false }}
+              />
 
-              <Stack.Screen name="HireDriverServiceOption" component={HireDriverServiceOption} options={{ headerShown: false }} />
-              <Stack.Screen name="HireDriverRequestScreen" component={HireDriverRequestScreen} options={{ headerShown: false }} />
-              <Stack.Screen name="HireRouteScreen" component={HireRouteScreen} options={{ headerShown: false }} />
-              <Stack.Screen name="HireMapScreen" component={HireMapScreen} options={{ headerShown: false }} />
-              <Stack.Screen name="HireLocationPicker" component={HireLocationPicker} options={{ headerShown: false }} />
+              <Stack.Screen
+                name="HireDriverServiceOption"
+                component={HireDriverServiceOption}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="HireDriverRequestScreen"
+                component={HireDriverRequestScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="HireRouteScreen"
+                component={HireRouteScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="HireMapScreen"
+                component={HireMapScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="HireLocationPicker"
+                component={HireLocationPicker}
+                options={{ headerShown: false }}
+              />
 
               <Stack.Screen
                 name="ManageNotifications"
@@ -309,7 +348,10 @@ export default function App() {
                 name="NotificationDetail"
                 component={NotificationDetail}
               />
-
+              <Stack.Screen
+                name="VoucherListScreen"
+                component={VoucherListScreen}
+              />
             </Stack.Navigator>
           </NavigationContainer>
         </AuthProvider>

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { IP_ADDRESS } from "@env";
 
-const CUSTOMER_API_URL = `https://flexiride-backend.onrender.com/customer/`;
+const CUSTOMER_API_URL = `https://flexiride.onrender.com/customer/`;
 
 const getAllCustomers = async () => {
   try {

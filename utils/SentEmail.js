@@ -5,7 +5,7 @@ const sendEmail = async (name, email, otpCode) => {
   console.log("API: " + IP_ADDRESS);
   try {
     const response = await fetch(
-      `https://flexiride-backend.onrender.com/driver/send-email`,
+      `https://flexiride.onrender.com/driver/send-email`,
 
       {
         method: "POST",

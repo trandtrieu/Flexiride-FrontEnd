@@ -48,7 +48,7 @@ const ManageNotifications = ({ route, navigation }) => {
         console.error("Không có thông báo hoặc dữ liệu không hợp lệ.");
       }
     } catch (error) {
-      console.error("Error fetching notifications:", error);
+      // console.error("Error fetching notifications:", error);
     }
   };
 

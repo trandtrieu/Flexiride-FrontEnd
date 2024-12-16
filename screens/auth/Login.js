@@ -55,7 +55,7 @@ const Login = ({ navigation }) => {
       console.log("🚀 ~ handleSubmit ~ loginData: ", loginData);
       try {
         const response = await axios.post(
-          `https://flexiride-backend.onrender.com/auth/login`,
+          `https://flexiride.onrender.com/auth/login`,
           loginData
         );
         if (response.data.token) {
@@ -67,7 +67,7 @@ const Login = ({ navigation }) => {
           // navigation.navigate("CustomerProfile");
         }
       } catch (error) {
-        console.error("Error during login: ", error);
+        console.error("Error during login:  ", error);
         setErrors({ general: "Số điện thoại hoặc mật khẩu không đúng" });
       } finally {
         setIsLoading(false);

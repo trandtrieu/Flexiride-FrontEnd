@@ -24,7 +24,7 @@ import { useFocusEffect } from "@react-navigation/native";
 const fetchRequestDetails = async (requestId) => {
   try {
     const response = await axios.get(
-      `https://flexiride-backend.onrender.com/booking-traditional/request/${requestId}`
+      `https://flexiride.onrender.com/booking-traditional/request/${requestId}`
     );
     if (response.data) {
       // setDriverStatus(response.data.status);
@@ -40,7 +40,7 @@ const fetchRequestDetails = async (requestId) => {
       };
     }
   } catch (error) {
-    console.error("Error fetching request details:", error);
+    console.error("Error fetching request detailss: ", error);
     throw new Error("Unable to fetch request details.");
   }
 };
@@ -48,7 +48,7 @@ const fetchRequestDetails = async (requestId) => {
 const fetchDriverDetails = async (driverId) => {
   try {
     const response = await axios.get(
-      `https://flexiride-backend.onrender.com/booking-traditional/location/driver/${driverId}`
+      `https://flexiride.onrender.com/booking-traditional/location/driver/${driverId}`
     );
     if (response.data && response.data.location) {
       return {
@@ -103,7 +103,7 @@ const RideTrackingScreen = ({ route, navigation }) => {
 
   const [driverLocation, setDriverLocation] = useState(null);
   const [driverDetails, setDriverDetails] = useState({});
-  const [driverStatus, setDriverStatus] = useState("offline");
+  const [driverStatus, setDriverStatus] = useState("Đang đến");
 
   const [routeData, setRouteData] = useState({
     coordinates: [],
@@ -118,7 +118,7 @@ const RideTrackingScreen = ({ route, navigation }) => {
   const fetchRequestStatus = async () => {
     try {
       const response = await axios.get(
-        `https://flexiride-backend.onrender.com/booking-traditional/request/${requestId}`
+        `https://flexiride.onrender.com/booking-traditional/request/${requestId}`
       );
       if (response.data) {
         return response.data.status;
@@ -127,7 +127,7 @@ const RideTrackingScreen = ({ route, navigation }) => {
         return null;
       }
     } catch (error) {
-      console.error("Error fetching request status:", error);
+      console.error("Error fetching request status:  ", error);
       return null;
     }
   };
@@ -156,17 +156,29 @@ const RideTrackingScreen = ({ route, navigation }) => {
       };
     }, [navigation])
   );
+  // useEffect(() => {
+  //   const intervalId = setInterval(async () => {
+  //     try {
+  //       const response = await fetchDriverDetails(driverId);
+  //       setDriverLocation(response.location);
+  //       console.log("driver location use effect", driverLocation);
+  //     } catch (error) {
+  //       console.error("Error fetching fallback driver location:", error);
+  //     }
+  //   }, 5000); // Kiểm tra mỗi 5 giây
+
+  //   return () => clearInterval(intervalId);
+  // }, [driverId]);
+
   useEffect(() => {
     const updateRoute = async () => {
       try {
         if (driverStatus === "on trip" || driverStatus === "picked up") {
-          // Vẽ tuyến đường từ điểm đón đến điểm đến
           await calculateRoute(pickupLocation, destination, setRouteData);
         } else if (
           driverStatus === "on the way" ||
           driverStatus === "confirmed"
         ) {
-          // Vẽ tuyến đường từ tài xế đến điểm đón
           await calculateRoute(driverLocation, pickupLocation, setRouteData);
         }
       } catch (error) {
@@ -174,7 +186,6 @@ const RideTrackingScreen = ({ route, navigation }) => {
       }
     };
 
-    // Gọi hàm khi trạng thái hoặc vị trí thay đổi
     if (pickupLocation && destination && driverLocation) {
       updateRoute();
     }
@@ -182,34 +193,57 @@ const RideTrackingScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     if (!socket.current) {
-      socket.current = io(`https://flexiride-backend.onrender.com`, {
+      socket.current = io(`https://flexiride.onrender.com`, {
         transports: ["websocket"],
         query: { customerId: authState.userId },
+      });
+
+      socket.current.on("driverLocationUpdate", (data) => {
+        if (data.driverId === driverId) {
+          setDriverLocation({
+            latitude: data.location.coordinates[1],
+            longitude: data.location.coordinates[0],
+          });
+        } else {
+          console.warn(
+            "Location update ignored for other driver:",
+            data.driverId
+          );
+        }
       });
 
       socket.current.on("updateStatus", (data) => {
         const { requestId: updatedRequestId, newStatus } = data;
         if (updatedRequestId === requestId) {
           setDriverStatus(newStatus);
-
-          if (newStatus === "dropped off") {
-            navigation.navigate("PaymentScreen", {
-              requestId,
-            });
-          }
         }
       });
     }
 
-    // Cleanup khi unmount
     return () => {
       if (socket.current) {
-        socket.current.off("updateStatus");
         socket.current.disconnect();
-        socket.current = null;
       }
     };
-  }, [requestId, authState.userId]);
+  }, [driverId, requestId]);
+  useEffect(() => {
+    if (driverLocation && pickupLocation) {
+      calculateRoute(driverLocation, pickupLocation, setRouteData);
+    }
+  }, [driverLocation, pickupLocation]);
+  useEffect(() => {
+    if (driverLocation && pickupLocation && routeData.coordinates.length > 0) {
+      calculateRoute(driverLocation, pickupLocation, setRouteData);
+    }
+  }, [driverLocation]);
+  useEffect(() => {
+    if (routeData.coordinates.length > 0) {
+      mapRef.current?.fitToCoordinates(routeData.coordinates, {
+        edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+        animated: true,
+      });
+    }
+  }, [routeData.coordinates]);
 
   const toggleModal = () => setIsModalVisible(!isModalVisible);
   useEffect(() => {
@@ -223,7 +257,6 @@ const RideTrackingScreen = ({ route, navigation }) => {
         const driver = await fetchDriverDetails(driverId);
         setDriverLocation(driver.location);
         setDriverDetails(driver.details);
-        setDriverStatus(driver.status);
 
         await calculateRoute(driver.location, pickup, setRouteData);
       } catch (error) {
@@ -235,7 +268,7 @@ const RideTrackingScreen = ({ route, navigation }) => {
 
     initializeData();
 
-    socket.current = io(`https://flexiride-backend.onrender.com`, {
+    socket.current = io(`https://flexiride.onrender.com`, {
       transports: ["websocket"],
       query: { driverId },
     });
@@ -265,40 +298,90 @@ const RideTrackingScreen = ({ route, navigation }) => {
     );
   }
 
-  const handleCancelRide = () => {
-    Alert.alert(
-      "Xác nhận",
-      "Bạn có chắc muốn hủy chuyến đi?",
-      [
-        { text: "Không", style: "cancel" },
-        {
-          text: "Hủy chuyến",
-          style: "destructive",
-          onPress: () => {
-            if (socket.current) {
-              // Gửi sự kiện hủy chuyến qua socket
-              socket.current.emit("cancelRide", {
-                requestId,
-                customerId: authState.userId,
-              });
+  // const handleCancelRide = () => {
+  //   Alert.alert(
+  //     "Xác nhận",
+  //     "Bạn có chắc muốn hủy chuyến đi?",
+  //     [
+  //       { text: "Không", style: "cancel" },
+  //       {
+  //         text: "Hủy chuyến",
+  //         style: "destructive",
+  //         onPress: () => {
+  //           if (socket.current) {
+  //             // Gửi sự kiện hủy chuyến qua socket
+  //             socket.current.emit("cancelRide", {
+  //               requestId,
+  //               customerId: authState.userId,
+  //             });
 
-              // Lắng nghe phản hồi từ server
-              socket.current.on("rideCanceledSuccess", (data) => {
-                AsyncStorage.removeItem("activeRide");
-                navigation.replace("Home");
-              });
+  //             // Lắng nghe phản hồi từ server
+  //             socket.current.on("rideCanceledSuccess", (data) => {
+  //               AsyncStorage.removeItem("activeRide");
+  //               navigation.replace("Home");
+  //             });
 
-              socket.current.on("cancelError", (error) => {
-                Alert.alert("Lỗi", error.message);
-              });
-            } else {
-              Alert.alert("Lỗi", "Kết nối socket không khả dụng.");
-            }
-          },
-        },
-      ],
-      { cancelable: true }
-    );
+  //             socket.current.on("cancelError", (error) => {
+  //               Alert.alert("Lỗi", error.message);
+  //             });
+  //           } else {
+  //             Alert.alert("Lỗi", "Kết nối socket không khả dụng.");
+  //           }
+  //         },
+  //       },
+  //     ],
+  //     { cancelable: true }
+  //   );
+  // };
+  const handleCancelRide = async () => {
+    try {
+      // Kiểm tra trạng thái chuyến đi
+
+      // Chỉ cho phép hủy nếu trạng thái chưa đến điểm đón
+      if (driverStatus === "confirmed" || driverStatus === "on the way") {
+        Alert.alert(
+          "Xác nhận",
+          "Bạn có chắc muốn hủy chuyến đi?",
+          [
+            { text: "Không", style: "cancel" },
+            {
+              text: "Hủy chuyến",
+              style: "destructive",
+              onPress: () => {
+                if (socket.current) {
+                  // Gửi sự kiện hủy chuyến qua socket
+                  socket.current.emit("cancelRide", {
+                    requestId,
+                    customerId: authState.userId,
+                  });
+
+                  // Lắng nghe phản hồi từ server
+                  socket.current.on("rideCanceledSuccess", () => {
+                    AsyncStorage.removeItem("activeRide");
+                    navigation.replace("Home");
+                  });
+
+                  socket.current.on("cancelError", (error) => {
+                    Alert.alert("Lỗi", error.message);
+                  });
+                } else {
+                  Alert.alert("Lỗi", "Kết nối socket không khả dụng.");
+                }
+              },
+            },
+          ],
+          { cancelable: true }
+        );
+      } else {
+        Alert.alert(
+          "Không thể hủy",
+          "Tài xế đã đến điểm đón hoặc đã bắt đầu chuyến đi."
+        );
+      }
+    } catch (error) {
+      console.error("Error canceling ride: ", error);
+      Alert.alert("Lỗi", "Không thể kiểm tra trạng thái chuyến đi.");
+    }
   };
 
   return (
@@ -319,12 +402,13 @@ const RideTrackingScreen = ({ route, navigation }) => {
             style={{ width: 40, height: 40 }}
           />
         </Marker>
-        <Marker coordinate={driverLocation} title="Tài xế">
+        <Marker coordinate={driverLocation}>
           <Image
             source={require("../../assets/bike-icon.png")}
             style={{ width: 40, height: 40 }}
           />
         </Marker>
+
         <Marker coordinate={destination} title="Điểm đến">
           <Image
             source={require("../../assets/destination-icon.png")} // Replace with your destination icon path
