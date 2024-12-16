@@ -129,7 +129,6 @@ const Home = ({ navigation }) => {
         }
       }
     };
-
     fetchDriverLocation();
   }, [activeRide]);
 

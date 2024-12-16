@@ -23,6 +23,7 @@ const PaymentScreen = ({ route, navigation }) => {
   // Fetch booking details
   useEffect(() => {
     const fetchDetails = async () => {
+      console.log("requestId: ", requestId);
       try {
         const bookingResponse = await axios.get(
           `https://flexiride.onrender.com/booking-traditional/request/${requestId}`
@@ -152,7 +153,7 @@ const PaymentScreen = ({ route, navigation }) => {
       {bookingDetails.payment_method !== "cash" && (
         <TouchableOpacity style={styles.payButton} onPress={handlePayment}>
           <Ionicons name="card-outline" size={24} color="white" />
-          <Text style={styles.payButtonText}>Pay Now</Text>
+          <Text style={styles.payButtonText}>Thanh toán ngay </Text>
         </TouchableOpacity>
       )}
       <TouchableOpacity

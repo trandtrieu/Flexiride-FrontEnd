@@ -427,7 +427,7 @@ const LocationPicker = ({ navigation, route }) => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Icon
+          <Ionicons
             name="arrow-back"
             type="ionicon"
             style={styles.backButton}
@@ -447,7 +447,7 @@ const LocationPicker = ({ navigation, route }) => {
                 textAlign="left"
               />
               {pickup ? (
-                <Icon
+                <Ionicons
                   name="close-circle"
                   type="ionicon"
                   size={20}
@@ -466,7 +466,7 @@ const LocationPicker = ({ navigation, route }) => {
                 textAlign="left"
               />
               {destination ? (
-                <Icon
+                <Ionicons
                   name="close-circle"
                   type="ionicon"
                   size={20}
@@ -494,7 +494,7 @@ const LocationPicker = ({ navigation, route }) => {
                 onPress={() => handlePredictionSelect(prediction)}
               >
                 <View style={styles.iconWrapper}>
-                  <Icon
+                  <Ionicons
                     name="location"
                     type="ionicon"
                     size={24}
@@ -567,7 +567,12 @@ const LocationPicker = ({ navigation, route }) => {
           isPickupFocused && (
             <>
               <TouchableOpacity style={styles.locationItem}>
-                <Icon name="locate" type="ionicon" size={20} color="#4a4a4a" />
+                <Ionicons
+                  name="locate"
+                  type="ionicon"
+                  size={20}
+                  color="#4a4a4a"
+                />
                 <Button
                   title="Sử dụng vị trí hiện tại"
                   onPress={getCurrentLocation}
@@ -586,7 +591,7 @@ const LocationPicker = ({ navigation, route }) => {
                       onPress={() => handlePredictionSelect(place)}
                     >
                       <View style={styles.iconWrapper}>
-                        <Icon
+                        <Ionicons
                           name="location"
                           type="ionicon"
                           size={24}
