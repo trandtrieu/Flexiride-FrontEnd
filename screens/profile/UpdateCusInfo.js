@@ -10,13 +10,13 @@ import {
   Platform,
   Alert,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
-import Icon from "react-native-vector-icons/FontAwesome";
+// import Icon from "react-native-vector-icons/FontAwesome";
 import {
   getAllCustomers,
   getCustomerById,
   updateCustomer,
 } from "../../service/CustomerService";
+import { Ionicons } from "@expo/vector-icons";
 
 const UpdateCusInfo = ({ navigation, route }) => {
   const { token, customerId } = route.params;
@@ -24,6 +24,7 @@ const UpdateCusInfo = ({ navigation, route }) => {
   const [phone, setPhone] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
   const [errors, setErrors] = useState({});
+  const [genderOptionsVisible, setGenderOptionsVisible] = useState(false);
 
   useEffect(() => {
     const fetchCustomerDetails = async () => {
@@ -44,7 +45,7 @@ const UpdateCusInfo = ({ navigation, route }) => {
   const handleUpdate = async () => {
     const newErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^[0-9]{10}$/; // Only 10 digits, no letters or symbols
+    const phoneRegex = /^[0-9]{10}$/;
 
     try {
       const existingCustomers = await getAllCustomers();
@@ -108,7 +109,7 @@ const UpdateCusInfo = ({ navigation, route }) => {
         style={styles.backButton}
         onPress={() => navigation.navigate("CustomerProfile")}
       >
-        <Icon name="arrow-left" size={20} color="black" />
+        <Ionicons name="arrow-back-outline" size={20} color="black" />
       </TouchableOpacity>
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
@@ -146,18 +147,35 @@ const UpdateCusInfo = ({ navigation, route }) => {
             )}
 
             <Text style={styles.label}>Giới tính *</Text>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={selectedGender}
-                style={styles.picker}
-                onValueChange={(itemValue) => setSelectedGender(itemValue)}
-              >
-                <Picker.Item label="Chọn giới tính" value="" />
-                <Picker.Item label="Nam" value="Nam" />
-                <Picker.Item label="Nữ" value="Nữ" />
-                <Picker.Item label="Khác" value="Khác" />
-              </Picker>
-            </View>
+            <TouchableOpacity
+              style={styles.input}
+              onPress={() => setGenderOptionsVisible(!genderOptionsVisible)}
+            >
+              <Text>{selectedGender || "Chọn giới tính"}</Text>
+              <Ionicons
+                name={genderOptionsVisible ? "caret-up" : "caret-down"}
+                size={20}
+                color="#6D6A6A"
+                style={styles.dropdownIcon}
+              />
+            </TouchableOpacity>
+
+            {genderOptionsVisible && (
+              <View style={styles.optionsContainer}>
+                {["Nam", "Nữ", "Khác"].map((gender) => (
+                  <TouchableOpacity
+                    key={gender}
+                    style={styles.optionItem}
+                    onPress={() => {
+                      setSelectedGender(gender);
+                      setGenderOptionsVisible(false);
+                    }}
+                  >
+                    <Text>{gender}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
             {errors.gender && (
               <Text style={styles.errorMessage}>{errors.gender}</Text>
             )}
@@ -223,22 +241,39 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderColor: "#6C6A6A",
     margin: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   pickerContainer: {
     borderWidth: 1,
-    borderColor: "#000", // Black border
+    borderColor: "#000",
     borderRadius: 8,
-    overflow: "hidden", // Ensures content stays within the border
+    overflow: "hidden",
     marginBottom: 20,
   },
-
   picker: {
     height: 50,
     width: "100%",
     backgroundColor: "#fff",
-    borderColor: "#000", // Change to black
+    borderColor: "#000",
     borderWidth: 1,
     borderRadius: 8,
+  },
+  optionsContainer: {
+    maxHeight: 150,
+    overflow: "scroll",
+    borderWidth: 1,
+    borderColor: "#6C6A6A",
+    borderRadius: 8,
+    marginTop: 5,
+    backgroundColor: "#fff",
+    zIndex: 1000,
+  },
+  optionItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderColor: "#6C6A6A",
   },
   checkboxContainer: {
     flexDirection: "row",
@@ -268,6 +303,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 20,
     alignSelf: "flex-end",
+    marginTop: 20,
   },
   buttonText: {
     color: "white",
@@ -286,6 +322,9 @@ const styles = StyleSheet.create({
     padding: 10,
     marginTop: -20,
     width: 50,
+  },
+  dropdownIcon: {
+    marginLeft: 10,
   },
 });
 

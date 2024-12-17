@@ -214,44 +214,61 @@ export default function App() {
                 <Stack.Screen
                   name="ServiceSelection"
                   component={ServiceSelectionScreen}
+                  options={{ title: "Lựa chọn dịch vụ" }}
                 />
                 <Stack.Screen
                   name="CarpoolRequest"
                   component={CarpoolRequestScreen}
                 />
-                <Stack.Screen name="Sucessfull" component={SucessfullScreen} />
+                <Stack.Screen
+                  name="Sucessfull"
+                  component={SucessfullScreen}
+                  options={{ title: "Tạo thành công" }}
+                />
                 <Stack.Screen
                   name="AvailableRides"
                   component={AvailableRidesScreen}
+                  options={{ title: "Yêu cầu có sẵn" }}
                 />
                 <Stack.Screen
                   name="ConfirmBooking"
                   component={ConfirmBookingScreen}
+                  options={{ title: "Xác nhận yêu cầu" }}
                 />
                 <Stack.Screen
                   name="ManageBooking"
                   component={ManageBookingScreen}
+                  options={{ title: "Quản lý yêu cầu" }}
                 />
                 <Stack.Screen
                   name="Notifications"
                   component={NotificationsScreen}
+                  options={{ title: "Thông báo của tôi" }}
                 />
                 <Stack.Screen
                   name="FeedbackScreen"
                   component={FeedbackScreen}
+                  options={{ title: "Phản hồi" }}
                 />
-                <Stack.Screen name="TypeService" component={TypeService} />
+                <Stack.Screen
+                  name="TypeService"
+                  component={TypeService}
+                  options={{ title: "Loại dịch vụ" }}
+                />
                 <Stack.Screen
                   name="RideDetailScreen"
                   component={RideDetailScreen}
+                  options={{ title: "Chi tiết chuyến xe" }}
                 />
                 <Stack.Screen
                   name="ViewAllAvailableRideScreen"
                   component={ViewAllAvailableRideScreen}
+                  options={{ title: "Tất cả yêu cầu" }}
                 />
                 <Stack.Screen
                   name="JoinRequestScreen"
                   component={JoinRequestScreen}
+                  options={{ title: "Tham gia chuyến đi" }}
                 />
 
                 {/* Screens for booking carpool driver */}
@@ -315,6 +332,7 @@ export default function App() {
                 <Stack.Screen
                   name="SingleRoute"
                   component={SingleRouteScreen}
+                  options={{ title: "Tuyến đường" }}
                 />
                 {/* Screens for hire driver */}
                 <Stack.Screen
@@ -361,6 +379,7 @@ export default function App() {
                 <Stack.Screen
                   name="NotificationDetail"
                   component={NotificationDetail}
+                  options={{ title: "Chi tiết thông báo" }}
                 />
                 <Stack.Screen
                   name="VoucherListScreen"

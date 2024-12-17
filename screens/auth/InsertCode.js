@@ -14,6 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/FontAwesome";
 import sendEmail from "../../utils/SentEmail";
 import { generateOtpCode } from "../../utils/genCode";
+import { Ionicons } from "@expo/vector-icons";
 
 const InsertCode = ({ navigation, route }) => {
   const [code, setCode] = useState(["", "", "", "", ""]); // Array for each input field
@@ -115,9 +116,9 @@ const InsertCode = ({ navigation, route }) => {
       behavior={Platform.OS === "android" ? "height" : null}
     >
       <TouchableOpacity style={styles.backButton}>
-        <Icon
+        <Ionicons
           onPress={() => navigation.navigate("Register")}
-          name="arrow-left"
+          name="arrow-back-outline"
           size={20}
           color="black"
         />

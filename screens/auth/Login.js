@@ -67,8 +67,8 @@ const Login = ({ navigation }) => {
           // navigation.navigate("CustomerProfile");
         }
       } catch (error) {
-        console.error("Error during login:  ", error);
-        setErrors({ general: "Số điện thoại hoặc mật khẩu không đúng" });
+        // console.error("Error during login:  ", error);
+        setErrors({ general: "Số điện thoại hoặc mật khẩu không đúng." });
       } finally {
         setIsLoading(false);
       }
@@ -136,6 +136,9 @@ const Login = ({ navigation }) => {
         {hasSubmitted && errors.password ? (
           <Text style={styles.errorText}>{errors.password}</Text>
         ) : null}
+        {errors.general && ( // Hiển thị lỗi nếu có
+          <Text style={styles.errorText}>{errors.general}</Text>
+        )}
 
         <TouchableOpacity
           onPress={handleForgotPassword}

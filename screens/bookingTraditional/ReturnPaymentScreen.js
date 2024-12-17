@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Alert } from "react-native";
 import axios from "axios";
 import { useAuth } from "../../provider/AuthProvider";
 import { useFocusEffect } from "@react-navigation/native";
+import { IP_ADDRESS } from "@env";
 
 const ReturnScreen = ({ route, navigation }) => {
   const { id: paymentId, status, orderCode, requestId } = route.params; // Thêm requestId từ route.params
@@ -25,6 +26,8 @@ const ReturnScreen = ({ route, navigation }) => {
 
   useFocusEffect(
     useCallback(() => {
+      console.log("🚀 ~ ReturnScreen ~ route.params:", route.params);
+
       loadActiveRide();
     }, [])
   );
@@ -32,35 +35,30 @@ const ReturnScreen = ({ route, navigation }) => {
   useEffect(() => {
     const handleReturnSuccess = async () => {
       try {
-        // Lấy thông tin requestDetail từ API
         const response = await axios.get(
           `https://flexiride.onrender.com/booking-traditional/request/${requestId}`
         );
 
-        const request = response.data; // Dữ liệu request trả về từ API
+        const request = response.data;
         console.log("🚀 ~ handleReturnSuccess ~ request:", request);
 
-        // Cập nhật trạng thái chuyến đi
-        await axios.put(
-          `https://flexiride.onrender.com/booking-traditional/update-status/${requestId}`,
-          { status: "completed" }
-        );
-
-        // Chuẩn bị dữ liệu cho lịch sử thanh toán
         const paymentData = {
-          requestId: activeRide?.requestId,
+          requestId: activeRide?.requestId || requestId,
           userId: request?.account_id,
           driverId: authState.userId,
           payment_method: request?.payment_method,
-          amount: request?.price || 0, // Giá chuyến đi (từ request detail)
-          pickup: `${request?.pickupLocation?.name}, ${request?.pickupLocation?.address}`,
-          destination: `${request?.destinationLocation?.name}, ${request?.destinationLocation?.address}`,
+          amount: request?.price || 0,
+          pickup: request?.pickupLocation
+            ? `${request.pickupLocation.name}, ${request.pickupLocation.address}`
+            : "Không rõ",
+          destination: request?.destinationLocation
+            ? `${request.destinationLocation.name}, ${request.destinationLocation.address}`
+            : "Không rõ",
           serviceId: request?.service_option_id,
         };
 
         console.log("🚀 ~ Payment Data:", paymentData);
 
-        // Gửi dữ liệu thanh toán
         const paymentResponse = await axios.post(
           `https://flexiride.onrender.com/payment-history/return-successfully`,
           paymentData,
@@ -69,6 +67,11 @@ const ReturnScreen = ({ route, navigation }) => {
               Authorization: `Bearer ${authState.token}`,
             },
           }
+        );
+        // Cập nhật trạng thái chuyến đi
+        await axios.put(
+          `https://flexiride.onrender.com/booking-traditional/update-status/${requestId}`,
+          { status: "completed" }
         );
 
         Alert.alert("Thành công", paymentResponse.data.message, [

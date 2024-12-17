@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { updatePassword } from "../../service/AuthCustomerService";
-
+import { Ionicons } from "@expo/vector-icons";
 const EnterNewPass = ({ navigation, route }) => {
   const [email, setEmail] = useState(route.params.email);
   const [newPassword, setNewPassword] = useState("");
@@ -68,9 +68,9 @@ const EnterNewPass = ({ navigation, route }) => {
       behavior={Platform.OS === "android" ? "height" : null}
     >
       <TouchableOpacity style={styles.backButton}>
-        <Icon
+        <Ionicons
           onPress={() => navigation.navigate("ForgotPasswordDriver")}
-          name="arrow-left"
+          name="arrow-back-outline"
           size={20}
           color="black"
         />
