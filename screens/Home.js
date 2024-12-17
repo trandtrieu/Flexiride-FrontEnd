@@ -18,6 +18,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { getPersonalNotification } from "../service/CommonServiceApi";
 import { useFocusEffect } from "@react-navigation/native";
+import { VIETMAP_API_KEY } from "@env";
+import Geolocation from "@react-native-community/geolocation";
+import useLocation from "../hook/useLocation";
 
 const Home = ({ navigation }) => {
   const { authState } = useAuth();
@@ -27,6 +30,42 @@ const Home = ({ navigation }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [request, setRequest] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [currentAddress, setCurrentAddress] = useState("Đại học FPT");
+  const { currentLocation, getOneTimeLocation } = useLocation();
+
+  const fetchCurrentLocation = async () => {
+    try {
+      Geolocation.getCurrentPosition(
+        async (position) => {
+          const radius = 500;
+          const size = 10;
+          // Gọi API VietMap Geocode
+          const response = await axios.get(
+            `https://maps.vietmap.vn/api/search/v3?apikey=${VIETMAP_API_KEY}&text=*&focus=${currentLocation.latitude},${currentLocation.longitude}&circle_center=${currentLocation.latitude},${currentLocation.longitude}&circle_radius=${radius}&size=${size}`
+          );
+          console.log(response.data);
+          if (response.data && response.data[0]) {
+            setCurrentAddress(response.data[0].name); // Hiển thị địa chỉ
+          } else {
+            setCurrentAddress("Không tìm thấy địa chỉ.");
+          }
+        },
+        (error) => {
+          console.error("Error fetching location: ", error);
+          setCurrentAddress("Không thể lấy vị trí.");
+        },
+        { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
+      );
+    } catch (error) {
+      console.error("Error calling Geocode API: ", error);
+      setCurrentAddress("Không thể lấy địa chỉ.");
+    }
+  };
+
+  // Lấy vị trí khi component được render
+  useEffect(() => {
+    fetchCurrentLocation();
+  }, []);
 
   // Load thông tin chuyến đi từ AsyncStorage
   const loadActiveRide = async () => {
@@ -168,10 +207,7 @@ const Home = ({ navigation }) => {
           <View style={styles.locationContainer}>
             <Text style={styles.text}>Đón bạn tại</Text>
             <TouchableOpacity>
-              <Text style={styles.locationText}>
-                Tạp Hóa Tứ Vang{" "}
-                <Ionicons name="chevron-down-outline" size={15} color="black" />
-              </Text>
+              <Text style={styles.locationText}>{currentAddress}</Text>
             </TouchableOpacity>
           </View>
           <TouchableOpacity
@@ -290,11 +326,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   text: {
-    fontSize: 13,
+    fontSize: 10,
   },
   locationText: {
     fontWeight: "bold",
-    fontSize: 15,
+    fontSize: 12,
   },
   scrollContent: {
     paddingBottom: 80, // Tránh bị chồng lấp bởi BottomNavigation

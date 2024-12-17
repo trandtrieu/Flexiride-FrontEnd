@@ -9,7 +9,7 @@ const ServiceIcons = () => {
     <View style={styles.servicesContainer}>
       <TouchableOpacity
         style={styles.serviceItem}
-        onPress={() => navigation.navigate("BikeBook")}
+        onPress={() => navigation.navigate("LocationPicker")}
       >
         <Image
           source={require("../../assets/bike-icon.png")}

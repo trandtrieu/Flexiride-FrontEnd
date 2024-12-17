@@ -51,7 +51,7 @@ const PaymentScreen = ({ route, navigation }) => {
       setIsLoading(true);
 
       const response = await axios.post(
-        `https://flexiride.onrender.com/payment-history/create-payos`,
+        `http://${IP_ADDRESS}:3000/payment-history/create-payos`,
         {
           userId: bookingDetails.account_id, // ID khách hàng
           amount: bookingDetails.price, // Tổng tiền

@@ -57,19 +57,16 @@ const StaticContent = ({ navigation }) => (
     </TouchableOpacity>
 
     {/* Ride Options */}
-    <Text style={styles.optionsHeader}>Đa dạng lựa chọn di chuyển ch...</Text>
+    <Text style={styles.optionsHeader}>Đa dạng lựa chọn di chuyển</Text>
     <View style={styles.optionsContainer}>
       <View style={styles.option}>
         <FontAwesome5 name="car" size={24} color="green" />
-        <Text style={styles.optionText}>Di chuyển nhóm th...</Text>
+        <Text style={styles.optionText}>Di chuyển thuận tiện</Text>
       </View>
-      <View style={styles.option}>
-        <FontAwesome5 name="car" size={24} color="green" />
-        <Text style={styles.optionText}>Xe rộng hiện đại</Text>
-      </View>
+
       <View style={styles.option}>
         <FontAwesome5 name="user-tie" size={24} color="green" />
-        <Text style={styles.optionText}>Thuê xe cùng tài...</Text>
+        <Text style={styles.optionText}>Thuê tài xế nhanh chóng</Text>
       </View>
     </View>
   </>

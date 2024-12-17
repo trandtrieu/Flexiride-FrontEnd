@@ -518,19 +518,6 @@ const LocationPicker = ({ navigation, route }) => {
         ) : (
           <View style={styles.tabs}>
             <TouchableOpacity
-              style={[styles.tab, selectedTab === "recent" && styles.activeTab]}
-              onPress={() => setSelectedTab("recent")}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  selectedTab === "recent" && styles.activeTabText,
-                ]}
-              >
-                Dùng gần đây
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
               style={[
                 styles.tab,
                 selectedTab === "suggested" && styles.activeTab,
@@ -544,19 +531,6 @@ const LocationPicker = ({ navigation, route }) => {
                 ]}
               >
                 Đề xuất
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.tab, selectedTab === "saved" && styles.activeTab]}
-              onPress={() => setSelectedTab("saved")}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  selectedTab === "saved" && styles.activeTabText,
-                ]}
-              >
-                Đã lưu
               </Text>
             </TouchableOpacity>
           </View>
