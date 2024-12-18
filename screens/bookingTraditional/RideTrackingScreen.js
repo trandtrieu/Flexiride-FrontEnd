@@ -27,7 +27,6 @@ const fetchRequestDetails = async (requestId) => {
       `https://flexiride.onrender.com/booking-traditional/request/${requestId}`
     );
     if (response.data) {
-      // setDriverStatus(response.data.status);
       return {
         pickup: {
           latitude: response.data.latitude_from,
@@ -121,6 +120,8 @@ const RideTrackingScreen = ({ route, navigation }) => {
         `https://flexiride.onrender.com/booking-traditional/request/${requestId}`
       );
       if (response.data) {
+        setDriverStatus(response.data.status);
+
         return response.data.status;
       } else {
         console.warn("No request data found.");
@@ -137,11 +138,11 @@ const RideTrackingScreen = ({ route, navigation }) => {
 
       if (currentStatus === "dropped off") {
         navigation.navigate("PaymentScreen", { requestId });
-        clearInterval(intervalId); // Dừng kiểm tra sau khi điều hướng
+        clearInterval(intervalId);
       }
-    }, 5000); // Kiểm tra mỗi 5 giây
+    }, 5000);
 
-    return () => clearInterval(intervalId); // Dọn dẹp khi unmount
+    return () => clearInterval(intervalId);
   }, [requestId, navigation]);
 
   useFocusEffect(
@@ -205,10 +206,10 @@ const RideTrackingScreen = ({ route, navigation }) => {
             longitude: data.location.coordinates[0],
           });
         } else {
-          console.warn(
-            "Location update ignored for other driver:",
-            data.driverId
-          );
+          // console.warn(
+          //   "Location update ignored for other driver:",
+          //   data.driverId
+          // );
         }
       });
 

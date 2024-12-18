@@ -184,7 +184,7 @@ export default function App() {
                 <Stack.Screen
                   name="RideTrackingScreen"
                   component={RideTrackingScreen}
-                  options={{ title: "Theo dõi tài xế" }}
+                  options={{ headerShown: false }}
                 />
                 <Stack.Screen
                   name="ActivityScreen"
