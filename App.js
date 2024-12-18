@@ -75,38 +75,13 @@ import { enableScreens } from "react-native-screens";
 export default function App() {
   enableScreens();
   const Stack = createNativeStackNavigator();
-  const linking = {
-    prefixes: ["flexiride://"], // Cấu hình scheme
-    config: {
-      screens: {
-        ReturnScreen: {
-          path: "ReturnScreen",
-          parse: {
-            code: (code) => code,
-            id: (id) => id,
-            status: (status) => status,
-            orderCode: (orderCode) => orderCode,
-          },
-        },
-        CancelScreen: {
-          path: "CancelScreen",
-          parse: {
-            code: (code) => code,
-            id: (id) => id,
-            status: (status) => status,
-            orderCode: (orderCode) => orderCode,
-          },
-        },
-      },
-    },
-  };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SocketProvider>
         <LocationProvider>
           <AuthProvider>
-            <NavigationContainer linking={linking}>
+            <NavigationContainer>
               <Stack.Navigator initialRouteName="Splash">
                 <Stack.Screen
                   name="Splash"

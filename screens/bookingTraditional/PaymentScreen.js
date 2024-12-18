@@ -45,35 +45,6 @@ const PaymentScreen = ({ route, navigation }) => {
     fetchDetails();
   }, [requestId]);
 
-  // Create payment link
-  const handlePayment = async () => {
-    try {
-      setIsLoading(true);
-
-      const response = await axios.post(
-        `http://${IP_ADDRESS}:3000/payment-history/create-payos`,
-        {
-          userId: bookingDetails.account_id, // ID khách hàng
-          amount: bookingDetails.price, // Tổng tiền
-          type: "SERVICE_BOOKING", // Loại giao dịch
-        }
-      );
-
-      const { paymentUrl } = response.data;
-
-      if (paymentUrl) {
-        setPaymentUrl(paymentUrl); // Hiển thị WebView
-      } else {
-        Alert.alert("Error", "Failed to create payment link. ");
-      }
-    } catch (error) {
-      console.error("Error creating payment link:", error);
-      Alert.alert("Error", "Unable to create payment link.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   // Hiển thị trạng thái loading
   if (isLoading) {
     return (
@@ -85,38 +56,6 @@ const PaymentScreen = ({ route, navigation }) => {
   }
 
   // Hiển thị WebView nếu có paymentUrl
-  if (paymentUrl) {
-    return (
-      <WebView
-        source={{ uri: paymentUrl }}
-        onNavigationStateChange={(navState) => {
-          const { url } = navState;
-          if (url.includes("ReturnScreen")) {
-            Alert.alert("Success", "Payment completed successfully.", [
-              { text: "OK", onPress: () => navigation.goBack() },
-            ]);
-            setPaymentUrl(null);
-          } else if (url.includes("CancelScreen")) {
-            Alert.alert("Cancelled", "Payment was cancelled.", [
-              { text: "OK", onPress: () => setPaymentUrl(null) },
-            ]);
-          }
-        }}
-        startInLoadingState
-        renderError={() => (
-          <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>Failed to load payment page.</Text>
-            <TouchableOpacity
-              style={styles.retryButton}
-              onPress={() => setPaymentUrl(paymentUrl)}
-            >
-              <Text style={styles.retryButtonText}>Retry</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      />
-    );
-  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -150,13 +89,6 @@ const PaymentScreen = ({ route, navigation }) => {
           </Text>
         </View>
       </View>
-      {bookingDetails.payment_method !== "cash" && (
-        <TouchableOpacity style={styles.payButton} onPress={handlePayment}>
-          <Ionicons name="card-outline" size={24} color="white" />
-          <Text style={styles.payButtonText}>Thanh toán ngay </Text>
-        </TouchableOpacity>
-      )}
-
       console.log("driverId ", driverId)
       <TouchableOpacity
         style={styles.backButton}
@@ -169,7 +101,6 @@ const PaymentScreen = ({ route, navigation }) => {
       >
         <Text style={styles.backButtonText}>Đánh giá</Text>
       </TouchableOpacity>
-
     </ScrollView>
   );
 };
