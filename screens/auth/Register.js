@@ -10,7 +10,6 @@ import {
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Picker } from "@react-native-picker/picker"; // Import Picker
 import sendEmail from "../../utils/SentEmail";
 import { generateOtpCode } from "../../utils/genCode";
 import { getAllCustomers } from "../../service/CustomerService";
@@ -126,12 +125,12 @@ export default function Register({ navigation }) {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.navigate("Login")}
         >
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
+          <Ionicons name="arrow-back-outline" size={24} color="black" />
+        </TouchableOpacity> */}
 
         <Text style={styles.headerText}>BẮT ĐẦU</Text>
 
@@ -147,18 +146,57 @@ export default function Register({ navigation }) {
           <Text style={styles.errorText}>{errors.name}</Text>
         )}
 
-        {/* Gender Picker */}
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={gender}
-            onValueChange={(itemValue) => setGender(itemValue)}
-            style={styles.picker}
+        {/* Gender Selection */}
+        <View style={styles.genderContainer}>
+          <Text style={styles.genderLabel}>Giới tính</Text>
+          <TouchableOpacity
+            style={[
+              styles.genderOption,
+              gender === "Nam" && styles.selectedOption,
+            ]}
+            onPress={() => setGender("Nam")}
           >
-            <Picker.Item label="Chọn giới tính" value="" />
-            <Picker.Item label="Nam" value="Nam" />
-            <Picker.Item label="Nữ" value="Nữ" />
-            <Picker.Item label="Khác" value="Khác" />
-          </Picker>
+            <Text
+              style={[
+                styles.genderText,
+                gender === "Nam" && styles.selectedText,
+              ]}
+            >
+              Nam
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.genderOption,
+              gender === "Nữ" && styles.selectedOption,
+            ]}
+            onPress={() => setGender("Nữ")}
+          >
+            <Text
+              style={[
+                styles.genderText,
+                gender === "Nữ" && styles.selectedText,
+              ]}
+            >
+              Nữ
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.genderOption,
+              gender === "Khác" && styles.selectedOption,
+            ]}
+            onPress={() => setGender("Khác")}
+          >
+            <Text
+              style={[
+                styles.genderText,
+                gender === "Khác" && styles.selectedText,
+              ]}
+            >
+              Khác
+            </Text>
+          </TouchableOpacity>
         </View>
         {hasSubmitted && errors.gender && (
           <Text style={styles.errorText}>{errors.gender}</Text>
@@ -274,13 +312,34 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#000",
   },
-  pickerContainer: {
-    borderBottomWidth: 1,
-    borderColor: "#ccc",
+  genderContainer: {
     marginBottom: 15,
+    flexDirection: 'row',  // Arrange gender options horizontally
+    flexWrap: 'wrap',  // Allow wrapping to the next line if necessary
+    justifyContent: 'space-between',  // Distribute space evenly
   },
-  picker: {
+  genderLabel: {
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  genderOption: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    width: "30%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  selectedOption: {
+    backgroundColor: "#270C6D",
+  },
+  genderText: {
+    textAlign: "center",
     color: "#000",
+  },
+  selectedText: {
+    color: "#fff",
   },
   passwordContainer: {
     position: "relative",

@@ -14,7 +14,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import sendEmail from "../../utils/SentEmail";
 import { generateOtpCode } from "../../utils/genCode";
 import { getAllCustomers } from "../../service/CustomerService";
-
+import { Ionicons } from "@expo/vector-icons";
 const ForgotPasswordDriver = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState({});
@@ -69,9 +69,9 @@ const ForgotPasswordDriver = ({ navigation }) => {
       behavior={Platform.OS === "android" ? "height" : null}
     >
       <TouchableOpacity style={styles.backButton}>
-        <Icon
+        <Ionicons
           onPress={() => navigation.navigate("Login")}
-          name="arrow-left"
+          name="arrow-back-outline"
           size={20}
           color="black"
         />

@@ -13,7 +13,7 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
-import Ionicons from "react-native-vector-icons/Ionicons";
+// import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAuth } from "../../provider/AuthProvider";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker"; // Import ImagePicker from expo
@@ -24,6 +24,7 @@ import {
   updateCustomer,
 } from "../../service/CustomerService";
 import { getCustomerById } from "../../service/CustomerService";
+import { Ionicons } from "@expo/vector-icons";
 const CustomerProfile = ({ route }) => {
   const { authState, logout } = useAuth();
   const [personalInfo, setPersonalInfo] = useState({});
@@ -161,9 +162,9 @@ const CustomerProfile = ({ route }) => {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Icon
+          <Ionicons
             onPress={() => navigation.navigate("Home")}
-            name="arrow-left"
+            name="arrow-back-outline"
             size={24}
             color="#000"
           />
@@ -185,7 +186,7 @@ const CustomerProfile = ({ route }) => {
               style={styles.cameraIcon}
               onPress={() => setModalVisible(true)} // Show modal when clicked
             >
-              <Ionicons name="camera" size={20} color="#fff" />
+              <Ionicons name="camera-outline" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
           <Text style={styles.profileName}>{personalInfo.name}</Text>
@@ -203,7 +204,7 @@ const CustomerProfile = ({ route }) => {
             }
             style={styles.editButton}
           >
-            <Text style={styles.editButtonText}>Cập nhập</Text>
+            <Text style={styles.editButtonText}>Cập nhật</Text>
           </TouchableOpacity>
 
           <View style={styles.infoItem}>
