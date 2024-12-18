@@ -1,17 +1,30 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, StyleSheet, Alert, TouchableOpacity } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 
 const CancelScreen = ({ route, navigation }) => {
   const { id: paymentId, orderCode } = route.params || {};
+  const [activeRide, setActiveRide] = useState(null);
 
-  const handleCancelTransaction = () => {
-    Alert.alert("Giao dịch đã bị hủy", "Bạn đã hủy giao dịch nạp tiền.", [
-      {
-        text: "OK",
-        onPress: () => navigation.navigate("Payment"),
-      },
-    ]);
+  const loadActiveRide = async () => {
+    try {
+      const ride = await AsyncStorage.getItem("activeRide");
+      if (ride) {
+        const parsedRide = JSON.parse(ride);
+        setActiveRide(parsedRide);
+        console.log("Active Ride at cancel screen:", parsedRide);
+      }
+    } catch (error) {
+      console.error("Error loading active ride: ", error);
+    }
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadActiveRide();
+    }, [])
+  );
 
   useEffect(() => {
     if (!paymentId || !orderCode) {
@@ -21,23 +34,33 @@ const CancelScreen = ({ route, navigation }) => {
         [
           {
             text: "OK",
-            onPress: () => navigation.navigate("Payment"),
+            onPress: () => {
+              if (activeRide?.requestId) {
+                navigation.replace("PaymentScreen", {
+                  requestId: activeRide.requestId,
+                });
+              } else {
+                navigation.navigate("Home");
+              }
+            },
           },
         ]
       );
-    } else {
-      handleCancelTransaction();
     }
-  }, [paymentId, orderCode, navigation]);
+  }, [paymentId, orderCode, navigation, activeRide]);
 
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Giao dịch đã bị hủy.</Text>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate("WalletScreen")}
+        onPress={() =>
+          navigation.replace("PaymentScreen", {
+            requestId: activeRide?.requestId,
+          })
+        }
       >
-        <Text style={styles.buttonText}>Quay lại ví</Text>
+        <Text style={styles.buttonText}>Quay lại thanh toán</Text>
       </TouchableOpacity>
     </View>
   );
