@@ -15,7 +15,6 @@ import { TouchableWithoutFeedback } from "react-native";
 import * as Location from "expo-location";
 import { IP_ADDRESS, VIETMAP_API_KEY } from "@env";
 import _ from "lodash";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 
 const LocationPicker = ({ navigation, route }) => {
@@ -30,6 +29,7 @@ const LocationPicker = ({ navigation, route }) => {
   const predictionCache = {};
   const nearbyPlacesCache = {};
   const [activeRide, setActiveRide] = useState(null);
+  const [cityId, setCityId] = useState(null);
 
   let previousLocation = null;
 
@@ -276,25 +276,6 @@ const LocationPicker = ({ navigation, route }) => {
     }
   };
 
-  // Hàm lấy địa chỉ từ tọa độ hiện tại
-  const fetchAddressFromCoordinates = async (latitude, longitude) => {
-    const url = `https://maps.vietmap.vn/api/reverse/v3?apikey=${VIETMAP_API_KEY}&lat=${latitude}&lng=${longitude}`;
-
-    console.log("🚀 ~ fetchAddressFromCoordinates ~ url:", url);
-    try {
-      const response = await fetch(url);
-      const data = await response.json();
-      if (data.length > 0) {
-        const address = data[0].address; // Extract address properly
-        setPickup(address);
-      } else {
-        console.log("Không tìm thấy địa chỉ");
-      }
-    } catch (error) {
-      console.error("Lỗi khi lấy địa chỉ từ tọa độ:", error);
-    }
-  };
-
   const fetchNearbyPlaces = async (latitude, longitude) => {
     const cacheKey = `${latitude},${longitude}`;
     if (nearbyPlacesCache[cacheKey]) {
@@ -354,6 +335,30 @@ const LocationPicker = ({ navigation, route }) => {
       setLoading(false);
     }
   };
+  const fetchCityId = async (latitude, longitude) => {
+    const url = `https://maps.vietmap.vn/api/reverse/v3?apikey=${VIETMAP_API_KEY}&lat=${latitude}&lng=${longitude}`;
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data && data.length > 0) {
+        const cityBoundary = data[0]?.boundaries?.find(
+          (boundary) => boundary.type === 0 // Loại 0 là "Thành phố"
+        );
+
+        if (cityBoundary) {
+          const cityId = cityBoundary.id;
+          console.log("City ID:", cityId);
+          return cityId;
+        }
+      }
+      console.log("Không tìm thấy cityId.");
+      return null;
+    } catch (error) {
+      console.error("Lỗi khi lấy cityId:", error);
+      return null;
+    }
+  };
 
   const getCurrentLocation = async () => {
     setLoading(true);
@@ -385,6 +390,10 @@ const LocationPicker = ({ navigation, route }) => {
 
       if (!previousLocation || distance > 0.5) {
         setCurrentLocation({ latitude, longitude });
+        const cityId = await fetchCityId(latitude, longitude);
+        if (cityId) {
+          setCityId(cityId); // Lưu `cityId` vào state
+        }
         await fetchNearbyPlaces(latitude, longitude);
         previousLocation = { latitude, longitude };
       }
