@@ -9,7 +9,7 @@ const ServiceIcons = () => {
     <View style={styles.servicesContainer}>
       <TouchableOpacity
         style={styles.serviceItem}
-        onPress={() => navigation.navigate("BikeBook")}
+        onPress={() => navigation.navigate("LocationPicker")}
       >
         <Image
           source={require("../../assets/bike-icon.png")}
@@ -20,7 +20,7 @@ const ServiceIcons = () => {
 
       <TouchableOpacity
         style={styles.serviceItem}
-        onPress={() => navigation.navigate("HireDriverScreen")}
+        onPress={() => navigation.navigate("HireLocationPicker")}
       >
         <Image
           source={require("../../assets/hire-driver-icon.png")}

@@ -56,10 +56,10 @@ import UpdateCusInfo from "./screens/profile/UpdateCusInfo";
 import ChangePassword from "./screens/auth/ChangePassword";
 import ManageNotifications from "./screens/ManageNotificationScreen";
 import NotificationDetail from "./screens/NotificationDetail";
+import FeedbackDriverScreen from "./screens/hireDriver/FeedbackDriverScreen";
 
 // HireDriver
 import TermsScreen from "./screens/hireDriver/TermsScreen";
-
 import HireDriverServiceOption from "./screens/hireDriver/HireDriverServiceOptionScreen";
 import HireDriverRequestScreen from "./screens/hireDriver/HireDriverRequestScreen";
 import HireRouteScreen from "./screens/hireDriver/HireRouteScreen";
@@ -68,295 +68,338 @@ import HireLocationPicker from "./screens/hireDriver/HireLocationPicker";
 import HireDriverScreen from "./screens/hireDriver/HireDriverScreen";
 import SingleRouteScreen from "./screens/bookingCarpool/SingleRouteScreen";
 import VoucherListScreen from "./screens/bookingTraditional/VoucherListScreen";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import SimpleMap from "./screens/SimpleMap";
+import { enableScreens } from "react-native-screens";
 
 export default function App() {
+  enableScreens();
   const Stack = createNativeStackNavigator();
   const linking = {
-    prefixes: ["flexiride://"], // Đảm bảo trùng với scheme trong `app.json`
+    prefixes: ["flexiride://"], // Cấu hình scheme
     config: {
       screens: {
-        PaymentScreen: "ReturnScreen", // Callback thành công
-        Home: "CancelScreen", // Callback hủy
+        ReturnScreen: {
+          path: "ReturnScreen",
+          parse: {
+            code: (code) => code,
+            id: (id) => id,
+            status: (status) => status,
+            orderCode: (orderCode) => orderCode,
+          },
+        },
+        CancelScreen: {
+          path: "CancelScreen",
+          parse: {
+            code: (code) => code,
+            id: (id) => id,
+            status: (status) => status,
+            orderCode: (orderCode) => orderCode,
+          },
+        },
       },
     },
   };
+
   return (
-    <SocketProvider>
-      <LocationProvider>
-        <AuthProvider>
-          <NavigationContainer linking={linking}>
-            <Stack.Navigator initialRouteName="Splash">
-              <Stack.Screen
-                name="Splash"
-                component={Splash}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="Authenticate"
-                component={Authenticate}
-                options={{ headerShown: false }}
-              />
-              {/* <Stack.Screen
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SocketProvider>
+        <LocationProvider>
+          <AuthProvider>
+            <NavigationContainer linking={linking}>
+              <Stack.Navigator initialRouteName="Splash">
+                <Stack.Screen
+                  name="Splash"
+                  component={Splash}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="Authenticate"
+                  component={Authenticate}
+                  options={{ headerShown: false }}
+                />
+                {/* <Stack.Screen
                 name="LoginOptions"
                 component={LoginOptions}
                 options={{ headerShown: false }}
               /> */}
-              <Stack.Screen
-                name="Home"
-                component={Home}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="Login"
-                component={Login}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="Register"
-                component={Register}
-                options={{ title: "Đăng ký" }}
-              />
-              <Stack.Screen
-                name="InsertCode"
-                component={InsertCode}
-                options={{ headerShown: false }}
-              />
-              {/* <Stack.Screen
-                name="VerificationScreen"
-                component={VerificationScreen}
-                options={{ headerShown: false }}
-              /> */}
-              <Stack.Screen
-                name="EnterNameScreen"
-                component={EnterNameScreen}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="VerifyWithSelfie"
-                component={VerifyWithSelfie}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="BikeBook"
-                component={BikeBook}
-                options={{ headerShown: false }}
-              />
-              {/* <Stack.Screen
-                name="SearchScreen"
-                component={SearchScreen}
-                options={{ headerShown: false }}
-              /> */}
-              <Stack.Screen
-                name="LocationPicker"
-                component={LocationPicker}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="MapScreen"
-                component={MapScreen}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="RouteScreen"
-                component={RouteScreen}
-                options={{ headerShown: false }}
-              />
-              {/* <Stack.Screen
-                name="TestMap"
-                component={TestMap}
-                options={{ headerShown: false }}
-              /> */}
-              <Stack.Screen
-                name="PaymentMethod"
-                component={PaymentMethodsScreen}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="RideTrackingScreen"
-                component={RideTrackingScreen}
-                options={{ title: "Theo dõi tài xế" }}
-              />
-              <Stack.Screen
-                name="ActivityScreen"
-                component={ActivityScreen}
-                options={{ title: "Lịch sử hoạt động" }}
-              />
-              <Stack.Screen
-                name="ChatScreenCustomer"
-                component={ChatScreenCustomer}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="PaymentScreen"
-                component={PaymentScreen}
-                options={{ title: "Thanh toán" }}
-              />
-              <Stack.Screen
-                name="ReturnScreen"
-                component={ReturnScreen}
-                options={{ title: "Thanh toán thành công" }}
-              />
-              <Stack.Screen
-                name="CancelScreen"
-                component={CancelScreen}
-                options={{ title: "Thanh toán bị hủy" }}
-              />
+                <Stack.Screen
+                  name="Home"
+                  component={Home}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="Login"
+                  component={Login}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="Register"
+                  component={Register}
+                  options={{ title: "Đăng ký" }}
+                />
+                <Stack.Screen
+                  name="InsertCode"
+                  component={InsertCode}
+                  options={{ headerShown: false }}
+                />
 
-              {/* Screens for booking carpool */}
-              <Stack.Screen
-                name="ServiceSelection"
-                component={ServiceSelectionScreen}
-              />
-              <Stack.Screen
-                name="CarpoolRequest"
-                component={CarpoolRequestScreen}
-              />
-              <Stack.Screen name="Sucessfull" component={SucessfullScreen} />
-              <Stack.Screen
-                name="AvailableRides"
-                component={AvailableRidesScreen}
-              />
-              <Stack.Screen
-                name="ConfirmBooking"
-                component={ConfirmBookingScreen}
-              />
-              <Stack.Screen
-                name="ManageBooking"
-                component={ManageBookingScreen}
-              />
-              <Stack.Screen
-                name="Notifications"
-                component={NotificationsScreen}
-              />
-              <Stack.Screen name="FeedbackScreen" component={FeedbackScreen} />
-              <Stack.Screen name="TypeService" component={TypeService} />
-              <Stack.Screen
-                name="RideDetailScreen"
-                component={RideDetailScreen}
-              />
-              <Stack.Screen
-                name="ViewAllAvailableRideScreen"
-                component={ViewAllAvailableRideScreen}
-              />
-              <Stack.Screen
-                name="JoinRequestScreen"
-                component={JoinRequestScreen}
-              />
+                <Stack.Screen
+                  name="EnterNameScreen"
+                  component={EnterNameScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="VerifyWithSelfie"
+                  component={VerifyWithSelfie}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="BikeBook"
+                  component={BikeBook}
+                  options={{ headerShown: false }}
+                />
 
-              {/* Screens for booking carpool driver */}
-              <Stack.Screen
-                name="DriverAvailableRides"
-                component={DriverAvailableRidesScreen}
-              />
-              <Stack.Screen
-                name="ManageDriverRides"
-                component={ManageDriverRidesScreen}
-              />
-              <Stack.Screen
-                name="PickupProgress"
-                component={PickupProgressScreen}
-              />
-              {/* Screens for hire driver */}
-              <Stack.Screen
-                name="HireDriver"
-                component={HireDriver}
-                options={{ headerShown: false }}
-              />
-              {/* start Forgot-pass */}
-              <Stack.Screen
-                name="ForgotPasswordDriver"
-                component={ForgotPasswordDriver}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="EnterOtp"
-                component={EnterOtp}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="EnterNewPass"
-                component={EnterNewPass}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="ChangePassSuccess"
-                component={ChangePassSuccess}
-                options={{ headerShown: false }}
-              />
-              {/* end forgot pass */}
-              {/* Start profile customer */}
-              <Stack.Screen
-                name="CustomerProfile"
-                component={CustomerProfile}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="UpdateCusInfo"
-                component={UpdateCusInfo}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="ChangePassword"
-                component={ChangePassword}
-                options={{ headerShown: false }}
-              />
-              {/* end profile customer */}
-              <Stack.Screen name="SingleRoute" component={SingleRouteScreen} />
-              {/* Screens for hire driver */}
-              <Stack.Screen
-                name="HireDriverScreen"
-                component={HireDriverScreen}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="TermsScreen"
-                component={TermsScreen}
-                options={{ headerShown: false }}
-              />
+                <Stack.Screen
+                  name="LocationPicker"
+                  component={LocationPicker}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="MapScreen"
+                  component={MapScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="RouteScreen"
+                  component={RouteScreen}
+                  options={{ headerShown: false }}
+                />
 
-              <Stack.Screen
-                name="HireDriverServiceOption"
-                component={HireDriverServiceOption}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="HireDriverRequestScreen"
-                component={HireDriverRequestScreen}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="HireRouteScreen"
-                component={HireRouteScreen}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="HireMapScreen"
-                component={HireMapScreen}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="HireLocationPicker"
-                component={HireLocationPicker}
-                options={{ headerShown: false }}
-              />
+                <Stack.Screen
+                  name="PaymentMethod"
+                  component={PaymentMethodsScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="RideTrackingScreen"
+                  component={RideTrackingScreen}
+                  options={{ title: "Theo dõi tài xế" }}
+                />
+                <Stack.Screen
+                  name="ActivityScreen"
+                  component={ActivityScreen}
+                  options={{ title: "Lịch sử hoạt động" }}
+                />
+                <Stack.Screen
+                  name="ChatScreenCustomer"
+                  component={ChatScreenCustomer}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="PaymentScreen"
+                  component={PaymentScreen}
+                  options={{ title: "Thanh toán" }}
+                />
+                <Stack.Screen
+                  name="ReturnScreen"
+                  component={ReturnScreen}
+                  options={{ title: "Thanh toán thành công" }}
+                />
+                <Stack.Screen
+                  name="CancelScreen"
+                  component={CancelScreen}
+                  options={{ title: "Thanh toán bị hủy" }}
+                />
 
-              <Stack.Screen
-                name="ManageNotifications"
-                component={ManageNotifications}
-              />
-              <Stack.Screen
-                name="NotificationDetail"
-                component={NotificationDetail}
-              />
-              <Stack.Screen
-                name="VoucherListScreen"
-                component={VoucherListScreen}
-              />
-            </Stack.Navigator>
-          </NavigationContainer>
-        </AuthProvider>
-      </LocationProvider>
-    </SocketProvider>
+                {/* Screens for booking carpool */}
+                <Stack.Screen
+                  name="ServiceSelection"
+                  component={ServiceSelectionScreen}
+                  options={{ title: "Lựa chọn dịch vụ" }}
+                />
+                <Stack.Screen
+                  name="CarpoolRequest"
+                  component={CarpoolRequestScreen}
+                />
+                <Stack.Screen
+                  name="Sucessfull"
+                  component={SucessfullScreen}
+                  options={{ title: "Tạo thành công" }}
+                />
+                <Stack.Screen
+                  name="AvailableRides"
+                  component={AvailableRidesScreen}
+                  options={{ title: "Yêu cầu có sẵn" }}
+                />
+                <Stack.Screen
+                  name="ConfirmBooking"
+                  component={ConfirmBookingScreen}
+                  options={{ title: "Xác nhận yêu cầu" }}
+                />
+                <Stack.Screen
+                  name="ManageBooking"
+                  component={ManageBookingScreen}
+                  options={{ title: "Quản lý yêu cầu" }}
+                />
+                <Stack.Screen
+                  name="Notifications"
+                  component={NotificationsScreen}
+                  options={{ title: "Thông báo của tôi" }}
+                />
+                <Stack.Screen
+                  name="FeedbackScreen"
+                  component={FeedbackScreen}
+                  options={{ title: "Phản hồi" }}
+                />
+                <Stack.Screen
+                  name="TypeService"
+                  component={TypeService}
+                  options={{ title: "Loại dịch vụ" }}
+                />
+                <Stack.Screen
+                  name="RideDetailScreen"
+                  component={RideDetailScreen}
+                  options={{ title: "Chi tiết chuyến xe" }}
+                />
+                <Stack.Screen
+                  name="ViewAllAvailableRideScreen"
+                  component={ViewAllAvailableRideScreen}
+                  options={{ title: "Tất cả yêu cầu" }}
+                />
+                <Stack.Screen
+                  name="JoinRequestScreen"
+                  component={JoinRequestScreen}
+                  options={{ title: "Tham gia chuyến đi" }}
+                />
+
+                {/* Screens for booking carpool driver */}
+                <Stack.Screen
+                  name="DriverAvailableRides"
+                  component={DriverAvailableRidesScreen}
+                />
+                <Stack.Screen
+                  name="ManageDriverRides"
+                  component={ManageDriverRidesScreen}
+                />
+                <Stack.Screen
+                  name="PickupProgress"
+                  component={PickupProgressScreen}
+                />
+                {/* Screens for hire driver */}
+                <Stack.Screen
+                  name="HireDriver"
+                  component={HireDriver}
+                  options={{ headerShown: false }}
+                />
+                {/* start Forgot-pass */}
+                <Stack.Screen
+                  name="ForgotPasswordDriver"
+                  component={ForgotPasswordDriver}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="EnterOtp"
+                  component={EnterOtp}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="EnterNewPass"
+                  component={EnterNewPass}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="ChangePassSuccess"
+                  component={ChangePassSuccess}
+                  options={{ headerShown: false }}
+                />
+                {/* end forgot pass */}
+                {/* Start profile customer */}
+                <Stack.Screen
+                  name="CustomerProfile"
+                  component={CustomerProfile}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="UpdateCusInfo"
+                  component={UpdateCusInfo}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="ChangePassword"
+                  component={ChangePassword}
+                  options={{ headerShown: false }}
+                />
+                {/* end profile customer */}
+                <Stack.Screen
+                  name="SingleRoute"
+                  component={SingleRouteScreen}
+                  options={{ title: "Tuyến đường" }}
+                />
+                {/* Screens for hire driver */}
+                <Stack.Screen
+                  name="HireDriverScreen"
+                  component={HireDriverScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="TermsScreen"
+                  component={TermsScreen}
+                  options={{ headerShown: false }}
+                />
+
+                <Stack.Screen
+                  name="HireDriverServiceOption"
+                  component={HireDriverServiceOption}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="HireDriverRequestScreen"
+                  component={HireDriverRequestScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="HireRouteScreen"
+                  component={HireRouteScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="HireMapScreen"
+                  component={HireMapScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="HireLocationPicker"
+                  component={HireLocationPicker}
+                  options={{ headerShown: false }}
+                />
+
+                <Stack.Screen
+                  name="ManageNotifications"
+                  component={ManageNotifications}
+                />
+                <Stack.Screen
+                  name="NotificationDetail"
+                  component={NotificationDetail}
+                  options={{ title: "Chi tiết thông báo" }}
+                />
+                <Stack.Screen
+                  name="VoucherListScreen"
+                  component={VoucherListScreen}
+                />
+                <Stack.Screen name="SimpleMap" component={SimpleMap} />
+
+                <Stack.Screen
+                  name="FeedbackDriverScreen"
+                  component={FeedbackDriverScreen}
+                  options={{ title: "Đánh giá tài xế" }}
+                />
+              </Stack.Navigator>
+            </NavigationContainer>
+          </AuthProvider>
+        </LocationProvider>
+      </SocketProvider>
+    </GestureHandlerRootView>
   );
 }
 

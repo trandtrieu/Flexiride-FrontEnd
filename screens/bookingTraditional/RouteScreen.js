@@ -150,7 +150,7 @@ const RouteScreen = ({ route, navigation }) => {
         animated: true,
       });
     } catch (error) {
-      navigation.replace("LocationPicker");
+      // navigation.replace("LocationPicker");
 
       console.error("Error calculating route:  ", error);
     }
@@ -286,7 +286,7 @@ const RouteScreen = ({ route, navigation }) => {
       <View style={styles.container}>
         <View style={styles.backButtonContainer}>
           <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
-            <Icon name="arrow-back" type="ionicon" color="#000" size={25} />
+            <Ionicons name="arrow-back" type="ionicon" color="#000" size={25} />
           </TouchableOpacity>
         </View>
         <MapView
@@ -374,19 +374,17 @@ const RouteScreen = ({ route, navigation }) => {
                       style={styles.serviceIcon}
                     />
                     <Text style={styles.optionTitle}>{service.name}</Text>
-                    <Icon
-                      name="user"
-                      type="font-awesome"
+                    <Ionicons
+                      name="person"
                       style={styles.seatIcon}
-                      size={16}
                       color={"#FFC323"}
                     />
                     <Text style={styles.optionSeats}>{service.seat}</Text>
                   </View>
                   <Text style={styles.priceContainer}>
                     {service._id === selectedServiceId &&
-                    originalPrice &&
-                    originalPrice > selectedServicePrice ? ( // Chỉ áp dụng nếu service được chọn
+                      originalPrice &&
+                      originalPrice > selectedServicePrice ? ( // Chỉ áp dụng nếu service được chọn
                       <View>
                         <Text style={styles.discountedPrice}>
                           {formatCurrency(selectedServicePrice)}{" "}
@@ -426,10 +424,6 @@ const RouteScreen = ({ route, navigation }) => {
                 onPress={navigateToVoucherScreen}
               >
                 <Text style={styles.methodText}>Ưu đãi</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.moreOptions}>
-                <Ionicons name="ellipsis-horizontal" size={24} color="black" />
               </TouchableOpacity>
             </View>
           </View>
@@ -549,7 +543,7 @@ const styles = StyleSheet.create({
   },
   seatIcon: {
     marginLeft: 10,
-    fontSize: 8,
+    fontSize: 20,
     color: "#555",
   },
   optionPrice: {
@@ -626,11 +620,12 @@ const styles = StyleSheet.create({
   iconContainer: {
     paddingRight: 10,
   },
+  methodRow: { paddingRight: 10 },
   detailsContainer: {
     flex: 1,
   },
   methodText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "bold",
     color: "#333",
   },

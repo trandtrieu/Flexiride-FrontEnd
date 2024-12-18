@@ -40,7 +40,7 @@ const fetchRequestDetails = async (requestId) => {
       };
     }
   } catch (error) {
-    console.error("Error fetching request detailss: ", error);
+    console.error("Error fetching request detailsss: ", error);
     throw new Error("Unable to fetch request details.");
   }
 };

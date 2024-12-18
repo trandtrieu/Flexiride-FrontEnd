@@ -23,6 +23,7 @@ const PaymentScreen = ({ route, navigation }) => {
   // Fetch booking details
   useEffect(() => {
     const fetchDetails = async () => {
+      console.log("requestId: ", requestId);
       try {
         const bookingResponse = await axios.get(
           `https://flexiride.onrender.com/booking-traditional/request/${requestId}`
@@ -50,7 +51,7 @@ const PaymentScreen = ({ route, navigation }) => {
       setIsLoading(true);
 
       const response = await axios.post(
-        `https://flexiride.onrender.com/payment-history/create-payos`,
+        `http://${IP_ADDRESS}:3000/payment-history/create-payos`,
         {
           userId: bookingDetails.account_id, // ID khách hàng
           amount: bookingDetails.price, // Tổng tiền
@@ -152,15 +153,23 @@ const PaymentScreen = ({ route, navigation }) => {
       {bookingDetails.payment_method !== "cash" && (
         <TouchableOpacity style={styles.payButton} onPress={handlePayment}>
           <Ionicons name="card-outline" size={24} color="white" />
-          <Text style={styles.payButtonText}>Pay Now</Text>
+          <Text style={styles.payButtonText}>Thanh toán ngay </Text>
         </TouchableOpacity>
       )}
+
+      console.log("driverId ", driverId)
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => navigation.navigate("Home")}
+        onPress={() =>
+          navigation.navigate("FeedbackDriverScreen", {
+            driverId: bookingDetails.driverId,
+            customerId: bookingDetails.account_id,
+          })
+        }
       >
-        <Text style={styles.backButtonText}>Đánh giá </Text>
+        <Text style={styles.backButtonText}>Đánh giá</Text>
       </TouchableOpacity>
+
     </ScrollView>
   );
 };

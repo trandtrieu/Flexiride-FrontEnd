@@ -7,12 +7,10 @@ import {
     ScrollView,
     Alert,
 } from "react-native";
-import { CheckBox } from "react-native-elements";
-
+import { Ionicons } from "@expo/vector-icons";
 const TermsScreen = ({ route }) => {
     const { onAccept } = route.params; // Nhận callback từ màn hình chính
     const [isChecked, setIsChecked] = useState(false);
-
     const handleAccept = () => {
         if (!isChecked) {
             Alert.alert(
@@ -23,7 +21,6 @@ const TermsScreen = ({ route }) => {
         }
         onAccept(); // Gọi callback khi xác nhận
     };
-
     return (
         <View style={styles.container}>
             <ScrollView contentContainerStyle={styles.content}>
@@ -56,13 +53,22 @@ const TermsScreen = ({ route }) => {
                     • Hệ thống Fride không chịu trách nhiệm đối với các vấn đề phát sinh do việc sử dụng dịch vụ sai mục đích.
                 </Text>
 
+                <View style={styles.checkboxContainer}>
+                    <TouchableOpacity
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                        onPress={() => setIsChecked(!isChecked)}
+                    >
+                        <Ionicons
+                            name={isChecked ? "checkbox" : "square-outline"}
+                            size={30}
+                            color="#6A0DAD"
+                        />
+                        <Text style={styles.checkboxLabel}>
+                            Tôi đã đọc đồng ý với điều khoản và dịch vụ
+                        </Text>
+                    </TouchableOpacity>
+                </View>
 
-                <CheckBox
-                    title="Tôi đã đọc đồng ý với điều khoản và dịch vụ"
-                    checked={isChecked}
-                    onPress={() => setIsChecked(!isChecked)}
-                    containerStyle={styles.checkbox}
-                />
             </ScrollView>
             <TouchableOpacity style={styles.button} onPress={handleAccept}>
                 <Text style={styles.buttonText}>Xác Nhận</Text>
@@ -85,11 +91,13 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         textAlign: "center",
         marginBottom: 20,
+        fontFamily: "Roboto-Bold",
     },
     sectionTitle: {
         fontSize: 16,
         fontWeight: "bold",
         marginBottom: 10,
+        fontFamily: "Roboto-Bold",
     },
     text: {
         fontSize: 14,
@@ -113,6 +121,18 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         fontSize: 16,
     },
-});
+    checkboxContainer: {
+        flexDirection: "row", // Đặt các phần tử theo chiều ngang
+        alignItems: "center", // Căn giữa icon và text theo chiều dọc
+        marginTop: 20,
+        marginLeft: 10, // Tạo khoảng cách bên trái nếu cần
+    },
+    checkboxLabel: {
+        marginLeft: 10, // Khoảng cách giữa icon và text
+        fontSize: 14,
+        flex: 1, // Cho phép text chiếm phần còn lại của hàng
+        fontStyle: "italic",
+    },
 
+});
 export default TermsScreen;

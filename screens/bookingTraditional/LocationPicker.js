@@ -166,9 +166,9 @@ const LocationPicker = ({ navigation, route }) => {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(toRad(lat1)) *
-        Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c;
@@ -376,11 +376,11 @@ const LocationPicker = ({ navigation, route }) => {
       const { latitude, longitude } = location.coords;
       const distance = previousLocation
         ? calculateDistance(
-            previousLocation.latitude,
-            previousLocation.longitude,
-            latitude,
-            longitude
-          )
+          previousLocation.latitude,
+          previousLocation.longitude,
+          latitude,
+          longitude
+        )
         : null;
 
       if (!previousLocation || distance > 0.5) {
@@ -427,7 +427,7 @@ const LocationPicker = ({ navigation, route }) => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Icon
+          <Ionicons
             name="arrow-back"
             type="ionicon"
             style={styles.backButton}
@@ -447,7 +447,7 @@ const LocationPicker = ({ navigation, route }) => {
                 textAlign="left"
               />
               {pickup ? (
-                <Icon
+                <Ionicons
                   name="close-circle"
                   type="ionicon"
                   size={20}
@@ -466,7 +466,7 @@ const LocationPicker = ({ navigation, route }) => {
                 textAlign="left"
               />
               {destination ? (
-                <Icon
+                <Ionicons
                   name="close-circle"
                   type="ionicon"
                   size={20}
@@ -494,7 +494,7 @@ const LocationPicker = ({ navigation, route }) => {
                 onPress={() => handlePredictionSelect(prediction)}
               >
                 <View style={styles.iconWrapper}>
-                  <Icon
+                  <Ionicons
                     name="location"
                     type="ionicon"
                     size={24}
@@ -518,19 +518,6 @@ const LocationPicker = ({ navigation, route }) => {
         ) : (
           <View style={styles.tabs}>
             <TouchableOpacity
-              style={[styles.tab, selectedTab === "recent" && styles.activeTab]}
-              onPress={() => setSelectedTab("recent")}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  selectedTab === "recent" && styles.activeTabText,
-                ]}
-              >
-                Dùng gần đây
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
               style={[
                 styles.tab,
                 selectedTab === "suggested" && styles.activeTab,
@@ -546,19 +533,6 @@ const LocationPicker = ({ navigation, route }) => {
                 Đề xuất
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.tab, selectedTab === "saved" && styles.activeTab]}
-              onPress={() => setSelectedTab("saved")}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  selectedTab === "saved" && styles.activeTabText,
-                ]}
-              >
-                Đã lưu
-              </Text>
-            </TouchableOpacity>
           </View>
         )}
 
@@ -567,7 +541,12 @@ const LocationPicker = ({ navigation, route }) => {
           isPickupFocused && (
             <>
               <TouchableOpacity style={styles.locationItem}>
-                <Icon name="locate" type="ionicon" size={20} color="#4a4a4a" />
+                <Ionicons
+                  name="locate"
+                  type="ionicon"
+                  size={20}
+                  color="#4a4a4a"
+                />
                 <Button
                   title="Sử dụng vị trí hiện tại"
                   onPress={getCurrentLocation}
@@ -586,7 +565,7 @@ const LocationPicker = ({ navigation, route }) => {
                       onPress={() => handlePredictionSelect(place)}
                     >
                       <View style={styles.iconWrapper}>
-                        <Icon
+                        <Ionicons
                           name="location"
                           type="ionicon"
                           size={24}

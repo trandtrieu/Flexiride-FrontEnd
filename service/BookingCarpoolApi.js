@@ -17,6 +17,7 @@ const createApiInstance = (token) => {
 
 // Customer API calls
 export const createCarpoolRequest = async (data, customerToken) => {
+  console.log("work api ");
   const customerApi = createApiInstance(customerToken);
   try {
     const response = await customerApi.post("/create-request", data);
