@@ -140,7 +140,7 @@ const RideTrackingScreen = ({ route, navigation }) => {
         navigation.navigate("PaymentScreen", { requestId });
         clearInterval(intervalId);
       }
-    }, 1000);
+    }, 5000);
 
     return () => clearInterval(intervalId);
   }, [requestId, navigation]);
@@ -206,10 +206,10 @@ const RideTrackingScreen = ({ route, navigation }) => {
             longitude: data.location.coordinates[0],
           });
         } else {
-          console.warn(
-            "Location update ignored for other driver:",
-            data.driverId
-          );
+          // console.warn(
+          //   "Location update ignored for other driver:",
+          //   data.driverId
+          // );
         }
       });
 
