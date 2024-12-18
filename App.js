@@ -56,7 +56,7 @@ import UpdateCusInfo from "./screens/profile/UpdateCusInfo";
 import ChangePassword from "./screens/auth/ChangePassword";
 import ManageNotifications from "./screens/ManageNotificationScreen";
 import NotificationDetail from "./screens/NotificationDetail";
-import { FeedbackCustomerScreen } from "./screens/hireDriver/FeedbackCustomerScreen";
+import FeedbackDriverScreen from "./screens/hireDriver/FeedbackDriverScreen";
 
 // HireDriver
 import TermsScreen from "./screens/hireDriver/TermsScreen";
@@ -388,6 +388,12 @@ export default function App() {
                   component={VoucherListScreen}
                 />
                 <Stack.Screen name="SimpleMap" component={SimpleMap} />
+
+                <Stack.Screen
+                  name="FeedbackDriverScreen"
+                  component={FeedbackDriverScreen}
+                  options={{ title: "Đánh giá tài xế" }}
+                />
               </Stack.Navigator>
             </NavigationContainer>
           </AuthProvider>

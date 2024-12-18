@@ -20,7 +20,7 @@ const ServiceIcons = () => {
 
       <TouchableOpacity
         style={styles.serviceItem}
-        onPress={() => navigation.navigate("HireDriverScreen")}
+        onPress={() => navigation.navigate("HireLocationPicker")}
       >
         <Image
           source={require("../../assets/hire-driver-icon.png")}

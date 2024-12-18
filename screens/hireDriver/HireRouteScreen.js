@@ -296,7 +296,7 @@ const RouteScreen = ({ route, navigation }) => {
       <View style={styles.container}>
         <View style={styles.backButtonContainer}>
           <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
-            <Icon name="arrow-back" type="ionicon" color="#000" size={25} />
+            <Ionicons name="arrow-back" type="ionicon" color="#000" size={25} />
           </TouchableOpacity>
         </View>
         <MapView
@@ -325,12 +325,9 @@ const RouteScreen = ({ route, navigation }) => {
               longitude: pickupLocation.longitude,
             }}
             pinColor="green"
-          >
-            <Callout>
-              <Text>{pickupLocation.name || "Pickup Location"}</Text>
-              <Text>{pickupLocation.address || "Địa điểm đón"}</Text>
-            </Callout>
-          </Marker>
+            title={pickupLocation.name}
+            description="Vị trí điểm đón"
+          ></Marker>
 
           <Marker
             coordinate={{
@@ -338,12 +335,9 @@ const RouteScreen = ({ route, navigation }) => {
               longitude: destinationLocation.longitude,
             }}
             pinColor="red"
-          >
-            <Callout>
-              <Text>{destinationLocation.name || "Drop-off Location"}</Text>
-              <Text>{destinationLocation.address || "Địa điểm đến"}</Text>
-            </Callout>
-          </Marker>
+            title={destinationLocation.name}
+            description="Vị trí điểm đến"
+          ></Marker>
 
           {/* Route Path */}
           {routeData && (
@@ -390,14 +384,14 @@ const RouteScreen = ({ route, navigation }) => {
                       style={styles.serviceIcon}
                     />
                     <Text style={styles.optionTitle}>{service.name}</Text>
-                    <Icon
+                    {/* <Ionicons
                       name="user"
                       type="font-awesome"
                       style={styles.seatIcon}
                       size={16}
                       color={"#FFC323"}
-                    />
-                    <Text style={styles.optionSeats}>{service.seat}</Text>
+                    /> */}
+                    {/* <Text style={styles.optionSeats}>{service.seat}</Text> */}
                   </View>
                   <Text style={styles.priceContainer}>
                     {service._id === selectedServiceId &&
@@ -444,9 +438,9 @@ const RouteScreen = ({ route, navigation }) => {
                 <Text style={styles.methodText}>Ưu đãi</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.moreOptions}>
+              {/* <TouchableOpacity style={styles.moreOptions}>
                 <Ionicons name="ellipsis-horizontal" size={24} color="black" />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
           </View>
           {/* Payment and Hire */}

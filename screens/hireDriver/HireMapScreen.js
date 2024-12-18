@@ -8,9 +8,9 @@ import {
     ScrollView,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
-import { Icon } from "react-native-elements";
+// import { Icon } from "react-native-elements";
 import { VIETMAP_API_KEY } from "@env";
-
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 const MapScreen = ({ navigation, route }) => {
     const { pickupLocation, destinationLocation, onSelectPickupLocation } = route.params;
     const [selectedPickupLocation, setSelectedPickupLocation] = useState(pickupLocation);
@@ -92,7 +92,7 @@ const MapScreen = ({ navigation, route }) => {
     return (
         <View style={styles.container}>
             <View style={styles.searchBar}>
-                <Icon name="arrow-back" type="ionicon" size={25} onPress={handleBack} />
+                <Ionicons name="arrow-back" type="ionicon" size={25} onPress={handleBack} />
                 <TextInput
                     style={styles.searchInput}
                     placeholder="Đón tại?"
@@ -129,7 +129,7 @@ const MapScreen = ({ navigation, route }) => {
                 <ScrollView style={styles.suggestionsList}>
                     {nearbyPlaces.map((place, index) => (
                         <View key={index} style={styles.locationItem}>
-                            <Icon name="location" type="ionicon" size={20} />
+                            <Ionicons name="location" type="ionicon" size={20} />
                             <View style={styles.locationTextWrapper}>
                                 <Text style={styles.locationName}>{place.name}</Text>
                                 <Text style={styles.locationAddress}>{place.address}</Text>

@@ -156,14 +156,20 @@ const PaymentScreen = ({ route, navigation }) => {
           <Text style={styles.payButtonText}>Thanh toán ngay </Text>
         </TouchableOpacity>
       )}
+
+      console.log("driverId ", driverId)
       <TouchableOpacity
         style={styles.backButton}
-        // onPress={() => navigation.navigate("Home")}
-        onPress={() => navigation.navigate("FeedbackCustomerScreen")}
-
+        onPress={() =>
+          navigation.navigate("FeedbackDriverScreen", {
+            driverId: bookingDetails.driverId,
+            customerId: bookingDetails.account_id,
+          })
+        }
       >
-        <Text style={styles.backButtonText}>Đánh giá </Text>
+        <Text style={styles.backButtonText}>Đánh giá</Text>
       </TouchableOpacity>
+
     </ScrollView>
   );
 };
