@@ -95,7 +95,7 @@ const RouteScreen = ({ route, navigation }) => {
       clearTimeout(bookingTimeout.current);
       Alert.alert(
         "Yêu cầu được chấp nhận",
-        `Tài xế ${data.driverId} đã nhận chuyến!`
+        `Tài xế ${data.driverName} đã nhận chuyến!`
       );
       setIsBooking(false);
     };
