@@ -8,11 +8,16 @@ import {
   StyleSheet,
   Image,
   Modal,
+  Linking,
+  Alert,
+  PermissionsAndroid,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import io from "socket.io-client";
 import { IP_ADDRESS } from "@env"; // Thay bằng địa chỉ IP backend của bạn
 import axios from "axios";
+import call from "react-native-phone-call"; // Import thư viện hỗ trợ gọi điện
+import { Platform } from "react-native";
 
 const ChatScreenCustomer = ({ route, navigation }) => {
   const { roomId, userId, driverId } = route.params;
@@ -32,7 +37,7 @@ const ChatScreenCustomer = ({ route, navigation }) => {
   ];
 
   useEffect(() => {
-    socket.current = io(`http://${IP_ADDRESS}:3000`, {
+    socket.current = io(`https://flexiride.onrender.com`, {
       transports: ["websocket"],
       query: { userId },
     });
@@ -53,7 +58,7 @@ const ChatScreenCustomer = ({ route, navigation }) => {
     const fetchMessages = async () => {
       try {
         const response = await axios.get(
-          `http://${IP_ADDRESS}:3000/booking-traditional/messages/${roomId}`
+          `https://flexiride.onrender.com/booking-traditional/messages/${roomId}`
         );
         setMessages(response.data);
       } catch (error) {
@@ -105,7 +110,7 @@ const ChatScreenCustomer = ({ route, navigation }) => {
     const fetchDriverLocation = async () => {
       try {
         const response = await axios.get(
-          `http://${IP_ADDRESS}:3000/booking-traditional/location/driver/${driverId}`
+          `https://flexiride.onrender.com/booking-traditional/location/driver/${driverId}`
         );
         if (response.data && response.data.location) {
           console.log("Driver Location Data:", response.data);
@@ -116,7 +121,49 @@ const ChatScreenCustomer = ({ route, navigation }) => {
       }
     };
     fetchDriverLocation();
+    requestCallPermission();
   }, [driverId]);
+  const requestCallPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CALL_PHONE,
+        {
+          title: "Cấp quyền gọi điện",
+          message: "Ứng dụng cần quyền để thực hiện cuộc gọi khẩn cấp.",
+          buttonPositive: "Đồng ý",
+        }
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } catch (err) {
+      console.warn(err);
+      return false;
+    }
+  };
+
+  const handleCall = async (phoneNumber) => {
+    const hasPermission =
+      Platform.OS === "android" ? await requestCallPermission() : true;
+
+    if (!hasPermission) {
+      Alert.alert("Lỗi", "Ứng dụng chưa được cấp quyền gọi điện.");
+      return;
+    }
+
+    const url = `tel:${phoneNumber}`;
+    Linking.canOpenURL(url)
+      .then((supported) => {
+        if (!supported) {
+          Alert.alert("Lỗi", "Thiết bị của bạn không hỗ trợ gọi điện.");
+        } else {
+          return Linking.openURL(url);
+        }
+      })
+      .catch((err) => {
+        console.error("Lỗi khi gọi điện:", err);
+        Alert.alert("Lỗi", `Không thể thực hiện cuộc gọi: ${err.message}`);
+      });
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -124,19 +171,14 @@ const ChatScreenCustomer = ({ route, navigation }) => {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
-        <Image
-          source={{
-            uri: "https://ninhbinhtouristcenter.com/wp-content/uploads/2019/08/car-with-driver-in-Ninh-Binh-North-Vietnam.webp",
-          }}
-          style={styles.avatar}
-        />
+        <Image source={{ uri: driverDetails.avatar }} style={styles.avatar} />
         <View style={styles.userInfo}>
           <Text style={styles.otherUserName}>Tài xế: {driverDetails.name}</Text>
           <Text style={styles.otherUserVehicle}>
             {driverDetails.vehiclePlate}
           </Text>
         </View>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => handleCall(driverDetails.phoneNumber)}>
           <Ionicons name="call" size={24} color="white" />
         </TouchableOpacity>
       </View>
@@ -147,6 +189,14 @@ const ChatScreenCustomer = ({ route, navigation }) => {
         keyExtractor={(item, index) => index.toString()}
         renderItem={renderMessage}
         contentContainerStyle={styles.messagesContainer}
+        ListEmptyComponent={
+          <View style={styles.emptyMessageContainer}>
+            <Text style={styles.emptyMessageText}>
+              Hiện chưa có tin nhắn nào. Nhấn vào nút '+' để chọn tin nhắn mẫu
+              và bắt đầu trò chuyện!
+            </Text>
+          </View>
+        }
       />
 
       {/* Input */}
@@ -301,6 +351,17 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: "white",
     fontSize: 16,
+  },
+  emptyMessageContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  emptyMessageText: {
+    fontSize: 16,
+    color: "#888",
+    textAlign: "center",
   },
 });
 

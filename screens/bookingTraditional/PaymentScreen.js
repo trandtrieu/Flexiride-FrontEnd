@@ -89,7 +89,6 @@ const PaymentScreen = ({ route, navigation }) => {
           </Text>
         </View>
       </View>
-      console.log("driverId ", driverId)
       <TouchableOpacity
         style={styles.backButton}
         onPress={() =>

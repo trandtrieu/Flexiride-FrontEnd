@@ -27,14 +27,17 @@ const fetchRequestDetails = async (requestId) => {
       `https://flexiride.onrender.com/booking-traditional/request/${requestId}`
     );
     if (response.data) {
+      console.log("🚀 ~ fetchRequestDetails ~ response.data:", response.data);
       return {
         pickup: {
           latitude: response.data.latitude_from,
           longitude: response.data.longitude_from,
+          address: response.data.pickup,
         },
         destination: {
           latitude: response.data.latitude_to,
           longitude: response.data.longitude_to,
+          address: response.data.destination,
         },
       };
     }
@@ -135,7 +138,6 @@ const RideTrackingScreen = ({ route, navigation }) => {
   useEffect(() => {
     const intervalId = setInterval(async () => {
       const currentStatus = await fetchRequestStatus();
-
       if (currentStatus === "dropped off") {
         navigation.navigate("PaymentScreen", { requestId });
         clearInterval(intervalId);
@@ -157,19 +159,6 @@ const RideTrackingScreen = ({ route, navigation }) => {
       };
     }, [navigation])
   );
-  // useEffect(() => {
-  //   const intervalId = setInterval(async () => {
-  //     try {
-  //       const response = await fetchDriverDetails(driverId);
-  //       setDriverLocation(response.location);
-  //       console.log("driver location use effect", driverLocation);
-  //     } catch (error) {
-  //       console.error("Error fetching fallback driver location:", error);
-  //     }
-  //   }, 5000); // Kiểm tra mỗi 5 giây
-
-  //   return () => clearInterval(intervalId);
-  // }, [driverId]);
 
   useEffect(() => {
     const updateRoute = async () => {
@@ -253,6 +242,7 @@ const RideTrackingScreen = ({ route, navigation }) => {
         setIsLoading(true);
         const { pickup, destination } = await fetchRequestDetails(requestId);
         setPickupLocation(pickup);
+
         setDestination(destination);
 
         const driver = await fetchDriverDetails(driverId);
@@ -299,41 +289,6 @@ const RideTrackingScreen = ({ route, navigation }) => {
     );
   }
 
-  // const handleCancelRide = () => {
-  //   Alert.alert(
-  //     "Xác nhận",
-  //     "Bạn có chắc muốn hủy chuyến đi?",
-  //     [
-  //       { text: "Không", style: "cancel" },
-  //       {
-  //         text: "Hủy chuyến",
-  //         style: "destructive",
-  //         onPress: () => {
-  //           if (socket.current) {
-  //             // Gửi sự kiện hủy chuyến qua socket
-  //             socket.current.emit("cancelRide", {
-  //               requestId,
-  //               customerId: authState.userId,
-  //             });
-
-  //             // Lắng nghe phản hồi từ server
-  //             socket.current.on("rideCanceledSuccess", (data) => {
-  //               AsyncStorage.removeItem("activeRide");
-  //               navigation.replace("Home");
-  //             });
-
-  //             socket.current.on("cancelError", (error) => {
-  //               Alert.alert("Lỗi", error.message);
-  //             });
-  //           } else {
-  //             Alert.alert("Lỗi", "Kết nối socket không khả dụng.");
-  //           }
-  //         },
-  //       },
-  //     ],
-  //     { cancelable: true }
-  //   );
-  // };
   const handleCancelRide = async () => {
     try {
       // Kiểm tra trạng thái chuyến đi
@@ -384,6 +339,9 @@ const RideTrackingScreen = ({ route, navigation }) => {
       Alert.alert("Lỗi", "Không thể kiểm tra trạng thái chuyến đi.");
     }
   };
+  const handleBackPress = () => {
+    navigation.replace("Home");
+  };
 
   return (
     <View style={styles.container}>
@@ -397,23 +355,27 @@ const RideTrackingScreen = ({ route, navigation }) => {
           longitudeDelta: 0.001,
         }}
       >
-        <Marker coordinate={pickupLocation} title="Điểm đón">
+        <Marker
+          coordinate={pickupLocation}
+          title="Điểm đón"
+          // description={pickupLocation.name}
+        >
           <Image
             source={require("../../assets/pickup-icon.png")}
-            style={{ width: 40, height: 40 }}
+            style={{ width: 30, height: 30 }}
           />
         </Marker>
         <Marker coordinate={driverLocation}>
           <Image
             source={require("../../assets/bike-icon.png")}
-            style={{ width: 40, height: 40 }}
+            style={{ width: 30, height: 30 }}
           />
         </Marker>
 
         <Marker coordinate={destination} title="Điểm đến">
           <Image
             source={require("../../assets/destination-icon.png")} // Replace with your destination icon path
-            style={{ width: 40, height: 40 }}
+            style={{ width: 30, height: 30 }}
           />
         </Marker>
 
@@ -426,13 +388,28 @@ const RideTrackingScreen = ({ route, navigation }) => {
         )}
       </MapView>
 
+      <View style={styles.backButtonContainer}>
+        <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
+          <Ionicons name="arrow-back" type="ionicon" color="#000" size={25} />
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.infoContainer}>
         <Text style={styles.infoText}>
-          Trạng thái hiện tại:{" "}
+          Trạng thái:{" "}
           <Text style={{ fontWeight: "bold", color: "blue" }}>
-            {driverStatus || "Đang tải..."}
+            {driverStatus === "confirmed" || driverStatus === "on the way"
+              ? "Đang đến"
+              : driverStatus === "picked up"
+              ? "Đã đón khách"
+              : driverStatus === "on trip"
+              ? "Đang trên đường"
+              : driverStatus === "dropped off"
+              ? "Đã hoàn thành chuyến đi"
+              : "Đang tải..."}
           </Text>
         </Text>
+
         <Text style={styles.infoText}>
           Khoảng cách:{" "}
           {routeData.estimatedDistance < 1
@@ -460,6 +437,7 @@ const RideTrackingScreen = ({ route, navigation }) => {
             <Text style={styles.vehiclePlate}>
               {driverDetails.vehiclePlate || "Vehicle Plate"}
             </Text>
+            <Text style={styles.vehiclePlate}>Air Balde 2020 150cc </Text>
             <Text style={styles.driverPhone}>
               SĐT: {driverDetails.phoneNumber || "Unavailable"}
             </Text>
@@ -482,27 +460,58 @@ const RideTrackingScreen = ({ route, navigation }) => {
         >
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
+              <Ionicons
+                name="information-circle-outline"
+                size={50}
+                color="#4CAF50"
+              />
               <Text style={styles.modalTitle}>Chi tiết chuyến đi</Text>
-              <Text>
-                Điểm đón: {pickupLocation.latitude}, {pickupLocation.longitude}
-              </Text>
-              <Text>
-                Điểm đến: {destination.latitude}, {destination.longitude}
-              </Text>
-              <Text>Tài xế: {driverDetails.name}</Text>
-              <Text>Biển số: {driverDetails.vehiclePlate}</Text>
 
+              {/* Thông tin điểm đón */}
+              <View style={styles.modalInfoRow}>
+                <Ionicons name="location-outline" size={20} color="#333" />
+                <Text style={styles.modalInfoText}>
+                  Điểm đón: {pickupLocation.address}
+                </Text>
+              </View>
+
+              {/* Thông tin điểm đến */}
+              <View style={styles.modalInfoRow}>
+                <Ionicons name="flag-outline" size={20} color="#333" />
+                <Text style={styles.modalInfoText}>
+                  Điểm đến: {destination.address}
+                </Text>
+              </View>
+
+              {/* Thông tin tài xế */}
+              <View style={styles.modalInfoRow}>
+                <Ionicons name="person-circle-outline" size={20} color="#333" />
+                <Text style={styles.modalInfoText}>
+                  Tài xế: {driverDetails.name}
+                </Text>
+              </View>
+              <View style={styles.modalInfoRow}>
+                <Ionicons name="car-outline" size={20} color="#333" />
+                <Text style={styles.modalInfoText}>
+                  Biển số: {driverDetails.vehiclePlate}
+                </Text>
+              </View>
+
+              {/* Nút hủy chuyến đi */}
               <TouchableOpacity
                 style={styles.cancelButton}
                 onPress={handleCancelRide}
               >
+                <Ionicons name="close-circle-outline" size={20} color="#fff" />
                 <Text style={styles.cancelText}>Hủy chuyến đi</Text>
               </TouchableOpacity>
 
+              {/* Nút đóng modal */}
               <TouchableOpacity
                 style={styles.closeButton}
                 onPress={toggleModal}
               >
+                <Ionicons name="close-outline" size={20} color="#333" />
                 <Text style={styles.closeText}>Đóng</Text>
               </TouchableOpacity>
             </View>
@@ -518,9 +527,21 @@ const styles = StyleSheet.create({
   map: { flex: 1 },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   loadingText: { marginTop: 10, fontSize: 16, color: "#333" },
+  backButtonContainer: {
+    position: "absolute",
+    top: 15,
+    left: 15,
+    zIndex: 2,
+  },
+  backButton: {
+    backgroundColor: "#fff",
+    padding: 8,
+    borderRadius: 50,
+    elevation: 3,
+  },
   infoContainer: {
     position: "absolute",
-    top: 10,
+    top: 70,
     left: 10,
     padding: 10,
     backgroundColor: "rgba(255, 255, 255, 0.8)",
@@ -578,33 +599,60 @@ const styles = StyleSheet.create({
   modalContent: {
     width: "90%",
     backgroundColor: "#fff",
-    borderRadius: 10,
+    borderRadius: 20,
     padding: 20,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 15,
+    color: "#333",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  modalInfoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 5,
+  },
+  modalInfoText: {
+    marginLeft: 10,
+    fontSize: 16,
+    color: "#555",
   },
   cancelButton: {
-    backgroundColor: "red",
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FF5722",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginTop: 20,
   },
   cancelText: {
     color: "#fff",
+    fontSize: 16,
     fontWeight: "bold",
+    marginLeft: 5,
   },
   closeButton: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: "#ccc",
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 15,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginTop: 10,
   },
   closeText: {
     color: "#333",
+    fontSize: 16,
+    marginLeft: 5,
   },
 });
 

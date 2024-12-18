@@ -25,6 +25,7 @@ const MapScreen = ({ navigation, route }) => {
   }, [pickupLocation]);
 
   const fetchAddressFromCoordinates = async (latitude, longitude) => {
+    console.log("work codi ");
     const url = `https://maps.vietmap.vn/api/reverse/v3?apikey=${VIETMAP_API_KEY}&lat=${latitude}&lng=${longitude}`;
     try {
       const response = await fetch(url);
@@ -142,7 +143,9 @@ const MapScreen = ({ navigation, route }) => {
                 <Text style={styles.locationAddress}>{place.address}</Text>
               </View>
               <Text style={styles.locationDistance}>
-                {place.distance ? `${place.distance.toFixed(1)} km` : "N/A"}
+                {place.distance
+                  ? `${(place.distance * 1000).toFixed(0)} m`
+                  : "0 m"}
               </Text>
             </View>
           ))}

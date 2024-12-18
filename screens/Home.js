@@ -63,10 +63,15 @@ const Home = ({ navigation }) => {
   };
 
   // Lấy vị trí khi component được render
-  useEffect(() => {
-    fetchCurrentLocation();
-  }, []);
-
+  // useEffect(() => {
+  //   fetchCurrentLocation();
+  // }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log("current location: ", currentLocation);
+      fetchCurrentLocation();
+    }, [])
+  );
   // Load thông tin chuyến đi từ AsyncStorage
   const loadActiveRide = async () => {
     try {
