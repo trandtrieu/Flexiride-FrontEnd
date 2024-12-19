@@ -16,7 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import io from "socket.io-client";
 import { IP_ADDRESS } from "@env"; // Thay bằng địa chỉ IP backend của bạn
 import axios from "axios";
-import call from "react-native-phone-call"; // Import thư viện hỗ trợ gọi điện
+// import call from "react-native-phone-call"; // Import thư viện hỗ trợ gọi điện
 import { Platform } from "react-native";
 
 const ChatScreenCustomer = ({ route, navigation }) => {

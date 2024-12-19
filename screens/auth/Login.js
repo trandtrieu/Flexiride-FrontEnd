@@ -97,8 +97,8 @@ const Login = ({ navigation }) => {
         </View>
 
         <Image
-          source={require("../../assets/Login_theme1.png")}
           style={styles.logo}
+          source={require("../../assets/Login_theme1.png")}
         />
 
         <TextInput
@@ -174,7 +174,8 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: 25,
     paddingTop: 60,
-    backgroundColor: "#fff",
+    backgroundColor: "#FFC323",
+    paddingTop: 120
   },
   header: {
     marginBottom: 30,
@@ -190,13 +191,13 @@ const styles = StyleSheet.create({
     color: "#5F3A8E",
     marginTop: 5,
   },
-  logo: {
-    alignSelf: "center",
-    marginBottom: 40,
-    width: 220,
-    height: 100,
-    resizeMode: "contain",
-  },
+  // logo: {
+  //   alignSelf: "center",
+  //   marginBottom: 40,
+  //   width: 220,
+  //   height: 100,
+  //   resizeMode: "contain",
+  // },
   input: {
     height: 50,
     borderColor: "#ccc",
@@ -225,7 +226,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   loginButton: {
-    backgroundColor: "#FFC323",
+    backgroundColor: "#270C6D",
     paddingVertical: 15,
     borderRadius: 12,
     alignItems: "center",
@@ -245,6 +246,13 @@ const styles = StyleSheet.create({
     color: "#5F3A8E",
     textAlign: "center",
     fontSize: 14,
+  },
+  logo: {
+    width: '100%',
+    height: undefined,
+    aspectRatio: 2,
+    resizeMode: 'contain',
+    marginBottom: 20,
   },
 });
 

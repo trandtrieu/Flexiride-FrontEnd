@@ -196,6 +196,7 @@ export default function App() {
                 <Stack.Screen
                   name="CarpoolRequest"
                   component={CarpoolRequestScreen}
+                  options={{ title: "Tạo yêu cầu" }}
                 />
                 <Stack.Screen
                   name="Sucessfull"

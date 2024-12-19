@@ -521,19 +521,6 @@ const LocationPicker = ({ navigation, route }) => {
                     </ScrollView>
                 ) : (
                     <View style={styles.tabs}>
-                        {/* <TouchableOpacity
-                            style={[styles.tab, selectedTab === "recent" && styles.activeTab]}
-                            onPress={() => setSelectedTab("recent")}
-                        >
-                            <Text
-                                style={[
-                                    styles.tabText,
-                                    selectedTab === "recent" && styles.activeTabText,
-                                ]}
-                            >
-                                Dùng gần đây
-                            </Text>
-                        </TouchableOpacity> */}
                         <TouchableOpacity
                             style={[
                                 styles.tab,
@@ -550,19 +537,6 @@ const LocationPicker = ({ navigation, route }) => {
                                 Đề xuất
                             </Text>
                         </TouchableOpacity>
-                        {/* <TouchableOpacity
-                            style={[styles.tab, selectedTab === "saved" && styles.activeTab]}
-                            onPress={() => setSelectedTab("saved")}
-                        >
-                            <Text
-                                style={[
-                                    styles.tabText,
-                                    selectedTab === "saved" && styles.activeTabText,
-                                ]}
-                            >
-                                Đã lưu
-                            </Text>
-                        </TouchableOpacity> */}
                         {activeRide && (
                             <TouchableOpacity
                                 style={styles.activeRideButton}
@@ -631,13 +605,6 @@ const LocationPicker = ({ navigation, route }) => {
                         </>
                     )}
 
-                <View style={styles.footer}>
-                    <Button
-                        title="Chọn từ bản đồ"
-                        onPress={handleSelectFromMap}
-                        buttonStyle={styles.btnMap}
-                    />
-                </View>
             </View>
         </TouchableWithoutFeedback>
     );

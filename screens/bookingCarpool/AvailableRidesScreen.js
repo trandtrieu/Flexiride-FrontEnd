@@ -11,14 +11,14 @@ export const AvailableRidesScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     const fetchRides = async () => {
+      console.log('Search Params:', searchParams);
       try {
         setLoading(true);
-        console.log('Search Params:', searchParams);
 
         // Gọi API để lấy danh sách các chuyến đi
         const response = searchParams
-          ? await getAvailableRides(searchParams)
-          : await getAvailableRides();
+          ? await getAvailableRides(searchParams, authState.token)
+          : await getAvailableRides(null, authState.token);
 
         console.log('API Response:', response.data);
         setRides(response.data);
