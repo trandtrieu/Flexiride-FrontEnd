@@ -1,7 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Alert, TouchableOpacity, ScrollView } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import { getDriverLocation, getCustomerLocation } from '../../service/BookingCarpoolApi';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Alert,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import {
+  getDriverLocation,
+  getCustomerLocation,
+} from "../../service/BookingCarpoolApi";
 import { useAuth } from "../../provider/AuthProvider";
 
 const RideDetailScreen = ({ route, navigation }) => {
@@ -24,18 +34,18 @@ const RideDetailScreen = ({ route, navigation }) => {
       const response = await getDriverLocation(driverId, authState.token);
       setLocation(response.data);
     } catch (error) {
-      console.error('Error fetching driver location:', error);
-      Alert.alert('Error', 'Không thể tải vị trí tài xế.');
+      console.error("Error fetching driver location:", error);
+      Alert.alert("Error", "Không thể tải vị trí tài xế.");
     }
   };
 
   const fetchCustomerLocation = async () => {
     try {
-      const response = await getCustomerLocation(ride._id,  authState.token);
+      const response = await getCustomerLocation(ride._id, authState.token);
       setCustomerLocation(response.data[0]);
     } catch (error) {
-      console.error('Error fetching customer location:', error);
-      Alert.alert('Error', 'Không thể tải vị trí khách hàng.');
+      console.error("Error fetching customer location:", error);
+      Alert.alert("Error", "Không thể tải vị trí khách hàng.");
     }
   };
 
@@ -48,10 +58,27 @@ const RideDetailScreen = ({ route, navigation }) => {
       latitude: parseFloat(customerLocation.latitude),
       longitude: parseFloat(customerLocation.longitude),
     };
-    navigation.navigate('SingleRoute', {
+    navigation.navigate("SingleRoute", {
       driverCoordinates,
       customerCoordinates,
     });
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case "pending":
+        return "Đang chờ";
+      case "accepted":
+        return "Đã chấp nhận";
+      case "completed":
+        return "Đã hoàn thành";
+      case "ongoing":
+        return "Đang di chuyển";
+      case "done":
+        return "Đã đánh giá";
+      default:
+        return "Trạng thái không xác định";
+    }
   };
 
   return (
@@ -68,7 +95,7 @@ const RideDetailScreen = ({ route, navigation }) => {
         </Text>
         <Text style={styles.detail}>
           <Text style={styles.label}>Ngày xuất phát: </Text>
-          {new Date(ride.date).toLocaleDateString('vi-VN')}
+          {new Date(ride.date).toLocaleDateString("vi-VN")}
         </Text>
         <Text style={styles.detail}>
           <Text style={styles.label}>Thời gian khởi hành: </Text>
@@ -76,11 +103,11 @@ const RideDetailScreen = ({ route, navigation }) => {
         </Text>
         <Text style={styles.detail}>
           <Text style={styles.label}>Giá: </Text>
-          {ride.price.toLocaleString('vi-VN')} VND
+          {ride.price.toLocaleString("vi-VN")} VND
         </Text>
         <Text style={styles.detail}>
           <Text style={styles.label}>Trạng thái: </Text>
-          {ride.status}
+          {getStatusText(ride.status)}
         </Text>
         <Text style={styles.detail}>
           <Text style={styles.label}>Số lượng khách: </Text>
@@ -104,8 +131,7 @@ const RideDetailScreen = ({ route, navigation }) => {
         <TouchableOpacity style={styles.routeButton} onPress={handleRoute}>
           <Text style={styles.routeButtonText}>Kiểm tra vị trí</Text>
         </TouchableOpacity>
-      )
-      }
+      )}
     </ScrollView>
   );
 };
@@ -113,22 +139,22 @@ const RideDetailScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f4f6f9',
+    backgroundColor: "#f4f6f9",
     padding: 20,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
     marginBottom: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 10,
     padding: 20,
     marginBottom: 20,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -136,25 +162,25 @@ const styles = StyleSheet.create({
   },
   detail: {
     fontSize: 16,
-    color: '#555',
+    color: "#555",
     marginBottom: 10,
   },
   label: {
-    fontWeight: 'bold',
-    color: '#222',
+    fontWeight: "bold",
+    color: "#222",
   },
   routeButton: {
-    backgroundColor: '#007bff',
+    backgroundColor: "#007bff",
     borderRadius: 10,
     paddingVertical: 15,
     paddingHorizontal: 20,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 20,
   },
   routeButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 

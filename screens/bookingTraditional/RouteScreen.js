@@ -100,7 +100,7 @@ const RouteScreen = ({ route, navigation }) => {
           console.error("Lỗi khi lưu activeRide:", error);
         });
 
-      navigation.navigate("RideTrackingScreen", {
+      navigation.replace("RideTrackingScreen", {
         requestId: data.requestDetailId,
         driverId: data.driverId,
       });

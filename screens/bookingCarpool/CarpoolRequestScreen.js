@@ -171,9 +171,9 @@ export const CarpoolRequestScreen = ({ navigation, route }) => {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(toRad(coords1.lat)) *
-        Math.cos(toRad(coords2.lat)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+      Math.cos(toRad(coords2.lat)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c; // Khoảng cách tính bằng km
   };
@@ -386,23 +386,25 @@ export const CarpoolRequestScreen = ({ navigation, route }) => {
   };
 
   const handleFindRequest = async () => {
-    const searchParams = {
-      start_location: startLocation,
-      location: locationDetail,
-      longitude: placeData.lng,
-      latitude: placeData.lat,
-      end_location: endLocation,
-      date: date.toISOString().split("T")[0], // Ngày định dạng yyyy-mm-dd
-      time_start: timeStart.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }), // Giờ khởi hành
-      service_id: serviceId, // Nếu cần lọc theo dịch vụ
-    };
+    console.log("searchParams ")
+    const placeUrl = `https://maps.vietmap.vn/api/place/v3?apikey=${VIETMAP_API_KEY}&refid=${selectedLocation.ref_id}`;
+    const placeResponse = await fetch(placeUrl);
+    const placeData = await placeResponse.json();
+    if (placeData && placeData.lat && placeData.lng) {
+      const searchParams = {
+        start_location: startLocation,
+        location: locationDetail,
+        longitude: placeData.lng,
+        latitude: placeData.lat,
+        end_location: endLocation,
+        date: date.toISOString().split("T")[0], // Ngày định dạng yyyy-mm-dd
+        time_start: timeStart, // Giờ khởi hành
+        service_id: serviceId, // Nếu cần lọc theo dịch vụ
+      };
+      console.log("=> searchParams: ", searchParams)
 
-    console.log("searchParams; ", searchParams);
-
-    navigation.navigate("AvailableRides", { searchParams });
+      navigation.navigate("AvailableRides", { searchParams });
+    }
   };
 
   return (

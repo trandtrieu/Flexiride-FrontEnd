@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -26,6 +26,7 @@ import useLocation from "../hook/useLocation";
 import * as Location from "expo-location";
 import _ from "lodash";
 
+import Swiper from "react-native-swiper";
 const Home = ({ navigation }) => {
   const { authState } = useAuth();
   const [activeRide, setActiveRide] = useState(null);
@@ -229,6 +230,11 @@ const Home = ({ navigation }) => {
       });
     }
   };
+  // slider
+  const banners = [
+    require("../assets/banner-long.png"),
+    require("../assets/banner-long2.png"), // Thêm ảnh khác
+  ];
 
   return (
     <View style={styles.container}>
@@ -269,31 +275,78 @@ const Home = ({ navigation }) => {
         <ServiceIcons />
 
         <View style={styles.bookNowContainer}>
-          <Text style={styles.bookNowTitle}>ĐẶT XE NGAY</Text>
-          <TouchableOpacity onPress={clearActiveBooking}>
-            <Ionicons name="arrow-forward-outline" size={24} color="white" />
+          <Text style={styles.bookNowTitle}>ĐẶT XE  -- NHẬN NGAY ƯU ĐÃI</Text>
+          <Ionicons name="arrow-forward-outline" size={24} color="black" />
+        </View>
+
+        <View style={styles.promotionsContainerSlider}>
+          {/* Slider Section */}
+          <Swiper
+            style={{ height: 120 }}
+            autoplay
+            loop
+          >
+            {banners.map((banner, index) => (
+              <View key={index} style={styles.promotionItemBaner}>
+                <Image source={banner} style={styles.promotionImage} />
+              </View>
+            ))}
+          </Swiper>
+        </View>
+
+        <View style={styles.promotionsContainer}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("ServiceSelection")}
+            style={styles.promotionItem}>
+            <Image
+              source={require("../assets/cm3.png")}
+              style={styles.promotionImage}
+            />
+            <Text style={styles.promotionText}>
+              Tết Đoàn Viên, giảm ngay 200K
+            </Text>
+            <Text style={styles.promotionDate}>Đến hết 25/01</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => navigation.navigate("LocationPicker")}
+            style={styles.promotionItem}>
+            <Image
+              source={require("../assets/cm2.png")}
+              style={styles.promotionImage}
+            />
+            <Text style={styles.promotionText}>
+              Giáng sinh an lành, ưu đãi chục cành!!
+            </Text>
+            <Text style={styles.promotionDate}>Đến hết 25/12</Text>
           </TouchableOpacity>
         </View>
+
         <View style={styles.promotionsContainer}>
-          <TouchableOpacity style={styles.promotionItem}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("LocationPicker")}
+            style={styles.promotionItem}>
             <Image
-              source={require("../assets/ad-01.png")}
+              source={require("../assets/cm4.png")}
               style={styles.promotionImage}
             />
             <Text style={styles.promotionText}>
-              Order mooncakes to gift & to enjoy
+              Ăn chơi hết sẩy, FRide đưa về!
             </Text>
-            <Text style={styles.promotionDate}>Until 21 Sep</Text>
+            <Text style={styles.promotionDate}>Đến hết 25/01</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.promotionItem}>
+
+          <TouchableOpacity
+            onPress={() => navigation.navigate("HireLocationPicker")}
+            style={styles.promotionItem}>
             <Image
-              source={require("../assets/ad-02.png")}
+              source={require("../assets/cm1.png")}
               style={styles.promotionImage}
             />
             <Text style={styles.promotionText}>
-              Plus an EXTRA $20 OFF on groceries
+              Thuê tài xế, Ưu đãi cực sốc!
             </Text>
-            <Text style={styles.promotionDate}>Until 31 Aug</Text>
+            <Text style={styles.promotionDate}>Đến hết 22/12</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -435,9 +488,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     marginBottom: 20,
+    // marginLeft: 10
+  },
+  promotionsContainerSlider: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 20,
+    marginLeft: 10
   },
   promotionItem: {
     width: width * 0.45,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    overflow: "hidden",
+    elevation: 2,
+  },
+  promotionItemBaner: {
+    width: width * 0.95,
     backgroundColor: "#fff",
     borderRadius: 10,
     overflow: "hidden",
@@ -455,6 +522,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     paddingHorizontal: 10,
     color: "#888",
+    marginBottom: 10
   },
   activeRideContainer: {
     position: "absolute",
