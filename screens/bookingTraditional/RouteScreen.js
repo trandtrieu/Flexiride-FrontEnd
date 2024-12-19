@@ -57,7 +57,18 @@ const RouteScreen = ({ route, navigation }) => {
     "bike-icon.png": require("../../assets/bike-icon.png"),
     "car-icon.png": require("../../assets/car-icon.png"),
   };
-
+  const loadActiveRide = async () => {
+    try {
+      const ride = await AsyncStorage.getItem("activeRide");
+      if (ride) {
+        const parsedRide = JSON.parse(ride);
+        setActiveRide(parsedRide);
+        console.log("Active Ride:", parsedRide);
+      }
+    } catch (error) {
+      console.error("Error loading active ride:  ", error);
+    }
+  };
   useEffect(() => {
     console.log("destinationLocation:  ", destinationLocation);
 

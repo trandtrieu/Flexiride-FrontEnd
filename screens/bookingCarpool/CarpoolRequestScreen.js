@@ -400,6 +400,8 @@ export const CarpoolRequestScreen = ({ navigation, route }) => {
       service_id: serviceId, // Nếu cần lọc theo dịch vụ
     };
 
+    console.log("searchParams; ", searchParams);
+
     navigation.navigate("AvailableRides", { searchParams });
   };
 

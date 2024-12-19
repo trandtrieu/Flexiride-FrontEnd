@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
   Keyboard,
   Alert,
-  RefreshControl,
 } from "react-native";
 import { Button, Icon } from "react-native-elements";
 import { TouchableWithoutFeedback } from "react-native";
@@ -417,16 +416,6 @@ const LocationPicker = ({ navigation, route }) => {
     setPredictions([]);
   };
 
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    try {
-      await Promise.all([]);
-    } catch (error) {
-      console.error("Error during refresh:", error);
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
@@ -490,15 +479,7 @@ const LocationPicker = ({ navigation, route }) => {
         )}
 
         {predictions.length > 0 ? (
-          <ScrollView
-            style={styles.locations}
-            refreshControl={
-              <RefreshControl
-                refreshing={isRefreshing}
-                onRefresh={handleRefresh}
-              />
-            }
-          >
+          <ScrollView style={styles.locations}>
             {predictions.map((prediction, index) => (
               <TouchableOpacity
                 key={index}
