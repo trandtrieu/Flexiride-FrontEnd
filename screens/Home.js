@@ -232,8 +232,8 @@ const Home = ({ navigation }) => {
   };
   // slider
   const banners = [
-    require("../assets/banner-long.png"),
-    require("../assets/banner-long2.png"), // Thêm ảnh khác
+    require("../assets/banner.jpg"),
+    require("../assets/banana.jpg"), // Thêm ảnh khác
   ];
 
   return (
@@ -275,17 +275,13 @@ const Home = ({ navigation }) => {
         <ServiceIcons />
 
         <View style={styles.bookNowContainer}>
-          <Text style={styles.bookNowTitle}>ĐẶT XE  -- NHẬN NGAY ƯU ĐÃI</Text>
+          <Text style={styles.bookNowTitle}>ĐẶT XE -- NHẬN NGAY ƯU ĐÃI</Text>
           <Ionicons name="arrow-forward-outline" size={24} color="black" />
         </View>
 
         <View style={styles.promotionsContainerSlider}>
           {/* Slider Section */}
-          <Swiper
-            style={{ height: 120 }}
-            autoplay
-            loop
-          >
+          <Swiper style={{ height: 120 }} autoplay loop>
             {banners.map((banner, index) => (
               <View key={index} style={styles.promotionItemBaner}>
                 <Image source={banner} style={styles.promotionImage} />
@@ -297,7 +293,8 @@ const Home = ({ navigation }) => {
         <View style={styles.promotionsContainer}>
           <TouchableOpacity
             onPress={() => navigation.navigate("ServiceSelection")}
-            style={styles.promotionItem}>
+            style={styles.promotionItem}
+          >
             <Image
               source={require("../assets/cm3.png")}
               style={styles.promotionImage}
@@ -310,7 +307,8 @@ const Home = ({ navigation }) => {
 
           <TouchableOpacity
             onPress={() => navigation.navigate("LocationPicker")}
-            style={styles.promotionItem}>
+            style={styles.promotionItem}
+          >
             <Image
               source={require("../assets/cm2.png")}
               style={styles.promotionImage}
@@ -325,7 +323,8 @@ const Home = ({ navigation }) => {
         <View style={styles.promotionsContainer}>
           <TouchableOpacity
             onPress={() => navigation.navigate("LocationPicker")}
-            style={styles.promotionItem}>
+            style={styles.promotionItem}
+          >
             <Image
               source={require("../assets/cm4.png")}
               style={styles.promotionImage}
@@ -338,7 +337,8 @@ const Home = ({ navigation }) => {
 
           <TouchableOpacity
             onPress={() => navigation.navigate("HireLocationPicker")}
-            style={styles.promotionItem}>
+            style={styles.promotionItem}
+          >
             <Image
               source={require("../assets/cm1.png")}
               style={styles.promotionImage}
@@ -494,7 +494,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     marginBottom: 20,
-    marginLeft: 10
+    marginLeft: 10,
   },
   promotionItem: {
     width: width * 0.45,
@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     paddingHorizontal: 10,
     color: "#888",
-    marginBottom: 10
+    marginBottom: 10,
   },
   activeRideContainer: {
     position: "absolute",
