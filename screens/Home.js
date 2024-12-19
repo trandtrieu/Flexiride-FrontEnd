@@ -7,7 +7,9 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
-  RefreshControl, // Import RefreshControl
+  RefreshControl,
+  Alert,
+  Linking, // Import RefreshControl
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import BottomNavigation from "./layouts/BottomNavigation";
@@ -21,6 +23,8 @@ import { useFocusEffect } from "@react-navigation/native";
 import { VIETMAP_API_KEY } from "@env";
 import Geolocation from "@react-native-community/geolocation";
 import useLocation from "../hook/useLocation";
+import * as Location from "expo-location";
+import _ from "lodash";
 
 const Home = ({ navigation }) => {
   const { authState } = useAuth();
@@ -31,19 +35,60 @@ const Home = ({ navigation }) => {
   const [request, setRequest] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [currentAddress, setCurrentAddress] = useState("Đại học FPT");
-  const { currentLocation, getOneTimeLocation } = useLocation();
+  // const { currentLocation, getOneTimeLocation } = useLocation();
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [loading, setLoading] = useState(false);
 
+  const getCurrentLocation = async () => {
+    setLoading(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Quyền truy cập vị trí bị từ chối",
+          "Ứng dụng cần quyền truy cập vị trí. Vui lòng kiểm tra cài đặt và cấp quyền.",
+          [
+            { text: "Hủy" },
+            { text: "Mở cài đặt", onPress: () => Linking.openSettings() },
+          ]
+        );
+        setLoading(false);
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
+
+      setCurrentLocation({ latitude, longitude });
+
+      const response = await axios.get(
+        `https://maps.vietmap.vn/api/search/v3?apikey=${VIETMAP_API_KEY}&text=*&focus=${latitude},${longitude}&circle_center=${latitude},${longitude}&circle_radius=500&size=1`
+      );
+
+      if (response.data && response.data[0]) {
+        setCurrentAddress(response.data[0].name); // Display the fetched address
+      } else {
+        setCurrentAddress("Không tìm thấy địa chỉ.");
+      }
+    } catch (error) {
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    console.log("hello");
+    getCurrentLocation();
+  }, []);
   const fetchCurrentLocation = async () => {
     try {
       Geolocation.getCurrentPosition(
         async (position) => {
           const radius = 500;
-          const size = 10;
+          const size = 1;
           // Gọi API VietMap Geocode
           const response = await axios.get(
             `https://maps.vietmap.vn/api/search/v3?apikey=${VIETMAP_API_KEY}&text=*&focus=${currentLocation.latitude},${currentLocation.longitude}&circle_center=${currentLocation.latitude},${currentLocation.longitude}&circle_radius=${radius}&size=${size}`
           );
-          console.log(response.data);
           if (response.data && response.data[0]) {
             setCurrentAddress(response.data[0].name); // Hiển thị địa chỉ
           } else {
@@ -51,10 +96,9 @@ const Home = ({ navigation }) => {
           }
         },
         (error) => {
-          console.error("Error fetching location: ", error);
           setCurrentAddress("Không thể lấy vị trí.");
         },
-        { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
+        { enableHighAccuracy: false, timeout: 20000, maximumAge: 1000 }
       );
     } catch (error) {
       console.error("Error calling Geocode API: ", error);
@@ -62,16 +106,14 @@ const Home = ({ navigation }) => {
     }
   };
 
-  // Lấy vị trí khi component được render
-  // useEffect(() => {
-  //   fetchCurrentLocation();
-  // }, []);
   useFocusEffect(
     React.useCallback(() => {
-      console.log("current location: ", currentLocation);
-      fetchCurrentLocation();
+      getCurrentLocation();
+      loadActiveRide();
+      fetchNotifications();
     }, [])
   );
+
   // Load thông tin chuyến đi từ AsyncStorage
   const loadActiveRide = async () => {
     try {
@@ -85,19 +127,14 @@ const Home = ({ navigation }) => {
       console.error("Error loading active ride:  ", error);
     }
   };
-  // useEffect(() => {
-  //   const clearActiveBooking = async () => {
-  //     try {
-  //       await AsyncStorage.removeItem("activeRide");
-  //       console.log("Active booking cleared successfully!");
-  //     } catch (error) {
-  //       console.error("Failed to clear active booking:", error);
-  //     }
-  //   };
+  const clearActiveBooking = async () => {
+    try {
+      await AsyncStorage.removeItem("activeRide");
+    } catch (error) {
+      console.error("Failed to clear active booking:", error);
+    }
+  };
 
-  //   // Gọi hàm để xóa
-  //   clearActiveBooking();
-  // }, []);
   const fetchNotifications = async () => {
     try {
       const response = await getPersonalNotification(authState.token);
@@ -115,13 +152,6 @@ const Home = ({ navigation }) => {
       // console.error("Error fetching notifications:", error);
     }
   };
-
-  useFocusEffect(
-    React.useCallback(() => {
-      loadActiveRide();
-      fetchNotifications();
-    }, [])
-  );
 
   useEffect(() => {
     if (!activeRide?.requestId || request?.requestId === activeRide.requestId) {
@@ -211,7 +241,9 @@ const Home = ({ navigation }) => {
         <View style={styles.header}>
           <View style={styles.locationContainer}>
             <Text style={styles.text}>Đón bạn tại</Text>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("LocationPicker")}
+            >
               <Text style={styles.locationText}>{currentAddress}</Text>
             </TouchableOpacity>
           </View>
@@ -238,7 +270,9 @@ const Home = ({ navigation }) => {
 
         <View style={styles.bookNowContainer}>
           <Text style={styles.bookNowTitle}>ĐẶT XE NGAY</Text>
-          <Ionicons name="arrow-forward-outline" size={24} color="black" />
+          <TouchableOpacity onPress={clearActiveBooking}>
+            <Ionicons name="arrow-forward-outline" size={24} color="white" />
+          </TouchableOpacity>
         </View>
         <View style={styles.promotionsContainer}>
           <TouchableOpacity style={styles.promotionItem}>

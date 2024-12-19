@@ -352,6 +352,7 @@ export default function App() {
                 <Stack.Screen
                   name="ManageNotifications"
                   component={ManageNotifications}
+                  options={{ title: "Quản lý thông báo" }}
                 />
                 <Stack.Screen
                   name="NotificationDetail"
@@ -361,6 +362,7 @@ export default function App() {
                 <Stack.Screen
                   name="VoucherListScreen"
                   component={VoucherListScreen}
+                  options={{ title: "Áp dụng ưu đãi" }}
                 />
                 <Stack.Screen name="SimpleMap" component={SimpleMap} />
 

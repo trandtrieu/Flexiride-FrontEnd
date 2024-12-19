@@ -25,16 +25,17 @@ const locations = [
     subAddress: "180 Xô Viết Nghệ Tĩnh, P. Hòa Cường...",
   },
 ];
+// const { currentAddress } = route.params;
 
 // Static content component
-const StaticContent = ({ navigation }) => (
+const StaticContent = ({ navigation, currentAddress }) => (
   <>
     {/* Location */}
     <View style={styles.locationContainer}>
       <Text style={styles.text}>Đón bạn tại</Text>
       <TouchableOpacity>
         <Text style={styles.locationText}>
-          Tạp Hóa Tứ Vang{" "}
+          {currentAddress}
           <Ionicons name="chevron-down-outline" size={15} color="black" />
         </Text>
       </TouchableOpacity>
@@ -72,7 +73,7 @@ const StaticContent = ({ navigation }) => (
   </>
 );
 
-export default function BikeBook({ navigation }) {
+export default function BikeBook({ navigation, route }) {
   return (
     <SafeAreaView style={styles.container}>
       <FlatList

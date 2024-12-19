@@ -63,7 +63,7 @@ const ManageNotifications = ({ route, navigation }) => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Quản lý Thông báo</Text>
+        <Text style={styles.headerTitle}>Quản Lí Thông Báo</Text>
       </View>
 
       {/* Danh sách thông báo */}

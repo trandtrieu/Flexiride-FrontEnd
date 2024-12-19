@@ -31,7 +31,10 @@
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
-        "CALL_PHONE"
+        "CALL_PHONE",
+        "CAMERA",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_EXTERNAL_STORAGE"
       ],
       "googleMaps": {
         "apiKey": "AIzaSyAmS7EXqYwISQIOzoZF6YUVUx6ZAFiW754"

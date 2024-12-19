@@ -72,24 +72,22 @@ const CustomerProfile = ({ route }) => {
     );
   };
 
-  // Function to request permission to access the media library
-  const requestLibraryPermission = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (permission.granted) {
-      pickImage();
-    } else {
-      alert("Permission to access media library is required.");
-    }
-  };
-
-  // Function to request permission to access the camera
   const requestCameraPermission = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
-    if (permission.granted) {
-      takePhoto();
-    } else {
-      alert("Permission to access camera is required.");
+    if (!permission.granted) {
+      Alert.alert("Quyền truy cập", "Quyền truy cập camera bị từ chối.");
+      return;
     }
+    takePhoto();
+  };
+
+  const requestLibraryPermission = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Quyền truy cập", "Quyền truy cập thư viện ảnh bị từ chối.");
+      return;
+    }
+    pickImage();
   };
 
   // Function to open image picker

@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Keyboard,
   Alert,
+  RefreshControl,
 } from "react-native";
 import { Button, Icon } from "react-native-elements";
 import { TouchableWithoutFeedback } from "react-native";
@@ -28,13 +29,11 @@ const LocationPicker = ({ navigation, route }) => {
   const [nearbyPlaces, setNearbyPlaces] = useState([]);
   const predictionCache = {};
   const nearbyPlacesCache = {};
-  const [activeRide, setActiveRide] = useState(null);
   const [cityId, setCityId] = useState(null);
 
   let previousLocation = null;
 
   useEffect(() => {
-    console.log("IP_ADDRESS: " + IP_ADDRESS);
     getCurrentLocation();
   }, []);
 
@@ -166,9 +165,9 @@ const LocationPicker = ({ navigation, route }) => {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c;
@@ -381,11 +380,11 @@ const LocationPicker = ({ navigation, route }) => {
       const { latitude, longitude } = location.coords;
       const distance = previousLocation
         ? calculateDistance(
-          previousLocation.latitude,
-          previousLocation.longitude,
-          latitude,
-          longitude
-        )
+            previousLocation.latitude,
+            previousLocation.longitude,
+            latitude,
+            longitude
+          )
         : null;
 
       if (!previousLocation || distance > 0.5) {
@@ -418,19 +417,15 @@ const LocationPicker = ({ navigation, route }) => {
     setPredictions([]);
   };
 
-  const handleNearbyPlaceSelect = (place) => {
-    setPickup(place);
-    setPredictions([]);
-  };
-
-  const handleSelectFromMap = () => {
-    navigation.navigate("MapScreen", {
-      pickupLocation: pickup,
-      destinationLocation: destination,
-      onSelectPickupLocation: (newPickupLocation) => {
-        setPickup(newPickupLocation); // Cập nhật vị trí đón
-      },
-    });
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([]);
+    } catch (error) {
+      console.error("Error during refresh:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -495,7 +490,15 @@ const LocationPicker = ({ navigation, route }) => {
         )}
 
         {predictions.length > 0 ? (
-          <ScrollView style={styles.locations}>
+          <ScrollView
+            style={styles.locations}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefreshing}
+                onRefresh={handleRefresh}
+              />
+            }
+          >
             {predictions.map((prediction, index) => (
               <TouchableOpacity
                 key={index}

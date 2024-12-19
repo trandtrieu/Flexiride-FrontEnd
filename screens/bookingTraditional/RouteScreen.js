@@ -51,6 +51,7 @@ const RouteScreen = ({ route, navigation }) => {
   const [note, setNote] = useState(""); // State for storing note
   const [noteModalVisible, setNoteModalVisible] = useState(false);
   const openNoteModal = () => setNoteModalVisible(true);
+  const [isDistanceTooShort, setIsDistanceTooShort] = useState(false);
 
   const images = {
     "bike-icon.png": require("../../assets/bike-icon.png"),
@@ -203,10 +204,33 @@ const RouteScreen = ({ route, navigation }) => {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distanceInKm = R * c;
 
-    setDistance(distanceInKm.toFixed(1));
+    const distanceInMeters = Math.round(distanceInKm * 1000); // Chuyển đổi sang mét
+    if (distanceInMeters < 500) {
+      // Hiển thị thông báo nếu khoảng cách nhỏ hơn 500m
+      setIsDistanceTooShort(true);
 
-    const averageSpeed = 40;
+      Alert.alert(
+        "Điểm đón và điểm đến quá gần",
+        "Khoảng cách giữa điểm đón và điểm đến dưới 500m. Vui lòng chọn điểm đến xa hơn!",
+        [
+          {
+            text: "OK",
+            onPress: () => {
+              navigation.replace("LocationPicker");
+            },
+          },
+        ]
+      );
+      setDistance("< 500 m");
+      return;
+    } else if (distanceInKm < 1) {
+      setDistance(`${distanceInMeters} m`);
+      setIsDistanceTooShort(false);
+    } else {
+      setDistance(`${distanceInKm.toFixed(1)} km`);
+    }
 
+    const averageSpeed = 40; // Tốc độ trung bình (km/h)
     const timeInHours = distanceInKm / averageSpeed;
     const timeInMinutes = timeInHours * 60;
     const hours = Math.floor(timeInHours);
@@ -214,6 +238,8 @@ const RouteScreen = ({ route, navigation }) => {
 
     if (hours >= 1) {
       setEstimatedTime(`${hours} giờ ${minutes} phút`);
+    } else if (minutes <= 1) {
+      setEstimatedTime(`1 phút`);
     } else {
       setEstimatedTime(`${minutes} phút`);
     }
@@ -340,7 +366,7 @@ const RouteScreen = ({ route, navigation }) => {
         </MapView>
 
         <View style={styles.distanceContainer}>
-          <Text style={styles.distanceText}>Khoảng cách: {distance} km</Text>
+          <Text style={styles.distanceText}>Khoảng cách: {distance}</Text>
           <Text style={styles.infoText}>
             Thời gian ước tính: {estimatedTime}
           </Text>
@@ -383,8 +409,8 @@ const RouteScreen = ({ route, navigation }) => {
                   </View>
                   <Text style={styles.priceContainer}>
                     {service._id === selectedServiceId &&
-                      originalPrice &&
-                      originalPrice > selectedServicePrice ? ( // Chỉ áp dụng nếu service được chọn
+                    originalPrice &&
+                    originalPrice > selectedServicePrice ? ( // Chỉ áp dụng nếu service được chọn
                       <View>
                         <Text style={styles.discountedPrice}>
                           {formatCurrency(selectedServicePrice)}{" "}
@@ -438,16 +464,21 @@ const RouteScreen = ({ route, navigation }) => {
             <TouchableOpacity
               style={styles.bookButton}
               onPress={handleBookingRequest}
-              disabled={isBooking} // Vô hiệu hóa nút khi đang đặt xe
+              disabled={isBooking || isDistanceTooShort} // Thêm điều kiện vô hiệu hóa
             >
               {isBooking ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
-                <>
-                  <Text style={styles.bookButtonText}>Đặt Xe</Text>
-                </>
+                <Text style={styles.bookButtonText}>Đặt Xe</Text>
               )}
             </TouchableOpacity>
+            {/* {isDistanceTooShort && (
+              <View style={styles.warningContainer}>
+                <Text style={styles.warningText}>
+                  Điểm đón và điểm đến quá gần. Vui lòng chọn điểm đến xa hơn!
+                </Text>
+              </View>
+            )} */}
           </View>
           <Modal
             visible={noteModalVisible}
@@ -707,6 +738,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
     fontWeight: "bold",
+  },
+  warningContainer: {
+    backgroundColor: "#fff3cd",
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "#ffeeba",
+  },
+  warningText: {
+    color: "#856404",
+    fontSize: 14,
+    textAlign: "center",
   },
 });
 

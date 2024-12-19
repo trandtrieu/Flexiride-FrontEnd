@@ -167,7 +167,8 @@ const RideTrackingScreen = ({ route, navigation }) => {
           await calculateRoute(pickupLocation, destination, setRouteData);
         } else if (
           driverStatus === "on the way" ||
-          driverStatus === "confirmed"
+          driverStatus === "confirmed" ||
+          driverStatus === "dropped off"
         ) {
           await calculateRoute(driverLocation, pickupLocation, setRouteData);
         }
